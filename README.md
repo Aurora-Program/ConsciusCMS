@@ -1,6 +1,6 @@
 # ConscioCMS
 
-![ConscioCMS Logo](./logo-preview.png)
+![ConscioCMS Logo](./logcms.png)
 
 **ConscioCMS** is a modern, responsive Content Management System built with React, TypeScript, and Redux Toolkit. Designed for photographers, artists, and creative professionals, it provides an intuitive interface for managing portfolios, galleries, and dynamic content with touch-enabled navigation and responsive design.
 
