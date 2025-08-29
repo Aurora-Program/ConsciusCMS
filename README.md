@@ -1,4 +1,4 @@
-# ConscioCMS
+# consciusCMS
 
 
 
@@ -41,8 +41,8 @@
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/ConscioCMS.git
-   cd ConscioCMS
+   git clone https://github.com/yourusername/consciusCMS.git
+   cd consciusCMS
    ```
 
 2. **Install dependencies**
@@ -88,7 +88,7 @@ npm run lint
 ### Project Structure
 
 ```
-ConscioCMS/
+consciusCMS/
 ├── public/                 # Static assets
 │   ├── favicon.png
 │   └── Login.jpeg
