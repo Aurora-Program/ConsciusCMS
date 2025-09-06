@@ -1,0 +1,317 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template to create a StackSet with stack instances.
+
+Parameters:
+  AccountName:
+    Description: AccountName
+    Type: String
+
+   
+  Environment:
+    Description: Environment
+    Type: String
+    AllowedValues:
+      - qa
+      - prod
+    Default: qa
+
+  Region:
+    Description: Region for where deploy the CMS
+    Type: String
+    AllowedValues:  
+      - us-east-1
+      - eu-west-3
+      - eu-south-2
+    Default: eu-west-3
+  
+  Domain:
+    Description: Website Domain
+    Type: String
+
+  License:
+    Description: License Account
+    Type: String
+    AllowedValues:  
+      - Entry
+      - Advance
+      - Enterprise
+    Default: Entry
+
+
+
+Resources:
+
+  LambdaEdgeFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: 
+          !Join 
+          
+                    - ''
+                    - - 'LambdaEdgeRequRoutingFunction'
+                      - !Ref AccountName
+                      - '-'
+                      - !Ref AWS::StackName
+      
+      Handler: index.handler
+      Role: !GetAtt LambdaEdgeExecutionRole.Arn
+      Code:
+        ZipFile: 
+           !Sub |
+              exports.handler = async (event) => {
+                  const request = event.Records[0].cf.request;
+                  const uri = request.uri;
+                  
+                  // Bucket domain and region derived from template parameters
+                  const BucketDomain = "ap-${AccountName}-ops-${Region}.amazonaws.com";
+                  const region = "${Region}";
+                
+
+
+           
+            
+                   if (!uri.match(/\/.*\.[^.]+$/)) {
+              request.uri = '/index.html';
+               }
+
+                  return request; // Continue to origin
+              };
+      Runtime: nodejs18.x
+      MemorySize: 128
+      Timeout: 5
+    
+  LambdaEdgeVersion:
+    Type: AWS::Lambda::Version
+    Properties:
+      FunctionName: !Ref LambdaEdgeFunction
+
+  
+                  
+
+  LambdaEdgeExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: 
+                - lambda.amazonaws.com
+                - edgelambda.amazonaws.com
+            Action: sts:AssumeRole
+          
+      Policies:
+        - PolicyName: LambdaEdgePolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: arn:aws:logs:*:*:*
+
+
+  AWSCloudFormationStackSetAdministrationRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: 
+                !Join 
+          
+                    - ''
+                    - - 'AWSCloudFormationStackSetExecutionRole'
+                      - '-'
+                      - !Ref AccountName
+                      - '-'
+                      - !Ref AWS::StackName
+
+
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: cloudformation.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: AWSCloudFormationStackSetAdministrationPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: '*'
+                Resource: '*'
+
+
+
+  AWSCloudFormationStackSetExecutionRole:
+
+    Type: AWS::IAM::Role
+    Properties: 
+      RoleName: 
+                !Join 
+          
+                    - ''
+                    - - 'AWSCloudFormationStackSetExecutionRole'
+                      - !Ref AccountName
+                      - '-'
+                      - !Ref AWS::StackName
+      
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !GetAtt AWSCloudFormationStackSetAdministrationRole.Arn
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: AWSCloudFormationStackSetExecutionPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: '*'
+                Resource: '*'
+
+  MyStackSet:
+    Type: AWS::CloudFormation::StackSet
+    Properties:
+      StackSetName: 
+        !Join 
+          - "-" 
+          - - "ParametersAndBucketStackSet"
+            - !Ref AWS::StackName
+
+      Description: A StackSet to deploy resources in multiple regions.
+      PermissionModel: SELF_MANAGED  # Or SERVICE_MANAGED, depending on your needs
+      TemplateBody: 
+        Fn::Sub: |
+
+          Parameters:
+            AccountName:
+               Type: String
+            Environment:
+              Type: String
+            Region:
+              Type: String
+            LambdaEdge:
+              Type: String
+            WebDomain:
+              Type: String
+            License:
+              Type: String
+          Resources:
+            OPSS3Bucket:
+              Type: 'AWS::S3::Bucket'
+              Properties: 
+                BucketName: 
+                  !Join 
+                    - ''
+                    - - 'ap-'
+                      - !Ref AccountName
+                      - '-ops-'
+                      - !Ref Region
+                      - '-'
+                      - !Ref Environment
+
+                AccessControl: Private
+                VersioningConfiguration:
+                  Status: Enabled
+                Tags:
+                  - Key: Environment
+                    Value: ${Environment}
+                  - Key: Name
+                    Value: 
+                      !Join 
+                        - ''
+                        - - !Ref AccountName
+                          - '-ops-'
+                          - !Ref Region
+                          - '-'
+                          - !Ref Environment
+              
+
+            OpsS3BucketParameter:
+              Type: 'AWS::SSM::Parameter'
+              Properties:
+                Name: '/consciuscms/ops'  # Change the name as needed
+                Type: 'String'
+                Value:  !Ref OPSS3Bucket
+
+            RegionParameter:
+              Type: 'AWS::SSM::Parameter'
+              Properties:
+                Name: '/consciuscms/region'  # Change the name as needed
+                Type: 'String'
+                Value: !Ref Region
+            
+            LicensesParameter:
+              Type: 'AWS::SSM::Parameter'
+              Properties:
+                Name: '/consciuscms/license'  # Change the name as needed
+                Type: 'String'
+                Value: !Ref License
+                                
+            AccountNameParameter:
+              Type: 'AWS::SSM::Parameter'
+              Properties:
+                Name: '/consciuscms/account-name'  # Change the name as needed
+                Type: 'String'
+                Value: !Ref AccountName
+
+            # Parameter Store for Environment
+            EnvironmentParameter:
+              Type: 'AWS::SSM::Parameter'
+              Properties:
+                Name: '/consciuscms/environment'  # Change the name as needed
+                Type: 'String'
+                Value: !Ref Environment
+
+            LambdaEdgeFunctionParameter:
+              Type: 'AWS::SSM::Parameter'
+              Properties:
+                Name: '/consciuscms/lambda-edge'  # Change the name as needed
+                Type: 'String'
+                Value: !Ref LambdaEdge
+
+            WebDomainParameter:
+              Type: 'AWS::SSM::Parameter'
+              Properties:
+                Name: '/consciuscms/webdomain'  # Change the name as needed
+                Type: 'String'
+                Value: !Ref WebDomain
+
+
+
+
+      Parameters:
+        - ParameterKey: AccountName
+          ParameterValue: !Ref AccountName
+        - ParameterKey: Region
+          ParameterValue: !Ref Region
+        - ParameterKey: Environment
+          ParameterValue: !Ref Environment
+        - ParameterKey: LambdaEdge
+          ParameterValue: !Ref LambdaEdgeVersion
+        - ParameterKey: WebDomain
+          ParameterValue: !Ref Domain
+        - ParameterKey: License
+          ParameterValue: !Ref License
+
+
+
+
+      StackInstancesGroup:
+       - DeploymentTargets:
+           Accounts:
+             - !Ref "AWS::AccountId"
+         Regions: 
+          - !Ref Region
+
+
+Outputs:
+  StackSetName:
+    Description: The name of the created StackSet.
+    Value: !Ref MyStackSet

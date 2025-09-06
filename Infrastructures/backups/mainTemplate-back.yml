@@ -1,0 +1,2059 @@
+Skip to Main Content
+
+Search
+[Alt+S]
+
+
+
+
+United States (N. Virginia)
+
+Account ID: 3761-2987-2596
+AWSAdministratorAccess/pablo.alvarez
+
+CloudFormation
+Stacks
+aurora-maintemplate
+CloudFormation
+Stacks
+aurora-maintemplate
+
+
+
+
+CloudFormation
+Stacks
+Stack details
+Drifts
+StackSets
+Exports
+Infrastructure Composer
+IaC generator
+Hooks overview
+Invocation summary
+New
+Hooks
+Registry
+Public extensions
+Activated extensions
+Publisher
+Spotlight
+Feedback
+Introducing a new Control Catalog integration for AWS CloudFormation Hooks
+You can now create Hooks more easily by using proactive controls from the AWS Control Tower Control Catalog and view your historical invocations. Learn more about Hook invocations  and the Control Catalog .
+View invocation summary
+
+Stacks (19)
+
+Filter status
+
+Active
+View nested
+
+1
+
+Items selection	
+Stacks
+
+Items selection	
+Stacks
+
+aurora-maintemplate
+2025-08-10 23:55:02 UTC+0200
+CREATE_COMPLETE
+aurora-web-full-inf
+2025-08-10 23:47:32 UTC+0200
+ROLLBACK_COMPLETE
+aurora-web-inf
+2025-08-10 23:35:15 UTC+0200
+ROLLBACK_COMPLETE
+apstack
+2025-08-10 23:24:34 UTC+0200
+ROLLBACK_COMPLETE
+Aurora-web-inf2-stack
+2025-08-10 23:21:29 UTC+0200
+ROLLBACK_COMPLETE
+Aurora-web-inf1-stack
+2025-08-10 23:20:00 UTC+0200
+ROLLBACK_COMPLETE
+Aurora-web-inf-stack
+2025-08-10 23:16:39 UTC+0200
+ROLLBACK_COMPLETE
+StackSet-ParametersAndBucketStackSet-Aurora-web-stack-ca78104a-d5bf-41cc-8d29-aafe3cd8a71a
+2025-08-10 23:13:55 UTC+0200
+CREATE_COMPLETE
+Aurora-web-stack
+2025-08-10 23:13:19 UTC+0200
+CREATE_COMPLETE
+aurora-base-inf-3
+2025-08-10 23:02:24 UTC+0200
+ROLLBACK_COMPLETE
+aurora-base-inf-1
+2025-08-10 22:54:54 UTC+0200
+ROLLBACK_COMPLETE
+aurora-base-inf
+2025-08-10 22:51:07 UTC+0200
+ROLLBACK_COMPLETE
+StackSet-SC-376129872596-pp-nrx74wng5icf2-0b55e675-3b5b-4327-a675-1b2dacafd053
+2024-11-08 17:47:44 UTC+0100
+CREATE_COMPLETE
+StackSet-AWSControlTowerBP-VPC-ACCOUNT-FACTORY-V1-b961ee02-8d61-4790-9519-66b263391ceb
+2024-11-08 17:43:04 UTC+0100
+CREATE_COMPLETE
+StackSet-AWSControlTowerBP-BASELINE-CLOUDWATCH-8e46d968-d9b7-4bab-9e63-8d830698796b
+2024-11-08 17:40:23 UTC+0100
+CREATE_COMPLETE
+StackSet-AWSControlTowerBP-BASELINE-CONFIG-bdc1689d-fd0d-4f5f-910e-04e2aaed9f0b
+2024-11-08 17:40:22 UTC+0100
+CREATE_COMPLETE
+StackSet-AWSControlTowerBP-BASELINE-SERVICE-ROLES-dd7a323d-c07d-4083-ad37-10a750a477b6
+2024-11-08 17:38:59 UTC+0100
+CREATE_COMPLETE
+StackSet-AWSControlTowerBP-BASELINE-ROLES-7a818eee-9d54-4c34-8938-41ee27198722
+2024-11-08 17:38:59 UTC+0100
+CREATE_COMPLETE
+StackSet-AWSControlTowerBP-BASELINE-SERVICE-LINKED-ROLE-79d3bdab-ec6a-447e-9d23-205e8207c3e4
+2024-11-08 17:38:59 UTC+0100
+CREATE_COMPLETE
+aurora-maintemplate
+
+
+Delete
+Update stack
+Stack actions
+Create stack
+
+Stack info
+
+Events
+
+Resources
+
+Outputs
+
+Parameters
+
+Template
+
+Change sets
+
+Git sync
+Template
+View in Infrastructure Composer
+
+View processed template
+AWSTemplateFormatVersion: '2010-09-09'
+Description: CloudFormation template to create S3 buckets, REST API Gateway,
+  CloudFront Distribution, and integrate API Gateway with S3 content bucket.
+
+Resources:
+
+  CognitoLambdaLayer:
+    Type: AWS::Lambda::LayerVersion
+    Properties:
+      LayerName: aws-jwt-verifier
+      Content:
+        S3Bucket: !Sub '{{resolve:ssm:/conciuscms/ops}}'
+        S3Key: aws-jwt-verifier.zip
+      CompatibleRuntimes:
+        - nodejs20.x
+      Description: A custom Lambda layer for shared code
+
+  # S3 Bucket for Static Website
+
+  WebsiteS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ap-{{resolve:ssm:/conciuscms/account-name}}-web-{{resolve:ssm:/conciuscms/region}}-{{resolve:ssm:/conciuscms/environment}}-5
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+
+
+  CMS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ap-{{resolve:ssm:/conciuscms/account-name}}-cm-{{resolve:ssm:/conciuscms/region}}-{{resolve:ssm:/conciuscms/environment}}-5
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+      WebsiteConfiguration:
+        IndexDocument: index.html
+        ErrorDocument: error.html
+
+# IAM User without console access
+  S3CMAccessUser:
+    Type: AWS::IAM::User
+    Properties:
+      UserName: GitHubCMActionsAcct
+      Policies:
+        - PolicyName: S3BucketAccessPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                  - s3:GetObject
+                  - s3:PutObject
+                Resource:
+                  - !Sub arn:aws:s3:::${CMS3Bucket}
+                  - !Sub arn:aws:s3:::${CMS3Bucket}/*
+
+
+  # S3 Bucket for Content Storage
+  ContentS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ap-{{resolve:ssm:/conciuscms/account-name}}-content-{{resolve:ssm:/conciuscms/region}}-{{resolve:ssm:/conciuscms/environment}}
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: false
+        BlockPublicPolicy: false
+        IgnorePublicAcls: false
+        RestrictPublicBuckets: false
+
+  # IAM User without console access
+  S3WebAccessUser:
+    Type: AWS::IAM::User
+    Properties:
+      UserName: GitHubWebActionsAcct
+      Policies:
+        - PolicyName: S3BucketAccessPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                  - s3:GetObject
+                  - s3:PutObject
+                Resource:
+                  - !Sub arn:aws:s3:::${WebsiteS3Bucket}
+                  - !Sub arn:aws:s3:::${WebsiteS3Bucket}/*
+
+
+ # IAM Access Key for programmatic access
+  #S3WebAccessUserAccessKey:
+  #  Type: AWS::IAM::AccessKey
+  #  Properties:
+  #    UserName: !Ref S3WebAccessUser
+
+  # IAM Role with permissions to access the S3 bucket
+
+  # IAM Access Key for programmatic access
+  #S3CMAccessUserAccessKey:
+  #  Type: AWS::IAM::AccessKey
+  #  Properties:
+  #    UserName: !Ref S3CMAccessUser
+
+  # IAM Role with permissions to access the S3 bucket
+
+
+  S3ContentAccessRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: S3ContentAccessRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: apigateway.amazonaws.com # Change this to the service that needs access
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: S3BucketAccessPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                  - s3:GetObject
+                  - s3:PutObject
+                Resource:
+                  - !Sub arn:aws:s3:::${ContentS3Bucket} # Bucket ARN
+                  - !Sub arn:aws:s3:::${ContentS3Bucket}/* # Objects in the bucket
+
+          
+  # DynamoDB Table for Logins
+  LoginsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: Logins
+      AttributeDefinitions:
+        - AttributeName: username
+          AttributeType: S # S for String
+        - AttributeName: time
+          AttributeType: S # S for String, can also be Number if you prefer a timestamp
+      KeySchema:
+        - AttributeName: username
+          KeyType: HASH # Partition key
+        - AttributeName: time
+          KeyType: RANGE # Sort key
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+
+  # DynamoDB Table for Pages
+  PagesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: Pages
+      AttributeDefinitions:
+        - AttributeName: Page
+          AttributeType: S # S for String
+      KeySchema:
+        - AttributeName: Page
+          KeyType: HASH # Partition key
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+
+  # DynamoDB Table for Schema
+  SchemaTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: Schema
+      AttributeDefinitions:
+        - AttributeName: page
+          AttributeType: S # S for String
+        - AttributeName: component
+          AttributeType: S # S for String
+      KeySchema:
+        - AttributeName: page
+          KeyType: HASH # Partition key
+        - AttributeName: component
+          KeyType: RANGE # Sort key
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+
+  # DynamoDB Table for Settings
+  SettingsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: Settings
+      AttributeDefinitions:
+        - AttributeName: Area
+          AttributeType: S # S for String
+        - AttributeName: Setting
+          AttributeType: S # S for String
+      KeySchema:
+        - AttributeName: Area
+          KeyType: HASH # Partition key
+        - AttributeName: Setting
+          KeyType: RANGE # Sort key
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+
+  # DynamoDB Table for SettingsSec
+  SettingsSecTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: SettingsSec
+      AttributeDefinitions:
+        - AttributeName: Area
+          AttributeType: S # S for String
+        - AttributeName: Setting
+          AttributeType: S # S for String
+      KeySchema:
+        - AttributeName: Area
+          KeyType: HASH # Partition key
+        - AttributeName: Setting
+          KeyType: RANGE # Sort key
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+
+  # Cognito User Pool
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: ConcidusCMSUserPool
+      UsernameAttributes:
+        - email
+
+      UserPoolAddOns:
+        AdvancedSecurityMode: ENFORCED # Enforce MFA
+
+      MfaConfiguration: OPTIONAL
+      EnabledMfas:
+        - SOFTWARE_TOKEN_MFA
+
+      AccountRecoverySetting:
+        RecoveryMechanisms:
+          - Name: verified_email
+            Priority: 1
+      AutoVerifiedAttributes:
+        - email
+
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: true
+        InviteMessageTemplate:
+          EmailMessage: |
+                <h4> bienvenido a Concidus CMS - Web editor</h4>
+                <p>Hola <strong>{username}</strong>,</p>
+                <p>Nos complace darte la bienvenida a <strong>[Nombre de la Plataforma</strong>!</p>
+                <p>Hemos creado tu usuario y ya puedes acceder a tu cuenta. Para comenzar, por favor sigue estos pasos:</p>
+
+                <ol>
+                    <li><strong>Accede a tu cuenta:</strong> Haz clic en el siguiente enlace para iniciar sesi?n:  
+                        <a href=${resolve:ssm:/conciuscms/webdomain} style="color: #4CAF50; text-decoration: none;">Iniciar sesi?n</a>
+                    </li>
+                    <li><strong>Contrase?a temporal:</strong> Se ha generado una contrase?a temporal para ti.  
+                        <strong>Contrase?a temporal: {####}</strong>
+                    </li>
+                    <li><strong>Cambiar tu contrase?a:</strong> La primera vez que inicies sesi?n, se te pedir? que cambies tu contrase?a temporal por una nueva de tu elecci?n. Ten en cuenta que, al hacerlo, aceptar?s autom?ticamente los <strong><a href="${resolve:ssm:/conciuscms/webdomain}/admin/terms/${license}" style="color: #4CAF50; text-decoration: none;">T?rminos y Condiciones</a></strong> de nuestro servicio.</li>
+                </ol>
+
+  
+                <p>?Gracias por unirte a <strong>Concidus CMS - Wed Editor</strong>! Estamos emocionados de que formes parte de nuestra comunidad.</p>
+
+          EmailSubject: Invitacion de acceso a Concidus CMS Website!!
+
+      Schema:
+        - Name: email
+          Required: true
+          AttributeDataType: String
+          Mutable: false
+        - Name: name
+          Required: true
+          AttributeDataType: String
+          Mutable: true
+
+      EmailConfiguration:
+        EmailSendingAccount: COGNITO_DEFAULT # Use Cognito's default email account
+        ReplyToEmailAddress: support@example.com # Replace with your support email address
+
+      LambdaConfig:
+        PostAuthentication: !GetAtt RecordLogin.Arn # Add the RecordLogin Lambda function as a post-authentication trigger
+
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireUppercase: true
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: true
+          TemporaryPasswordValidityDays: 7
+
+  # Cognito User Pool Client
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: MyUserPoolClient
+      UserPoolId: !Ref UserPool
+      GenerateSecret: false
+      ExplicitAuthFlows:
+        - ALLOW_USER_PASSWORD_AUTH
+        - ALLOW_USER_SRP_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+      ReadAttributes:
+        - email
+        - name
+      WriteAttributes:
+        - email
+        - name
+
+  MicroserviceExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: MicroserviceapExecutionLamda1Role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: MicroserviceExecutionap
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:/aws/lambda/*
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:PutItem
+                  - dynamodb:Scan
+                  - dynamodb:UpdateItem
+                  - dynamodb:DeleteItem
+                Resource: !Sub arn:aws:dynamodb:*:${AWS::AccountId}:table/*
+
+  CognitoAuthLambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: CognitoAuthapLambdaExecutionRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+
+        - PolicyName: CognitoAuthLambdaExecution
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:/aws/lambda/*
+
+              - Effect: Allow
+                Action:
+                  - cognito-idp:AdminGetUser
+                  - cognito-idp:GetUser
+                  - cognito-idp:ListUser
+                Resource:
+                  - !GetAtt UserPool.Arn
+    DependsOn:
+      - UserPool
+
+  # Cognito User Pool Group for Admins
+  CognitoUserPoolAdminGroup:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      GroupName: Admin
+      UserPoolId: !Ref UserPool
+      Description: Admin group with full access
+
+  # Cognito User Pool Group for Editors
+  CognitoUserPoolEditorGroup:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      GroupName: Editor
+      UserPoolId: !Ref UserPool
+      Description: Editor group with limited access
+
+  # Lambda Function for DDBAccessPages
+  DDBAccessPagesFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: DDBAccessPages
+      Handler: index.handler
+      Role: !GetAtt MicroserviceExecutionRole.Arn
+      Code:
+        ZipFile: |
+          const { DynamoDB } = require('@aws-sdk/client-dynamodb');
+          const { DynamoDBDocument } = require('@aws-sdk/lib-dynamodb');
+          const dynamo = DynamoDBDocument.from(new DynamoDB());
+          exports.handler = async (event) => {
+          //console.log('Received event:', JSON.stringify(event, null, 2));
+          let body;
+          let statusCode = '200';
+          const headers = {
+          'Content-Type': 'application/json',
+      
+          'Access-Control-Allow-Methods': 'OPTIONS, GET, PUT, POST ,DELETE',
+          'Access-Control-Allow-Headers':  '*',
+          'Access-Control-Allow-Credentials': true
+           }
+           const tableName = "Pages"
+          try {
+          switch (event.httpMethod) {
+            case 'DELETE':
+                const params={
+                    TableName: tableName,
+                    Key: JSON.parse(event.body)
+                }
+                body = await dynamo.delete(params);
+                break;
+            case 'GET':
+                if (event.resource == "/pages/{page}")
+                {
+                    const dpage = decodeURI(event.pathParameters.page)
+                    const parames = {
+                          TableName: tableName,
+                          ExpressionAttributeValues: {":p": dpage },
+                          FilterExpression: "Page = :p"
+                    }
+                    body= await dynamo.scan(parames)
+                }
+                else{
+                    const paramis = {
+                          TableName: tableName,
+                          ProjectionExpression: "Page,Template,updateTime,updateUser"
+                    }
+                    body = await dynamo.scan(paramis);
+                }
+                break;
+            case 'POST':
+                {
+                let payload = {...JSON.parse(event.body)}
+                payload["updateTime"] = Date().toString();
+                payload["updateUser"] = event.requestContext.authorizer.email ;
+                  payload["createdTime"] = Date().toString();
+                payload["creatorUser"] = event.requestContext.authorizer.email ;
+                const paramos={
+                    TableName: tableName,
+                    Item: JSON.parse(JSON.stringify(payload)),
+                    ConditionExpression: "attribute_not_exists(Page)",
+                }
+                await dynamo.put(paramos);
+                body = payload
+                break;
+                }
+            case 'PUT':
+                {
+                let payload = {...JSON.parse(event.body)}
+                payload["updateTime"] = Date().toString();
+                payload["updateUser"] = event.requestContext.authorizer.email ;
+                  const param={
+                    TableName: tableName,
+                    ConditionExpression: "Page = :p",
+                    Item: JSON.parse(JSON.stringify(payload)),
+                    ExpressionAttributeValues: {":p": payload.Page }
+                }
+                await dynamo.put(param);
+                body = payload
+                break;
+                }
+            case 'OPTIONS':
+                break
+            default:
+                throw new Error(`Unsupported method "${event.httpMethod}"`);
+              }
+            } catch (err) {
+            statusCode = '400';
+            body = err.message;
+            } finally {
+          body = JSON.stringify(body);
+          }
+          return  {
+            statusCode,
+          body,
+          headers,
+          };
+          };
+
+      Runtime: nodejs20.x
+      MemorySize: 128
+      Timeout: 3
+
+  # Lambda Function for DDBAccessSettingsSec
+  DDBAccessSettingsSecFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: DDBAccessSettingsSec
+      Handler: index.handler
+      Role: !GetAtt MicroserviceExecutionRole.Arn
+      Code:
+        ZipFile: |
+          const { DynamoDB } = require('@aws-sdk/client-dynamodb');
+          const { DynamoDBDocument } = require('@aws-sdk/lib-dynamodb');
+          const dynamo = DynamoDBDocument.from(new DynamoDB());
+          exports.handler = async (event) => {
+                const dynamo = DynamoDBDocument.from(new DynamoDB());
+                /**
+                * Demonstrates a simple HTTP endpoint using API Gateway. You have full
+                * access to the request and response payload, including headers and
+                * status code.
+                *
+                * To scan a DynamoDB table, make a GET request with the TableName as a
+                * query string parameter. To put, update, or delete an item, make a POST,
+                * PUT, or DELETE request respectively, passing in the payload to the
+                * DynamoDB API as a JSON body.
+                */
+                //console.log('Received event:', JSON.stringify(event, null, 2));
+                    let body;
+                    let statusCode = '200';
+                    const headers = {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': 'http://localhost:5173',
+                        'Access-Control-Allow-Methods': 'OPTIONS, GET, PUT, POST ,DELETE',
+                        'Access-Control-Allow-Headers':  '*',
+                        'Access-Control-Allow-Credentials': true
+                    }
+                    const tableName = "SettingsSec"
+                    try {
+                        switch (event.httpMethod) {
+                            case 'DELETE':
+                                {
+                                const params={
+                                    TableName: tableName,
+                                    Key: JSON.parse(event.body)
+                                }
+                                body = await dynamo.delete(params);
+                                }
+                                break;
+                            case 'GET':
+                                if (event.resource == "/settingsSec/{area}")
+                                {
+                                    const params = {
+                                          TableName: tableName,
+                                          ExpressionAttributeValues: {":a": event.pathParameters.area },
+                                          FilterExpression: "Area = :a"
+                                    }
+                                    body= await dynamo.scan(params)
+                                }
+                                else{
+                                    const params = {
+                                          TableName: tableName,
+                                          ExpressionAttributeValues: {":p": "Page", ":lp":"DynamicPage" },
+                                          FilterExpression: "CType = :p OR CType =:lp"
+                                    }
+                                    body = await dynamo.scan(params);
+                                }
+                                break;
+                            case 'POST':
+                                console.log(event.body)
+                                const params={
+                                    TableName: tableName,
+                                    Item: JSON.parse(event.body)
+                                }
+                                await dynamo.put(params);
+                                body = JSON.parse(event.body)
+                                break;
+                            case 'PUT':
+                                body = await dynamo.update(JSON.parse(event.body));
+                                break;
+                            case 'OPTIONS':
+                                break
+                            default:
+                                throw new Error(`Unsupported method "${event.httpMethod}"`);
+                        }
+                    } catch (err) {
+                        statusCode = '400';
+                        body = err.message;
+                    } finally {
+                        body = JSON.stringify(body);
+                    }
+                    return {
+                        statusCode,
+                        body,
+                        headers,
+                    };
+                };
+
+      Runtime: nodejs20.x
+      MemorySize: 128
+      Timeout: 3
+
+  # Lambda Function for DDBAccessSettings
+  DDBAccessSettingsFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: DDBAccessSettings
+      Handler: index.handler
+      Role: !GetAtt MicroserviceExecutionRole.Arn
+      Code:
+        ZipFile: |
+          const { DynamoDB } = require('@aws-sdk/client-dynamodb');
+          const { DynamoDBDocument } = require('@aws-sdk/lib-dynamodb');
+          const dynamo = DynamoDBDocument.from(new DynamoDB());
+          exports.handler = async (event) => {
+            /**
+            * Demonstrates a simple HTTP endpoint using API Gateway. You have full
+            * access to the request and response payload, including headers and
+            * status code.
+            *
+            * To scan a DynamoDB table, make a GET request with the TableName as a
+            * query string parameter. To put, update, or delete an item, make a POST,
+            * PUT, or DELETE request respectively, passing in the payload to the
+            * DynamoDB API as a JSON body.
+            */
+                //console.log('Received event:', JSON.stringify(event, null, 2));
+                let body;
+                let statusCode = '200';
+                const headers = {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': 'http://localhost:5173',
+                    'Access-Control-Allow-Methods': 'OPTIONS, GET, PUT, POST ,DELETE',
+                    'Access-Control-Allow-Headers':  '*',
+                    'Access-Control-Allow-Credentials': true
+                }
+                const tableName = "Settings"
+                try {
+                    switch (event.httpMethod) {
+                        case 'DELETE':
+                            {
+                            const params={
+                                TableName: tableName,
+                                Key: JSON.parse(event.body)
+                            }
+                            body = await dynamo.delete(params);
+                            }
+                            break;
+                        case 'GET':
+                            if (event.resource == "/settings/{area}")
+                            {
+                                const params = {
+                                      TableName: tableName,
+                                      ExpressionAttributeValues: {":a": event.pathParameters.area },
+                                      FilterExpression: "Area = :a"
+                                }
+                                body= await dynamo.scan(params)
+                            }
+                            else{
+                                const params = {
+                                      TableName: tableName,
+                                      ExpressionAttributeValues: {":p": "Page", ":lp":"DynamicPage" },
+                                      FilterExpression: "CType = :p OR CType =:lp"
+                                }
+                                body = await dynamo.scan(params);
+                            }
+                            break;
+                        case 'POST':
+                            console.log(event.body)
+                            const params={
+                                TableName: tableName,
+                                Item: JSON.parse(event.body)
+                            }
+                            await dynamo.put(params);
+                            body = JSON.parse(event.body)
+                            break;
+                        case 'PUT':
+                            body = await dynamo.update(JSON.parse(event.body));
+                            break;
+                        case 'OPTIONS':
+                            break
+                        default:
+                            throw new Error(`Unsupported method "${event.httpMethod}"`);
+                    }
+                } catch (err) {
+                    statusCode = '400';
+                    body = err.message;
+                } finally {
+                    body = JSON.stringify(body);
+                }
+                return {
+                    statusCode,
+                    body,
+                    headers,
+                };
+            };
+
+      Runtime: nodejs20.x
+      MemorySize: 128
+      Timeout: 3
+
+  # Lambda Function for DDBAccessSchema
+  DDBAccessSchemaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: DDBAccessSchema
+      Handler: index.handler
+      Role: !GetAtt MicroserviceExecutionRole.Arn
+      Code:
+        ZipFile: |
+          const { DynamoDB } = require('@aws-sdk/client-dynamodb');
+          const { DynamoDBDocument } = require('@aws-sdk/lib-dynamodb');
+          const dynamo = DynamoDBDocument.from(new DynamoDB());
+          exports.handler = async (event) => {
+              /**
+              * Demonstrates a simple HTTP endpoint using API Gateway. You have full
+              * access to the request and response payload, including headers and
+              * status code.
+              *
+              * To scan a DynamoDB table, make a GET request with the TableName as a
+              * query string parameter. To put, update, or delete an item, make a POST,
+              * PUT, or DELETE request respectively, passing in the payload to the
+              * DynamoDB API as a JSON body.
+              */
+                  //console.log('Received event:', JSON.stringify(event, null, 2));
+                  const admin = () => {
+                        console.log(event)
+                      //  return (true)
+                    // return event.requestContext.authorizer.roles.find(i => i == "Admin") ? true : false
+                  return event.requestContext.authorizer.roles == "Admin"  ? true : false
+                  }
+                  let body;
+                  let statusCode = '200';
+                  const headers = {
+                      'Content-Type': 'application/json',
+                      'Access-Control-Allow-Origin': 'http://localhost:5173',
+                      'Access-Control-Allow-Methods': 'OPTIONS, GET, PUT, POST ,DELETE',
+                      'Access-Control-Allow-Headers':  '*',
+                      'Access-Control-Allow-Credentials': true
+                  }
+                  const tableName = "Schema"
+                  try {
+                      switch (event.httpMethod) {
+                          case 'DELETE':
+                              if (admin()){
+                              const params={
+                                  TableName: tableName,
+                                  Key: JSON.parse(event.body)
+                              }
+                              body = await dynamo.delete(params);
+                              }
+                              else{
+                                  statusCode = '401'
+                                  body = "Access denied"
+                              }
+                              break;
+                          case 'GET':
+                              if (event.resource == "/schema/{page}")
+                              {
+                                  const params = {
+                                        TableName: tableName,
+                                        ExpressionAttributeValues: {":p": event.pathParameters.page },
+                                        FilterExpression: "page = :p"
+                                  }
+                                  body= await dynamo.scan(params)
+                              }
+                              else{
+                                  const params = {
+                                        TableName: tableName,
+                                        ExpressionAttributeValues: {":p": "page", ":lp":"partial" },
+                                        FilterExpression: "CType = :p OR CType =:lp"
+                                  }
+                                  body = await dynamo.scan(params);
+                              }
+                              break;
+                          case 'POST':
+                              if (admin()) {
+                              let payload = {...JSON.parse(event.body)}
+                              payload["updateTime"] = Date().toString();
+                              payload["updateUser"] = event.requestContext.authorizer.email ;
+                              const params={
+                                  TableName: tableName,
+                                  Item: JSON.parse(JSON.stringify(payload))
+                              }
+                              await dynamo.put(params);
+                              body =  payload;
+                              }
+                              else{
+                                  statusCode="401";
+                                  body = "Access denied";
+                              }
+                              break;
+                          case 'PUT':
+                              if (admin()) {
+                              let payload = {...JSON.parse(event.body)}
+                              payload["updateTime"] = Date().toString();
+                              payload["updateUser"] = event.requestContext.authorizer.email ;
+                              payload["createdTime"] = Date().toString();
+                              payload["creatorUser"] = event.requestContext.authorizer.email ;
+                              const params={
+                                  TableName: tableName,
+                                  Item: JSON.parse(JSON.stringify(payload))
+                              }
+                              await dynamo.put(params);
+                              body =  payload;
+                              }
+                              else{
+                                  statusCode="401";
+                                  body = "Access denied";
+                              }
+                              break;
+                          case 'OPTIONS':
+                              break
+                          default:
+                              throw new Error(`Unsupported method "${event.httpMethod}"`);
+                      }
+                  } catch (err) {
+                      console.log("error: " + err)
+                      statusCode = '400';
+                      body = err.message;
+                  } finally {
+                      body = JSON.stringify(body);
+                  }
+                  return {
+                      statusCode,
+                      body,
+                      headers,
+                  };
+              };
+
+      Runtime: nodejs20.x
+      MemorySize: 128
+      Timeout: 3
+
+  RecordLogin:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: RecordLogin
+      Handler: index.handler
+      Role: !GetAtt MicroserviceExecutionRole.Arn
+      Code:
+        ZipFile: |
+          const { DynamoDB } = require('@aws-sdk/client-dynamodb');
+          const { DynamoDBDocument } = require('@aws-sdk/lib-dynamodb');
+          const dynamo = DynamoDBDocument.from(new DynamoDB());
+          exports.handler = async (event) => {
+            /**
+            * Demonstrates a simple HTTP endpoint using API Gateway. You have full
+            * access to the request and response payload, including headers and
+            * status code.
+            *
+            * To scan a DynamoDB table, make a GET request with the TableName as a
+            * query string parameter. To put, update, or delete an item, make a POST,
+            * PUT, or DELETE request respectively, passing in the payload to the
+            * DynamoDB API as a JSON body.
+            */
+                //console.log('Received event:', JSON.stringify(event, null, 2));
+                    const tableName = "Logins";
+                var data = event;
+                try {
+                            const email =  event.request.userAttributes.email;
+                            const timestamp = Date();
+                            const value= {userName: email, time: timestamp};
+                            console.log(value);
+                            const paramos={
+                                TableName: tableName,
+                                Item: value
+                            };
+                            await dynamo.put(paramos);
+                }
+                catch (err) {
+                    console.log (data);
+                    console.log(err);
+            }
+                return data;
+            };
+
+      Runtime: nodejs20.x
+      MemorySize: 128
+      Timeout: 3
+
+  # Lambda Function for GetLastLogin
+  GetLastLogin:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: GetLastLogin
+      Handler: index.handler
+      Role: !GetAtt MicroserviceExecutionRole.Arn
+      Code:
+        ZipFile: |
+          const { DynamoDB } = require('@aws-sdk/client-dynamodb');
+          const { DynamoDBDocument } = require('@aws-sdk/lib-dynamodb');
+          const dynamo = DynamoDBDocument.from(new DynamoDB());
+          exports.handler = async (event) => {
+                /**
+                * Demonstrates a simple HTTP endpoint using API Gateway. You have full
+                * access to the request and response payload, including headers and
+                * status code.
+                *
+                * To scan a DynamoDB table, make a GET request with the TableName as a
+                * query string parameter. To put, update, or delete an item, make a POST,
+                * PUT, or DELETE request respectively, passing in the payload to the
+                * DynamoDB API as a JSON body.
+                */
+                    //console.log('Received event:', JSON.stringify(event, null, 2));
+                    let body;
+                    let statusCode = '200';
+                    const headers = {
+                        'Content-Type': 'application/json',
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Methods': 'OPTIONS, GET, PUT, POST ,DELETE',
+                        'Access-Control-Allow-Headers':  '*',
+                        'Access-Control-Allow-Credentials': true
+                    }
+                    const tableName = "Logins"
+                    try {
+                      switch (event.httpMethod) {
+                            case 'GET':
+                                    const email =  event.requestContext.authorizer.email
+                                    console.log("email: ")
+                                    console.log(email)
+                                    const parames = {
+                                          TableName: tableName,
+                                          ExpressionAttributeValues: {":p": email },
+                                          FilterExpression: "userName = :p"
+                                    }
+                                    body= await dynamo.scan(parames)
+                                    console.log(body)
+                                break;
+                                  case 'OPTIONS':
+                                break;
+                            default:
+                                throw new Error(`Unsupported method "${event.httpMethod}"`);
+                        }
+                    } catch (err) {
+                        statusCode = '400';
+                        body = err.message;
+                    } finally {
+                        body = JSON.stringify(body);
+                    }
+                    return {
+                        statusCode,
+                        body,
+                        headers,
+                    };
+                };
+
+      Runtime: nodejs20.x
+      MemorySize: 128
+      Timeout: 3
+
+  # Lambda Function for RecordLogin
+
+
+  ApiGatewayRestApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: Concidus CMSApi
+      Description: API Gateway for accessing content in S3 bucket
+      BinaryMediaTypes:
+        - image/*
+        - application/pdf
+        - application/vnd.openxmlformats-officedocument.wordprocessingml.document
+        - video/*
+
+  # API Gateway Deployment
+  ApiGatewayDeployment:
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      StageName: prod # This can be used to create the stage directly
+    DependsOn:
+
+      - ApiGatewayRestApi
+
+      - ApiGatewayLastLoginGetMethod
+
+      - ApiGatewayGetSettingMethod
+      - ApiGatewayGetSchemaMethod
+      - ApiGatewayGetPageMethod
+
+      - ApiGatewayGetSettingsSecMethod
+
+      - ApiGatewayPostSchemaMethod
+      - ApiGatewayPostPageMethod
+
+      - ApiGatewayPutSchemaMethod
+      - ApiGatewayPutPageMethod
+
+      - ApiGatewayDeletePageMethod
+      - ApiGatewayDeleteSchemaMethod
+
+      - ApiGatewayPutFileMethod
+      - ApiGatewayGetFileMethod
+
+  # Cognito Token Authorizer Lambda
+  CognitoTokenAuthorizer:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: CognitoTokenAuthorizer
+      Handler: index.handler # Adjust according to your handler implementation
+      Role: !GetAtt CognitoAuthLambdaExecutionRole.Arn
+      Environment:
+        Variables:
+          ENV_COGNITO_USERPOOLID: !Ref UserPool
+          ENV_COGNITO_USERPOOLCLIENT: !Ref UserPoolClient
+      Layers:
+        - !Ref CognitoLambdaLayer
+      Code:
+        ZipFile: |
+          const { createRequire }  = require ('module');
+          const { CognitoIdentityProviderClient, AdminGetUserCommand } = require ("@aws-sdk/client-cognito-identity-provider");
+                  function parseJwt (token) {
+                      return JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+                  }
+                  exports.handler = async (event) => {
+                      // TODO: Implement custom authorizer logic here
+                      const userPoolID = process.env.ENV_COGNITO_USERPOOLID;
+                      const userPoolClient  = process.env.ENV_COGNITO_USERPOOLCLIENT;
+                      const token = event.authorizationToken.replace("Bearer ","");
+                      const methodArn = event.methodArn;
+                      const jwtverifier = require("aws-jwt-verify");
+                      console.log("token: " + token )
+                      //config.update({region: 'eu-west-3'});
+                      const verifier = jwtverifier.CognitoJwtVerifier.create({
+                        userPoolId: userPoolID,
+                        tokenUse: "access",
+                        clientId: userPoolClient,
+                      });
+                  try {
+                    const payload = await verifier.verify(
+                      token // the JWT as string
+                    );
+                    const client = new CognitoIdentityProviderClient({});
+                    const input = { // AdminGetUserRequest
+                      UserPoolId: userPoolID,
+                      Username:  parseJwt(token)["username"]
+                      };
+                      const command = new AdminGetUserCommand(input);
+                      const response = await client.send(command);
+                      const email=response.UserAttributes.find (i => i.Name == "email").Value
+                      return {
+                          principalId: 'user',
+                          policyDocument: {
+                              Version: '2012-10-17',
+                              Statement: [
+                                  {
+                                      Action: 'execute-api:Invoke',
+                                      Effect: 'Allow',
+                                      Resource: methodArn,
+                                  },
+                              ],
+                            },
+                          context: {roles: parseJwt(token)["cognito:groups"][0], email:email}
+                      };
+                    }
+                  catch(err) {
+                      console.log("error: " + err)
+                      return {
+                          principalId: 'user',
+                          policyDocument: {
+                              Version: '2012-10-17',
+                              Statement: [
+                                  {
+                                      Action: 'execute-api:Invoke',
+                                      Effect: 'Deny',
+                                      Resource: methodArn,
+                                  },
+                              ],
+                          },
+                      };
+                  }
+                  };
+      Runtime: nodejs20.x # Adjust to the appropriate runtime
+      MemorySize: 128
+      Timeout: 3
+    DependsOn:
+      - UserPool
+      - UserPoolClient
+
+  # API Gateway Authorizer using CognitoTokenAuthorizer Lambda
+  ApiGatewayAuthorizer:
+    Type: AWS::ApiGateway::Authorizer
+    Properties:
+      Name: CognitoTokenAuthorizer
+      RestApiId: !Ref ApiGatewayRestApi
+      Type: TOKEN
+      IdentitySource: method.request.header.Authorization
+      AuthorizerUri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CognitoTokenAuthorizer.Arn}/invocations
+      AuthorizerResultTtlInSeconds: 300 # Cache duration
+
+  # /file/{folder}/{file} Resource for PUT method
+  ApiGatewayFileResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt ApiGatewayRestApi.RootResourceId
+      PathPart: file
+      RestApiId: !Ref ApiGatewayRestApi
+
+  ApiGatewayFileFolderResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !Ref ApiGatewayFileResource
+      PathPart: '{folder}'
+      RestApiId: !Ref ApiGatewayRestApi
+
+  ApiGatewayFileFolderFileResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !Ref ApiGatewayFileFolderResource
+      PathPart: '{file}'
+      RestApiId: !Ref ApiGatewayRestApi
+
+  ApiGatewayPutFileMethod:
+      Type: AWS::ApiGateway::Method
+      Properties:
+        AuthorizationType: CUSTOM # Using a custom authorizer
+        AuthorizerId: !Ref ApiGatewayAuthorizer
+        HttpMethod: PUT
+        ResourceId: !Ref ApiGatewayFileFolderFileResource
+        RestApiId: !Ref ApiGatewayRestApi
+        RequestParameters:
+          method.request.path.folder: true # Enable path parameter for folder
+          method.request.path.file: true # Enable path parameter for file
+        Integration:
+          IntegrationHttpMethod: PUT # Use PUT for file upload
+          Type: AWS # AWS Proxy integration with S3
+          Uri: !Sub
+            - arn:aws:apigateway:${AWS::Region}:s3:path/{bucket}/content/{key}
+            - bucket: !Ref ContentS3Bucket
+          Credentials: !GetAtt S3ContentAccessRole.Arn
+          PassthroughBehavior: WHEN_NO_MATCH
+          RequestParameters:
+            integration.request.path.bucket: "method.request.path.folder"  # Map bucket path parameter
+            integration.request.path.key: "method.request.path.file"       # Map key path parameter
+          CacheKeyParameters: []            # Disable caching
+
+          IntegrationResponses:
+            - StatusCode: 200
+              ResponseParameters:
+                method.response.header.Content-Type: "'application/json'"
+              ResponseTemplates:
+                application/json: |
+                  {
+                    "message": "Success",
+                    "bucket": "Content",
+                    "key": "$input.params('file')",
+                    "data": "$input.body"
+                  }
+            - StatusCode: 400
+              SelectionPattern: "4\\d{2}"
+              ResponseTemplates:
+                application/json: |
+                  {
+                    "error": "Client Error",
+                    "message": "$input.path('$.errorMessage')"
+                  }
+        MethodResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: true
+              method.response.header.Content-Length: true
+              method.response.header.Content-Type: true
+              method.response.header.Typestamp: true
+            ResponseModels:
+              application/json: Empty
+          - StatusCode: 400
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Origin: true
+              method.response.header.Typestamp: true
+            ResponseModels:
+              application/json: Error
+
+  ApiGatewayGetFileMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE # Using a custom authorizer
+
+      HttpMethod: GET
+      ResourceId: !Ref ApiGatewayFileFolderFileResource
+      RestApiId: !Ref ApiGatewayRestApi
+      RequestParameters:
+        method.request.path.folder: true # Enable path parameter for folder
+        method.request.path.file: true # Enable path parameter for file
+      Integration:
+        IntegrationHttpMethod: POST # Use GET for file retrieval
+        Type: AWS # AWS Proxy integration with S3
+        Uri: !Sub
+          - arn:aws:apigateway:${AWS::Region}:s3:path/{bucket}/{key}
+          - bucket: !Ref ContentS3Bucket
+        Credentials: !GetAtt S3ContentAccessRole.Arn
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestParameters:
+          integration.request.path.bucket: "method.request.path.folder"  # Map bucket path parameter
+          integration.request.path.key: "method.request.path.file"       # Map key path parameter
+        CacheKeyParameters: []            # Disable caching
+
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Content-Type: "'application/json'"
+            ResponseTemplates:
+              application/json: |
+                {
+                  "message": "Success",
+                  "bucket": "content",
+                  "key": "$input.params('file')",
+                  "data": "$input.body"
+                }
+          - StatusCode: 400
+            SelectionPattern: "4\\d{2}"
+            ResponseTemplates:
+              application/json: |
+                {
+                  "error": "Client Error",
+                  "message": "$input.path('$.errorMessage')"
+                }
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: true
+            method.response.header.Content-Length: true
+            method.response.header.Content-Type: true
+            method.response.header.Typestamp: true
+          ResponseModels:
+            application/json: Empty
+        - StatusCode: 400
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: true
+            method.response.header.Typestamp: true
+          ResponseModels:
+            application/json: Error
+
+
+  # /lastlogin Resource for GET method
+  ApiGatewayLastLoginResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt ApiGatewayRestApi.RootResourceId
+      PathPart: lastlogin
+      RestApiId: !Ref ApiGatewayRestApi
+
+  ApiGatewayLastLoginGetMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: CUSTOM # Using a custom authorizer
+      AuthorizerId: !Ref ApiGatewayAuthorizer
+      HttpMethod: GET
+      ResourceId: !Ref ApiGatewayLastLoginResource
+      RestApiId: !Ref ApiGatewayRestApi
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri: !Sub
+          - arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaArn}/invocations
+          - LambdaArn: !GetAtt GetLastLogin.Arn
+
+    DependsOn:
+      - DDBAccessPagesFunction
+
+  # /pages Resource for DELETE, POST, and PUT methods
+  ApiGatewayPagesResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt ApiGatewayRestApi.RootResourceId
+      PathPart: pages
+      RestApiId: !Ref ApiGatewayRestApi
+
+  ApiGatewayDeletePageMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: CUSTOM # Using a custom authorizer
+      AuthorizerId: !Ref ApiGatewayAuthorizer
+      HttpMethod: DELETE
+      ResourceId: !Ref ApiGatewayPagesResource
+      RestApiId: !Ref ApiGatewayRestApi
+      Integration:
+        IntegrationHttpMethod:  POST
+        Type: AWS_PROXY
+        Uri: !Sub
+          - arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaArn}/invocations
+          - LambdaArn: !GetAtt DDBAccessPagesFunction.Arn
+    DependsOn:
+      - DDBAccessPagesFunction
+
+  ApiGatewayGetPageMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE # Using a custom authorizerr
+      HttpMethod: GET
+      ResourceId: !Ref ApiGatewayPagesResource
+      RestApiId: !Ref ApiGatewayRestApi
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri: !Sub
+          - arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaArn}/invocations
+          - LambdaArn: !GetAtt DDBAccessPagesFunction.Arn
+    DependsOn:
+      - DDBAccessPagesFunction
+
+  ApiGatewayPostPageMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: CUSTOM # Using a custom authorizer
+      AuthorizerId: !Ref ApiGatewayAuthorizer
+      HttpMethod: POST
+      ResourceId: !Ref ApiGatewayPagesResource
+      RestApiId: !Ref ApiGatewayRestApi
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri: !Sub
+          - arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaArn}/invocations
+          - LambdaArn: !GetAtt DDBAccessPagesFunction.Arn
+
+    DependsOn:
+      - DDBAccessPagesFunction
+
+  ApiGatewayPutPageMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: CUSTOM # Using a custom authorizer
+      AuthorizerId: !Ref ApiGatewayAuthorizer
+      HttpMethod: PUT
+      ResourceId: !Ref ApiGatewayPagesResource
+      RestApiId: !Ref ApiGatewayRestApi
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri: !Sub
+          - arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaArn}/invocations
+          - LambdaArn: !GetAtt DDBAccessPagesFunction.Arn
+
+    DependsOn:
+      - DDBAccessPagesFunction
+
+  ApiGatewayGetPagePagesResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !Ref ApiGatewayPagesResource
+      PathPart: '{page}'
+      RestApiId: !Ref ApiGatewayRestApi
+
+  ApiGatewayPagesGetPageMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE # Using a custom authorizerr
+      HttpMethod: GET
+      ResourceId: !Ref ApiGatewayGetPagePagesResource
+      RestApiId: !Ref ApiGatewayRestApi
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri: !Sub
+          - arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaArn}/invocations
+          - LambdaArn: !GetAtt DDBAccessPagesFunction.Arn
+    DependsOn:
+      - DDBAccessPagesFunction
+
+  # /schema Resource for POST, PUT, DELETE methods
+  ApiGatewaySchemaResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt ApiGatewayRestApi.RootResourceId
+      PathPart: schema
+      RestApiId: !Ref ApiGatewayRestApi
+
+  ApiGatewayPostSchemaMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: CUSTOM # Using a custom authorizer
+      AuthorizerId: !Ref ApiGatewayAuthorizer
+      HttpMethod: POST
+      ResourceId: !Ref ApiGatewaySchemaResource
+      RestApiId: !Ref ApiGatewayRestApi
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri: !Sub
+          - arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaArn}/invocations
+          - LambdaArn: !GetAtt DDBAccessSchemaFunction.Arn
+    DependsOn:
+      - DDBAccessSchemaFunction
+
+  ApiGatewayPutSchemaMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: CUSTOM # Using a custom authorizer
+      AuthorizerId: !Ref ApiGatewayAuthorizer
+      HttpMethod: PUT
+      ResourceId: !Ref ApiGatewaySchemaResource
+      RestApiId: !Ref ApiGatewayRestApi
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri: !Sub
+          - arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaArn}/invocations
+          - LambdaArn: !GetAtt DDBAccessSchemaFunction.Arn
+    DependsOn:
+      - DDBAccessSchemaFunction
+
+  ApiGatewayGetSchemaMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE # Using a custom authorizer
+
+      HttpMethod: GET
+      ResourceId: !Ref ApiGatewaySchemaResource
+      RestApiId: !Ref ApiGatewayRestApi
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri: !Sub
+          - arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaArn}/invocations
+          - LambdaArn: !GetAtt DDBAccessSchemaFunction.Arn
+    DependsOn:
+      - DDBAccessSchemaFunction
+
+  ApiGatewayDeleteSchemaMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: CUSTOM # Using a custom authorizer
+      AuthorizerId: !Ref ApiGatewayAuthorizer
+      HttpMethod: DELETE
+      ResourceId: !Ref ApiGatewaySchemaResource
+      RestApiId: !Ref ApiGatewayRestApi
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri: !Sub
+          - arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaArn}/invocations
+          - LambdaArn: !GetAtt DDBAccessSchemaFunction.Arn
+
+    DependsOn:
+      - DDBAccessSchemaFunction
+
+  ApiGatewayGetSchemePagesResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !Ref ApiGatewaySchemaResource
+      PathPart: '{page}'
+      RestApiId: !Ref ApiGatewayRestApi
+
+  ApiGatewaySchemaGetPagesMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE # Using a custom authorizerr
+      HttpMethod: GET
+      ResourceId: !Ref ApiGatewayGetSchemePagesResource
+      RestApiId: !Ref ApiGatewayRestApi
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri: !Sub
+          - arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaArn}/invocations
+          - LambdaArn: !GetAtt DDBAccessSchemaFunction.Arn
+    DependsOn:
+      - DDBAccessSchemaFunction
+
+  # /setting Resource for PUT method
+  ApiGatewaySettingResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt ApiGatewayRestApi.RootResourceId
+      PathPart: settings
+      RestApiId: !Ref ApiGatewayRestApi
+
+  ApiGatewayPostSettingMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: CUSTOM # Using a custom authorizer
+      AuthorizerId: !Ref ApiGatewayAuthorizer
+      HttpMethod: POST
+      ResourceId: !Ref ApiGatewaySettingResource
+      RestApiId: !Ref ApiGatewayRestApi
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri: !Sub
+          - arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaArn}/invocations
+          - LambdaArn: !GetAtt DDBAccessSettingsFunction.Arn
+
+    DependsOn:
+      - DDBAccessSettingsFunction
+
+  ApiGatewaySettingAreaResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !Ref ApiGatewaySettingResource
+      PathPart: '{area}'
+      RestApiId: !Ref ApiGatewayRestApi
+
+  ApiGatewayGetSettingMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE # Using a custom authorizer
+      HttpMethod: GET
+      ResourceId: !Ref ApiGatewaySettingAreaResource
+      RestApiId: !Ref ApiGatewayRestApi
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri: !Sub
+          - arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaArn}/invocations
+          - LambdaArn: !GetAtt DDBAccessSettingsFunction.Arn
+
+  # /settingssec Resource for GET, POST, PUT, DELETE methods
+  ApiGatewaySettingsSecResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !GetAtt ApiGatewayRestApi.RootResourceId
+      PathPart: settingsSec
+      RestApiId: !Ref ApiGatewayRestApi
+
+  ApiGatewaySettingsSecAreaResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      ParentId: !Ref ApiGatewaySettingsSecResource
+      PathPart: '{area}'
+      RestApiId: !Ref ApiGatewayRestApi
+
+  ApiGatewayGetSettingsSecMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: CUSTOM # Using a custom authorizer
+      AuthorizerId: !Ref ApiGatewayAuthorizer
+      HttpMethod: GET
+      ResourceId: !Ref ApiGatewaySettingsSecAreaResource
+      RestApiId: !Ref ApiGatewayRestApi
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri: !Sub
+          - arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaArn}/invocations
+          - LambdaArn: !GetAtt DDBAccessSettingsSecFunction.Arn
+
+    DependsOn:
+      - DDBAccessSettingsSecFunction
+
+  ApiGatewayPostSettingsSecMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: CUSTOM # Using a custom authorizer
+      AuthorizerId: !Ref ApiGatewayAuthorizer
+      HttpMethod: POST
+      ResourceId: !Ref ApiGatewaySettingsSecResource
+      RestApiId: !Ref ApiGatewayRestApi
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri: !Sub
+          - arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaArn}/invocations
+          - LambdaArn: !GetAtt DDBAccessSettingsSecFunction.Arn
+
+    DependsOn:
+      - DDBAccessSettingsSecFunction
+
+  CognitoTokenAuthorizerLambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt CognitoTokenAuthorizer.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayRestApi}/authorizers/${ApiGatewayAuthorizer}
+
+  DDBAccessSchemaLambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt DDBAccessSchemaFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayRestApi}/*/*/schema
+
+  DDBAccessSchemaPageLambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt DDBAccessSchemaFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayRestApi}/*/*/schema/{page}
+
+  DDBAccessPagesLambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt DDBAccessPagesFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayRestApi}/*/*/pages
+
+  DDBAccessPagesPageLambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt DDBAccessPagesFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayRestApi}/*/*/pages/{page}
+
+  DDBAccessSettingsLambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt DDBAccessSettingsFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayRestApi}/*/*/settings
+
+  DDBAccessSettingsAreaLambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt DDBAccessSettingsFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayRestApi}/*/*/settings/{area}
+
+  DDBAccessSettingsSecLambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt DDBAccessSettingsSecFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayRestApi}/*/*/settingsSec
+
+  DDBAccessSettingsSecAreaLambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt DDBAccessSettingsSecFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayRestApi}/*/*/settingsSec/{area}
+
+  GetLastLoginLambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt GetLastLogin.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayRestApi}/*/*/lastlogin
+
+  RecordLoginLambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt RecordLogin.Arn
+      Action: lambda:InvokeFunction
+      Principal: cognito-idp.amazonaws.com
+      SourceArn: !GetAtt UserPool.Arn
+
+  CloudFrontOriginAccessIdentity:
+    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: Access Identity for S3 buckets for CloudFront
+
+  CloudFrontOriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        SigningBehavior: always
+        SigningProtocol: sigv4
+        OriginAccessControlOriginType: s3
+        Name: !Ref WebsiteS3Bucket
+
+  CloudFrontCMOriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        SigningBehavior: always
+        SigningProtocol: sigv4
+        OriginAccessControlOriginType: s3
+        Name: !Ref CMS3Bucket
+ 
+  CloudFrontContentOriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        SigningBehavior: always
+        SigningProtocol: sigv4
+        OriginAccessControlOriginType: s3
+        Name: !Ref ContentS3Bucket
+
+
+
+
+  
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+
+        Origins:
+          - Id: WebsiteS3Origin
+            DomainName: !GetAtt WebsiteS3Bucket.RegionalDomainName
+            OriginAccessControlId: !Ref CloudFrontOriginAccessControl
+            S3OriginConfig: {}
+          - Id: ApiGatewayOrigin
+            DomainName: !Sub ${ApiGatewayRestApi}.execute-api.${AWS::Region}.amazonaws.com
+            CustomOriginConfig:
+              OriginProtocolPolicy: https-only
+          - Id: CMS3Origin
+            DomainName: !GetAtt CMS3Bucket.RegionalDomainName
+            OriginAccessControlId: !Ref CloudFrontCMOriginAccessControl
+            S3OriginConfig: {}
+          - Id: ContentS3Origin
+            DomainName: !GetAtt ContentS3Bucket.RegionalDomainName
+            OriginAccessControlId: !Ref CloudFrontContentOriginAccessControl
+            S3OriginConfig: {}
+
+        DefaultCacheBehavior:
+   
+          TargetOriginId: WebsiteS3Origin
+          Compress: true
+          AllowedMethods:
+            - HEAD
+            - GET
+            - OPTIONS
+          CachedMethods:
+            - HEAD
+            - GET
+
+          ViewerProtocolPolicy: redirect-to-https
+          CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad 
+          OriginRequestPolicyId: 88a5eaf4-2fd4-4709-b370-b4c650ea3fcf
+          ResponseHeadersPolicyId: 60669652-455b-4ae9-85a4-c4c02393f86c
+          LambdaFunctionAssociations:
+            - EventType: origin-request
+              LambdaFunctionARN: !Sub '{{resolve:ssm:/conciuscms/lambda-edge}}'
+
+
+        CacheBehaviors:
+
+          - PathPattern: "/admin/*"
+
+            TargetOriginId: CMS3Origin
+            Compress: true
+            AllowedMethods:
+              - HEAD
+              - GET
+              - OPTIONS
+            CachedMethods:
+              - HEAD
+              - GET
+
+            ViewerProtocolPolicy: redirect-to-https
+            CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad 
+            OriginRequestPolicyId: 88a5eaf4-2fd4-4709-b370-b4c650ea3fcf
+            ResponseHeadersPolicyId: 60669652-455b-4ae9-85a4-c4c02393f86c
+            LambdaFunctionAssociations:
+              - EventType: origin-request
+                LambdaFunctionARN: !Sub '{{resolve:ssm:/conciuscms/lambda-edge}}'
+
+     
+
+
+          - PathPattern: "/content/*"
+            TargetOriginId: ContentS3Origin
+            Compress: true
+            AllowedMethods:
+              - HEAD
+              - GET
+              - OPTIONS
+            CachedMethods:
+              - HEAD
+              - GET
+            ViewerProtocolPolicy: redirect-to-https
+            CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad 
+            OriginRequestPolicyId: 88a5eaf4-2fd4-4709-b370-b4c650ea3fcf
+            ResponseHeadersPolicyId: 60669652-455b-4ae9-85a4-c4c02393f86c
+
+          - PathPattern: /prod/*
+            TargetOriginId:  ApiGatewayOrigin
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods:
+              - HEAD
+              - DELETE
+              - POST
+              - GET
+              - OPTIONS
+              - PUT
+              - PATCH
+
+            CachedMethods:
+              - GET
+              - HEAD
+            Compress: true
+            CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad
+            OriginRequestPolicyId: b689b0a8-53d0-40ab-baf2-68738e2966ac
+
+
+        PriceClass: PriceClass_All
+        HttpVersion: http2
+        ViewerCertificate:
+          CloudFrontDefaultCertificate: true
+        DefaultRootObject: index.html
+        
+    DependsOn:
+      - WebsiteS3Bucket
+      - CloudFrontOriginAccessIdentity
+      - ApiGatewayRestApi
+      - CMS3Bucket
+
+  WebsiteBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref WebsiteS3Bucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action: s3:GetObject
+            Resource: !Sub arn:aws:s3:::${WebsiteS3Bucket}/*
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}
+
+
+  CMBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref CMS3Bucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action: s3:GetObject
+            Resource: !Sub arn:aws:s3:::${CMS3Bucket}/*
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}
+
+    DependsOn:
+      - CMS3Bucket
+      - CloudFrontDistribution
+
+  ContentBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref ContentS3Bucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action: s3:GetObject
+            Resource: !Sub arn:aws:s3:::${ContentS3Bucket}/*
+            Condition:
+              StringEquals: 
+                AWS:SourceArn: !Sub arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}
+
+    DependsOn:
+      - CMS3Bucket
+      - CloudFrontDistribution
+
+ # GitActionSecreteSecureStringParameter:
+  #  Type: AWS::SSM::Parameter
+   # Properties:
+    #  Name: /conciuscms/secure/gitactionssecret
+    #  Type: String
+    #  Value: !GetAtt S3WebAccessUserAccessKey.SecretAccessKey # Example for fetching a secure parameter
+    #  Description: Secure password for the application
+
+  # GitActionIDKeyParameter:
+    # Type: AWS::SSM::Parameter
+    # Properties:
+    #  Name: /conciuscms/gitactionsidkey # Change the name as needed
+    #  Type: String
+    #  Value: !Ref S3WebAccessUserAccessKey
+
+Outputs:
+
+  # Output the Access Key ID
+  WebBucket:
+    Description: CM S3 Bucket
+    Value: !Ref WebsiteS3Bucket
+  
+  CMBucket:
+    Description: CM S3 Bucket
+    Value: !Ref CMS3Bucket
+
+  UserPool:
+    Description: UserPool
+    Value: !Ref UserPool
+
+  UserPoolClient:
+    Description: UserPool Client
+    Value: !Ref UserPoolClient
+
+  DistributionDomainName:
+    Description: Domain for Cloudfront DistributionConfig
+    Value: !GetAtt CloudFrontDistribution.DomainName
+
+  ContentBucketName:
+    Description: Content Bucket Name
+    Value: !Ref ContentS3Bucket
+  
