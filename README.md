@@ -297,18 +297,15 @@ Resources & methods (selected):
 
 
 
-## 📁 Proyect estructure
+## 📁 Project structure
 
 ```
-infrastructurasAWS/
-├── README.md
-├── new.yml   
-├── frontend/                        # React app: frontend Code 
-├── cminterface/                     # Ract app: content management       
-├── new.yml                          # Template adicional
-└── Infrastructures/
-    ├── mainTemplate.yml             # Template principal del CMS
-    └── accountFactory.yml           # Factory para múltiples cuentas
+Infrastructures/
+├── mainTemplate.yml             # Template principal del CMS
+├── accountFactory.yml           # Factory para múltiples cuentas
+├── aws-jwt-verifier.zip         # Dependency layer
+└── backups/
+   └── mainTemplate-back.yml
 ```
 
 ## 🚀 Despliegue
@@ -327,7 +324,9 @@ infrastructurasAWS/
 ### 0. **Clone the repository**
    ```bash
    git clone https://github.com/<your-org>/ConsciusCMS.git
-   cd ConsciusCMS/infrastructuresAWS
+   cd ConsciusCMS/Infrastructures
+   ```
+
 ### 1. Run Account Factory (region: us-east-1)
 Execute the accountFactory.yml script with the following parameters:
 
@@ -343,7 +342,7 @@ Region
 
 
 aws cloudformation deploy \
-  --template-file Infrastructures/accountFactory.yml \
+   --template-file Infrastructures/accountFactory.yml \
   --stack-name conscius-accounts \
   --capabilities CAPABILITY_NAMED_IAM \
   --parameter-overrides \
@@ -360,7 +359,7 @@ Upload the file aws-jwt-verifier.zip to the newly created OPS bucket.
 Execute the mainTemplate.yml in the region selected in step 1.
 
 aws cloudformation deploy \
-  --template-file Infrastructures/maintemplate.yml \
+   --template-file Infrastructures/mainTemplate.yml \
   --stack-name conscius-inf \
   --capabilities CAPABILITY_NAMED_IAM \
   --parameter-overrides \
