@@ -256,9 +256,9 @@ By adopting this licensing approach, we ensure that ConsciusCMS remains free, op
 
 ## 📞 Soporte
 
-Para soporte técnico o preguntas:
+Auora program has free support for Aurora program members
 
-- **Email**: support@example.com
+- **Email**: support@auroraprogram.org
 - **Issues**: GitHub Issues
 - **Documentación**: [Wiki del proyecto](../../wiki)
 
