@@ -281,6 +281,7 @@ Resources & methods (selected):
   - Origins: Website, CMS, Content, API Gateway  
   - Default → Website (+ Lambda@Edge)  
   - Behaviors: `/admin/*` → CMS, `/content/*` → Content, `/prod/*` → API
+  
 
 ### IAM
 - Users for GitHub actions (scoped S3 access): `GitHubCMActionsAcct`, `GitHubWebActionsAcct`  
