@@ -6,15 +6,6 @@ Parameters:
     Description: AccountName
     Type: String
 
-   
-  Environment:
-    Description: Environment
-    Type: String
-    AllowedValues:
-      - qa
-      - prod
-    Default: qa
-
   Region:
     Description: Region for where deploy the CMS
     Type: String
@@ -24,9 +15,7 @@ Parameters:
       - eu-south-2
     Default: eu-west-3
   
-  Domain:
-    Description: Website Domain
-    Type: String
+
 
   License:
     Description: License Account
@@ -117,17 +106,7 @@ Resources:
   AWSCloudFormationStackSetAdministrationRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: 
-                !Join 
-          
-                    - ''
-                    - - 'AWSCloudFormationStackSetExecutionRole'
-                      - '-'
-                      - !Ref AccountName
-                      - '-'
-                      - !Ref AWS::StackName
-
-
+      RoleName: AWSCloudFormationStackSetAdministrationRole
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -150,15 +129,8 @@ Resources:
 
     Type: AWS::IAM::Role
     Properties: 
-      RoleName: 
-                !Join 
-          
-                    - ''
-                    - - 'AWSCloudFormationStackSetExecutionRole'
-                      - !Ref AccountName
-                      - '-'
-                      - !Ref AWS::StackName
-      
+      RoleName: AWSCloudFormationStackSetExecutionRole
+
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -175,8 +147,9 @@ Resources:
                 Action: '*'
                 Resource: '*'
 
-  MyStackSet:
+  SystemPreparationStackSet:
     Type: AWS::CloudFormation::StackSet
+
     Properties:
       StackSetName: 
         !Join 
@@ -192,14 +165,11 @@ Resources:
           Parameters:
             AccountName:
                Type: String
-            Environment:
-              Type: String
             Region:
               Type: String
             LambdaEdge:
               Type: String
-            WebDomain:
-              Type: String
+
             License:
               Type: String
           Resources:
@@ -213,15 +183,13 @@ Resources:
                       - !Ref AccountName
                       - '-ops-'
                       - !Ref Region
-                      - '-'
-                      - !Ref Environment
+
 
                 AccessControl: Private
                 VersioningConfiguration:
                   Status: Enabled
                 Tags:
-                  - Key: Environment
-                    Value: ${Environment}
+
                   - Key: Name
                     Value: 
                       !Join 
@@ -229,8 +197,7 @@ Resources:
                         - - !Ref AccountName
                           - '-ops-'
                           - !Ref Region
-                          - '-'
-                          - !Ref Environment
+
               
 
             OpsS3BucketParameter:
@@ -261,13 +228,8 @@ Resources:
                 Type: 'String'
                 Value: !Ref AccountName
 
-            # Parameter Store for Environment
-            EnvironmentParameter:
-              Type: 'AWS::SSM::Parameter'
-              Properties:
-                Name: '/consciuscms/environment'  # Change the name as needed
-                Type: 'String'
-                Value: !Ref Environment
+    
+
 
             LambdaEdgeFunctionParameter:
               Type: 'AWS::SSM::Parameter'
@@ -276,12 +238,7 @@ Resources:
                 Type: 'String'
                 Value: !Ref LambdaEdge
 
-            WebDomainParameter:
-              Type: 'AWS::SSM::Parameter'
-              Properties:
-                Name: '/consciuscms/webdomain'  # Change the name as needed
-                Type: 'String'
-                Value: !Ref WebDomain
+
 
 
 
@@ -291,12 +248,10 @@ Resources:
           ParameterValue: !Ref AccountName
         - ParameterKey: Region
           ParameterValue: !Ref Region
-        - ParameterKey: Environment
-          ParameterValue: !Ref Environment
+
         - ParameterKey: LambdaEdge
           ParameterValue: !Ref LambdaEdgeVersion
-        - ParameterKey: WebDomain
-          ParameterValue: !Ref Domain
+
         - ParameterKey: License
           ParameterValue: !Ref License
 
@@ -314,4 +269,4 @@ Resources:
 Outputs:
   StackSetName:
     Description: The name of the created StackSet.
-    Value: !Ref MyStackSet
+    Value: !Ref SystemPreparationStackSet
