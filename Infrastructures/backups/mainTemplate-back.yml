@@ -413,12 +413,12 @@ Resources:
 
                 <ol>
                     <li><strong>Accede a tu cuenta:</strong> Haz clic en el siguiente enlace para iniciar sesi?n:  
-                        <a href=${resolve:ssm:/conciuscms/webdomain} style="color: #4CAF50; text-decoration: none;">Iniciar sesi?n</a>
+                        <a href="{{resolve:ssm:/consciuscms/webdomain}}" style="color: #4CAF50; text-decoration: none;">Iniciar sesi?n</a>
                     </li>
                     <li><strong>Contrase?a temporal:</strong> Se ha generado una contrase?a temporal para ti.  
                         <strong>Contrase?a temporal: {####}</strong>
                     </li>
-                    <li><strong>Cambiar tu contrase?a:</strong> La primera vez que inicies sesi?n, se te pedir? que cambies tu contrase?a temporal por una nueva de tu elecci?n. Ten en cuenta que, al hacerlo, aceptar?s autom?ticamente los <strong><a href="${resolve:ssm:/conciuscms/webdomain}/admin/terms/${license}" style="color: #4CAF50; text-decoration: none;">T?rminos y Condiciones</a></strong> de nuestro servicio.</li>
+                    <li><strong>Cambiar tu contrase?a:</strong> La primera vez que inicies sesi?n, se te pedir? que cambies tu contrase?a temporal por una nueva de tu elecci?n. Ten en cuenta que, al hacerlo, aceptar?s autom?ticamente los <strong><a href="{{resolve:ssm:/consciuscms/webdomain}}/admin/terms/${license}" style="color: #4CAF50; text-decoration: none;">T?rminos y Condiciones</a></strong> de nuestro servicio.</li>
                 </ol>
 
   

@@ -1,0 +1,5 @@
+[
+  {"ParameterKey":"Environment","ParameterValue":"qa"},
+  {"ParameterKey":"WebDomain","ParameterValue":"https://www.example.com"}
+]
+

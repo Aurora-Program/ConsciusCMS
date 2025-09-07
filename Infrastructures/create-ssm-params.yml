@@ -1,0 +1,39 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Create SSM Parameter Store entries required by ConsciusCMS templates (/consciuscms/environment and /consciuscms/webdomain)
+
+Parameters:
+  EnvironmentValue:
+    Type: String
+    Default: qa
+    Description: Environment name (e.g. dev, qa, prod)
+
+  WebDomainValue:
+    Type: String
+    Default: 'https://www.example.com'
+    Description: 'Public web domain used by the application (include scheme: https://)'
+
+Resources:
+  ConsciusCMSEnvironmentParam:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /consciuscms/environment
+      Type: String
+      Value: !Ref EnvironmentValue
+    DeletionPolicy: Retain
+
+  ConsciusCMSWebDomainParam:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /consciuscms/webdomain
+      Type: String
+      Value: !Ref WebDomainValue
+    DeletionPolicy: Retain
+
+Outputs:
+  EnvironmentParameterName:
+    Description: SSM parameter name for environment
+    Value: /consciuscms/environment
+
+  WebDomainParameterName:
+    Description: SSM parameter name for web domain
+    Value: /consciuscms/webdomain

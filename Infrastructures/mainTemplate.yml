@@ -2,6 +2,15 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: CloudFormation template to create S3 buckets, REST API Gateway,
   CloudFront Distribution, and integrate API Gateway with S3 content bucket.
 
+Parameters:
+  Environment:
+    Description: Environment
+    Type: String
+  WebDomain:
+    Description: Website Domain
+    Type: String
+
+
 
 
 Resources:
@@ -9,198 +18,59 @@ Resources:
 
 # certificate for the domain
 
+  WebDomainParameter:
+    Type: 'AWS::SSM::Parameter'
+    Properties:
+      Name: '/consciuscms/webdomain'  # Change the name as neededf
+      Type: 'String'
+      Value: !Ref WebDomain
+
+  EnvironmentParameter:
+      Type: 'AWS::SSM::Parameter'
+      Properties:
+        Name: '/consciuscms/environment'  # Change the name as needed
+        Type: 'String'
+        Value: !Ref Environment
 
 
-CloudFrontSingleCertStackSet:
-  Type: AWS::CloudFormation::StackSet
-  Properties:
-    StackSetName: !Sub "acm-single-us-east-1-${AWS::StackName}"
-    Description: "ACM (single-domain) en us-east-1 para CloudFront; SSM + Outputs con CNAME de validación."
-    PermissionModel: SELF_MANAGED
-    AdministrationRoleARN: !Sub "arn:aws:iam::${AWS::AccountId}:role/AWSCloudFormationStackSetAdministrationRole"
-    ExecutionRoleName: "AWSCloudFormationStackSetExecutionRole"
-    Capabilities: [CAPABILITY_IAM]
-    TemplateBody:
-      Fn::Sub: |
-        AWSTemplateFormatVersion: '2010-09-09'
-        Description: "ACM single-domain en us-east-1 con DNS validation, SSM y Outputs de CNAME."
-
-        Resources:
-          SiteCertificate:
-            Type: AWS::CertificateManager::Certificate
-            Properties:
-              DomainName: !Ref DomainName
-              ValidationMethod: DNS
-              DomainValidationOptions:
-                - DomainName: !Sub ${{{resolve:ssm:/consciuscms/webdomain}}
-                 
-             
-
-          # Guarda el ARN en SSM
-          CertArnParam:
-            Type: AWS::SSM::Parameter
-            Properties:
-              Name: "/consciuscms/cf/cert-arn"
-              Type: String
-              Value: !Ref SiteCertificate
-
-          # --- Custom Resource para exponer el CNAME de validación ---
-          CertInfoRole:
-            Type: AWS::IAM::Role
-            Properties:
-              AssumeRolePolicyDocument:
-                Version: "2012-10-17"
-                Statement:
-                  - Effect: Allow
-                    Principal: { Service: lambda.amazonaws.com }
-                    Action: sts:AssumeRole
-              Policies:
-                - PolicyName: acm-describe-and-logs
-                  PolicyDocument:
-                    Version: "2012-10-17"
-                    Statement:
-                      - Effect: Allow
-                        Action: ["acm:DescribeCertificate"]
-                        Resource: "*"
-                      - Effect: Allow
-                        Action:
-                          - logs:CreateLogGroup
-                          - logs:CreateLogStream
-                          - logs:PutLogEvents
-                        Resource: "arn:aws:logs:*:*:*"
-
-          CertInfoFn:
-            Type: AWS::Lambda::Function
-            Properties:
-              Runtime: nodejs20.x
-              Handler: index.handler
-              Role: !GetAtt CertInfoRole.Arn
-              Timeout: 120
-              Code:
-                ZipFile: |
-                  const https = require('https'); const url = require('url');
-                  const { ACMClient, DescribeCertificateCommand } = require('@aws-sdk/client-acm');
-                  const sleep = (ms)=>new Promise(r=>setTimeout(r,ms));
-                  const respond = (event, status, data, physId) => new Promise((res, rej) => {
-                    const body = JSON.stringify({
-                      Status: status,
-                      Reason: data?.Reason || '',
-                      PhysicalResourceId: physId || event.PhysicalResourceId || event.LogicalResourceId,
-                      StackId: event.StackId,
-                      RequestId: event.RequestId,
-                      LogicalResourceId: event.LogicalResourceId,
-                      Data: data
-                    });
-                    const parsed = url.parse(event.ResponseURL);
-                    const opts = { hostname: parsed.hostname, path: parsed.path, method: 'PUT', headers: { 'content-length': Buffer.byteLength(body) } };
-                    const req = https.request(opts, r => { r.on('data', ()=>{}); r.on('end', res); r.resume(); });
-                    req.on('error', rej); req.write(body); req.end();
-                  });
-                  exports.handler = async (event) => {
-                    try {
-                      if (event.RequestType === 'Delete') return respond(event, 'SUCCESS', {});
-                      const certArn = event.ResourceProperties.CertificateArn;
-                      const client = new ACMClient({});
-                      let rr = null, tries = 0;
-                      while (tries++ < 30) {
-                        const out = await client.send(new DescribeCertificateCommand({ CertificateArn: certArn }));
-                        const dvo = out.Certificate?.DomainValidationOptions?.[0];
-                        rr = dvo?.ResourceRecord;
-                        if (rr?.Name && rr?.Type && rr?.Value) break;
-                        await sleep(2000);
-                      }
-                      if (!rr) throw new Error('No ResourceRecord yet from ACM');
-                      return respond(event, 'SUCCESS', {
-                        RecordName: rr.Name,
-                        RecordType: rr.Type,
-                        RecordValue: rr.Value
-                      }, certArn);
-                    } catch (e) {
-                      console.error(e);
-                      return respond(event, 'FAILED', { Reason: e.message });
-                    }
-                  };
-
-          CertInfo:
-            Type: AWS::CloudFormation::CustomResource
-            Properties:
-              ServiceToken: !GetAtt CertInfoFn.Arn
-              CertificateArn: !Ref SiteCertificate
-
-          # (Opcional) Guarda también el CNAME en SSM para consumo externo
-          CertDnsNameParam:
-            Type: AWS::SSM::Parameter
-            Properties:
-              Name: "/consciuscms/cf/cert-dns-name"
-              Type: String
-              Value: !GetAtt CertInfo.RecordName
-
-          CertDnsValueParam:
-            Type: AWS::SSM::Parameter
-            Properties:
-              Name: "/consciuscms/cf/cert-dns-value"
-              Type: String
-              Value: !GetAtt CertInfo.RecordValue
-
-        Outputs:
-          CertificateArn:
-            Description: "ARN del certificado ACM (us-east-1)"
-            Value: !Ref SiteCertificate
-          DnsRecordName:
-            Description: "Nombre del CNAME de validación"
-            Value: !GetAtt CertInfo.RecordName
-          DnsRecordType:
-            Description: "Tipo del registro de validación (CNAME)"
-            Value: !GetAtt CertInfo.RecordType
-          DnsRecordValue:
-            Description: "Valor del CNAME de validación"
-            Value: !GetAtt CertInfo.RecordValue
-
-
-
-    StackInstancesGroup:
-      - DeploymentTargets:
-          Accounts: [ !Ref "AWS::AccountId" ]
-        Regions: [ us-east-1 ]
 
 
 
   CognitoLambdaLayer:
-    Type: AWS::Lambda::LayerVersion
-    Properties:
-      LayerName: aws-jwt-verifier
-      Content:
-        S3Bucket: !Sub '{{resolve:ssm:/consciuscms/ops}}'
-        S3Key: aws-jwt-verifier.zip
-      CompatibleRuntimes:
-        - nodejs20.x
-      Description: A custom Lambda layer for shared code
+      Type: AWS::Lambda::LayerVersion
+      Properties:
+        LayerName: aws-jwt-verifier
+        Content:
+          S3Bucket: !Sub '{{resolve:ssm:/consciuscms/ops}}'
+          S3Key: aws-jwt-verifier.zip
+        CompatibleRuntimes:
+          - nodejs20.x
+        Description: A custom Lambda layer for shared code
 
-  # S3 Bucket for Static Website
+    # S3 Bucket for Static Website
 
   WebsiteS3Bucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub ap-{{resolve:ssm:/consciuscms/account-name}}-web-{{resolve:ssm:/consciuscms/region}}-{{resolve:ssm:/consciuscms/environment}}-5
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: false
-        BlockPublicPolicy: false
-        IgnorePublicAcls: false
-        RestrictPublicBuckets: false
+      BucketName: !Sub "ap-{{resolve:ssm:/consciuscms/account-name}}-web-{{resolve:ssm:/consciuscms/region}}-${Environment}"
 
+
+    DependsOn:
+      - EnvironmentParameter
+      - WebDomainParameter
 
   CMS3Bucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub ap-{{resolve:ssm:/consciuscms/account-name}}-cm-{{resolve:ssm:/consciuscms/region}}-{{resolve:ssm:/consciuscms/environment}}-5
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: false
-        BlockPublicPolicy: false
-        IgnorePublicAcls: false
-        RestrictPublicBuckets: false
+      BucketName: !Sub "ap-{{resolve:ssm:/consciuscms/account-name}}-cm-{{resolve:ssm:/consciuscms/region}}-${Environment}"
+
+
       WebsiteConfiguration:
         IndexDocument: index.html
         ErrorDocument: error.html
+    DependsOn:
+        - EnvironmentParameter
+        - WebDomainParameter
 
 # IAM User without console access
   S3CMAccessUser:
@@ -227,20 +97,20 @@ CloudFrontSingleCertStackSet:
   ContentS3Bucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub ap-{{resolve:ssm:/consciuscms/account-name}}-content-{{resolve:ssm:/consciuscms/region}}-{{resolve:ssm:/consciuscms/environment}}
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: false
-        BlockPublicPolicy: false
-        IgnorePublicAcls: false
-        RestrictPublicBuckets: false
+      BucketName: !Sub "ap-{{resolve:ssm:/consciuscms/account-name}}-content-{{resolve:ssm:/consciuscms/region}}-${Environment}"
+
+
+    DependsOn:
+      - EnvironmentParameter
+      - WebDomainParameter
 
   # IAM User without console access
   S3WebAccessUser:
     Type: AWS::IAM::User
     Properties:
-      UserName: !Sub "GitHubWebActionsAcct-{{resolve:ssm:/consciuscms/account-name}}-${AWS::StackName}"
+      UserName: !Sub "GitHubWebActionsAcct-${AWS::AccountId}-${Environment}"
       Policies:
-        - PolicyName: !Sub "S3BucketAccessPolicy-{{resolve:ssm:/consciuscms/account-name}}-${AWS::StackName}"
+        - PolicyName: !Sub "S3BucketAccessPolicy-${AWS::AccountId}-${Environment}"
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
@@ -276,7 +146,7 @@ CloudFrontSingleCertStackSet:
   S3ContentAccessRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub "S3ContentAccessRole-{{resolve:ssm:/consciuscms/account-name}}-${AWS::StackName}"
+      RoleName: !Sub "S3ContentAccessRole-{{resolve:ssm:/consciuscms/account-name}}-${Environment}"
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -313,7 +183,7 @@ CloudFrontSingleCertStackSet:
   LoginsTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: Logins
+      TableName: !Sub "Logins-${Environment}"
       AttributeDefinitions:
         - AttributeName: username
           AttributeType: S # S for String
@@ -332,7 +202,7 @@ CloudFrontSingleCertStackSet:
   PagesTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: Pages
+      TableName: !Sub "Pages-${Environment}"
       AttributeDefinitions:
         - AttributeName: Page
           AttributeType: S # S for String
@@ -347,7 +217,7 @@ CloudFrontSingleCertStackSet:
   SchemaTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: Schema
+      TableName: !Sub "Schema-${Environment}"
       AttributeDefinitions:
         - AttributeName: page
           AttributeType: S # S for String
@@ -366,7 +236,7 @@ CloudFrontSingleCertStackSet:
   SettingsTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: Settings
+      TableName: !Sub "Settings-${Environment}"
       AttributeDefinitions:
         - AttributeName: Area
           AttributeType: S # S for String
@@ -385,7 +255,7 @@ CloudFrontSingleCertStackSet:
   SettingsSecTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: SettingsSec
+      TableName: !Sub "SettingsSec-${Environment}"
       AttributeDefinitions:
         - AttributeName: Area
           AttributeType: S # S for String
@@ -403,7 +273,7 @@ CloudFrontSingleCertStackSet:
   ConscienceTokensTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: ConscienceTokens
+      TableName: !Sub "ConscienceTokens-${Environment}"
       BillingMode: PAY_PER_REQUEST
       AttributeDefinitions:
         - AttributeName: Token
@@ -418,7 +288,7 @@ CloudFrontSingleCertStackSet:
   ConscienceTokensTablePolicy:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: !Sub "ConscienceTokensAccess-{{resolve:ssm:/consciuscms/account-name}}-${AWS::StackName}"
+      PolicyName: !Sub "ConscienceTokensAccess-${Environment}"
       Roles:
         - !Ref MicroserviceExecutionRole
       PolicyDocument:
@@ -434,7 +304,7 @@ CloudFrontSingleCertStackSet:
   LambdaInvokePermissionForApi:
     Type: AWS::Lambda::Permission
     Properties:
-      FunctionName: !Ref DDBAccessPagesFunction
+      FunctionName: !Sub "${DDBAccessPagesFunction}"
       Action: lambda:InvokeFunction
       Principal: apigateway.amazonaws.com
 
@@ -443,7 +313,7 @@ CloudFrontSingleCertStackSet:
   UserPool:
     Type: AWS::Cognito::UserPool
     Properties:
-      UserPoolName: ConcidusCMSUserPool
+      UserPoolName: !Sub "ConcidusCMSUserPool-${Environment}"
       UsernameAttributes:
         - email
 
@@ -472,12 +342,12 @@ CloudFrontSingleCertStackSet:
 
                 <ol>
                     <li><strong>Accede a tu cuenta:</strong> Haz clic en el siguiente enlace para iniciar sesi?n:  
-                        <a href=${resolve:ssm:/consciuscms/webdomain} style="color: #4CAF50; text-decoration: none;">Iniciar sesi?n</a>
+                        <a href="!Ref WebDomain" style="color: #4CAF50; text-decoration: none;">Iniciar sesi?n</a>
                     </li>
                     <li><strong>Contrase?a temporal:</strong> Se ha generado una contrase?a temporal para ti.  
                         <strong>Contrase?a temporal: {####}</strong>
                     </li>
-                    <li><strong>Cambiar tu contrase?a:</strong> La primera vez que inicies sesi?n, se te pedir? que cambies tu contrase?a temporal por una nueva de tu elecci?n. Ten en cuenta que, al hacerlo, aceptar?s autom?ticamente los <strong><a href="${resolve:ssm:/consciuscms/webdomain}/admin/terms/${license}" style="color: #4CAF50; text-decoration: none;">T?rminos y Condiciones</a></strong> de nuestro servicio.</li>
+                    <li><strong>Cambiar tu contrase?a:</strong> La primera vez que inicies sesi?n, se te pedir? que cambies tu contrase?a temporal por una nueva de tu elecci?n. Ten en cuenta que, al hacerlo, aceptar?s autom?ticamente los <strong><a href="!Ref WebDomain/admin/terms/${license}" style="color: #4CAF50; text-decoration: none;">T?rminos y Condiciones</a></strong> de nuestro servicio.</li>
                 </ol>
 
   
@@ -539,7 +409,7 @@ CloudFrontSingleCertStackSet:
   MicroserviceExecutionRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub "MicroserviceapExecutionLamda1Role-{{resolve:ssm:/consciuscms/account-name}}-${AWS::StackName}"
+      RoleName: !Sub "MicroserviceapExecutionLamda1Role-${Environment}"
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -573,7 +443,7 @@ CloudFrontSingleCertStackSet:
   CognitoAuthLambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub "CognitoAuthapLambdaExecutionRole-${AWS::StackName}" 
+      RoleName: !Sub "CognitoAuthapLambdaExecutionRole-${Environment}" 
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -583,7 +453,7 @@ CloudFrontSingleCertStackSet:
             Action: sts:AssumeRole
       Policies:
 
-        - PolicyName: CognitoAuthLambdaExecution
+        - PolicyName: !Sub "CognitoAuthapLambdaExecutionPolicy-${Environment}"
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
@@ -627,7 +497,7 @@ CloudFrontSingleCertStackSet:
   DDBAccessPagesFunction:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: DDBAccessPages
+      FunctionName: !Sub "DDBAccessPages-${Environment}"
       Handler: index.handler
       Role: !GetAtt MicroserviceExecutionRole.Arn
       Runtime: nodejs20.x
@@ -635,8 +505,8 @@ CloudFrontSingleCertStackSet:
       Timeout: 5
       Environment:
         Variables:
-          PAGES_TABLE: "Pages"
-          TOKENS_TABLE: "ConscienceTokens"
+          PAGES_TABLE: "Pages-${Environment}"
+          TOKENS_TABLE: "ConscienceTokens-${Environment}"
           TOKEN_TTL_SECONDS: "600" # 10 minutos
       Code:
         ZipFile: |
@@ -819,9 +689,12 @@ CloudFrontSingleCertStackSet:
   DDBAccessSettingsSecFunction:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: DDBAccessSettingsSec
+      FunctionName: !Sub "DDBAccessSettingsSec-${Environment}"
       Handler: index.handler
       Role: !GetAtt MicroserviceExecutionRole.Arn
+      Environment:
+        Variables:
+          SETTINGSSEC_TABLE: !Sub "SettingsSec-${Environment}"
       Code:
         ZipFile: |
           const { DynamoDB } = require('@aws-sdk/client-dynamodb');
@@ -849,7 +722,7 @@ CloudFrontSingleCertStackSet:
                         'Access-Control-Allow-Headers':  '*',
                         'Access-Control-Allow-Credentials': true
                     }
-                    const tableName = "SettingsSec"
+                    const tableName = process.env.SETTINGSSEC_TABLE 
                     try {
                         switch (event.httpMethod) {
                             case 'DELETE':
@@ -918,9 +791,12 @@ CloudFrontSingleCertStackSet:
   DDBAccessSettingsFunction:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: DDBAccessSettings
+      FunctionName: !Sub "DDBAccessSettings-${Environment}"
       Handler: index.handler
       Role: !GetAtt MicroserviceExecutionRole.Arn
+      Environment:
+        Variables:
+          SETTINGS_TABLE: !Sub "Settings-${Environment}"  
       Code:
         ZipFile: |
           const { DynamoDB } = require('@aws-sdk/client-dynamodb');
@@ -947,7 +823,7 @@ CloudFrontSingleCertStackSet:
                     'Access-Control-Allow-Headers':  '*',
                     'Access-Control-Allow-Credentials': true
                 }
-                const tableName = "Settings"
+                const tableName = process.env.SETTINGS_TABLE;
                 try {
                     switch (event.httpMethod) {
                         case 'DELETE':
@@ -1016,9 +892,12 @@ CloudFrontSingleCertStackSet:
   DDBAccessSchemaFunction:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: DDBAccessSchema
+      FunctionName: !Sub "DDBAccessSchema-${Environment}"
       Handler: index.handler
       Role: !GetAtt MicroserviceExecutionRole.Arn
+      Environment:
+        Variables:
+          SCHEMA_TABLE: !Sub "Schema-${Environment}"
       Code:
         ZipFile: |
           const { DynamoDB } = require('@aws-sdk/client-dynamodb');
@@ -1051,7 +930,7 @@ CloudFrontSingleCertStackSet:
                       'Access-Control-Allow-Headers':  '*',
                       'Access-Control-Allow-Credentials': true
                   }
-                  const tableName = "Schema"
+                  const tableName = process.env.SCHEMA_TABLE;
                   try {
                       switch (event.httpMethod) {
                           case 'DELETE':
@@ -1148,9 +1027,12 @@ CloudFrontSingleCertStackSet:
   RecordLogin:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: RecordLogin
+      FunctionName: !Sub "RecordLogin-${Environment}"
       Handler: index.handler
       Role: !GetAtt MicroserviceExecutionRole.Arn
+      Environment:
+        Variables:
+          LOGINS_TABLE: !Sub "Logins-${Environment}"
       Code:
         ZipFile: |
           const { DynamoDB } = require('@aws-sdk/client-dynamodb');
@@ -1168,7 +1050,7 @@ CloudFrontSingleCertStackSet:
             * DynamoDB API as a JSON body.
             */
                 //console.log('Received event:', JSON.stringify(event, null, 2));
-                    const tableName = "Logins";
+                    const tableName = process.env.LOGINS_TABLE;
                 var data = event;
                 try {
                             const email =  event.request.userAttributes.email;
@@ -1196,9 +1078,12 @@ CloudFrontSingleCertStackSet:
   GetLastLogin:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: GetLastLogin
+      FunctionName: !Sub "GetLastLogin-${Environment}"
       Handler: index.handler
       Role: !GetAtt MicroserviceExecutionRole.Arn
+      Environment:
+        Variables:
+          LOGINS_TABLE: !Sub "Logins-${Environment}"
       Code:
         ZipFile: |
           const { DynamoDB } = require('@aws-sdk/client-dynamodb');
@@ -1225,7 +1110,7 @@ CloudFrontSingleCertStackSet:
                         'Access-Control-Allow-Headers':  '*',
                         'Access-Control-Allow-Credentials': true
                     }
-                    const tableName = "Logins"
+                    const tableName = process.env.LOGINS_TABLE;
                     try {
                       switch (event.httpMethod) {
                             case 'GET':
@@ -1268,7 +1153,7 @@ CloudFrontSingleCertStackSet:
   ApiGatewayRestApi:
     Type: AWS::ApiGateway::RestApi
     Properties:
-      Name: Concidus CMSApi
+      Name: !Sub "ConsciusCMSApi-${Environment}"
       Description: API Gateway for accessing content in S3 bucket
       BinaryMediaTypes:
         - image/*
@@ -1281,7 +1166,7 @@ CloudFrontSingleCertStackSet:
     Type: AWS::ApiGateway::Deployment
     Properties:
       RestApiId: !Ref ApiGatewayRestApi
-      StageName: prod # This can be used to create the stage directly
+      StageName: !Sub "${Environment}" # This can be used to create the stage directly
     DependsOn:
 
       - ApiGatewayRestApi
@@ -1312,7 +1197,7 @@ CloudFrontSingleCertStackSet:
   CognitoTokenAuthorizer:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: CognitoTokenAuthorizer
+      FunctionName: !Sub "CognitoTokenAuthorizer-${Environment}"
       Handler: index.handler # Adjust according to your handler implementation
       Role: !GetAtt CognitoAuthLambdaExecutionRole.Arn
       Environment:
@@ -1336,7 +1221,7 @@ CloudFrontSingleCertStackSet:
                       const methodArn = event.methodArn;
                       const jwtverifier = require("aws-jwt-verify");
                       console.log("token: " + token )
-                      //config.update({region: 'eu-west-3'});
+                    
                       const verifier = jwtverifier.CognitoJwtVerifier.create({
                         userPoolId: userPoolID,
                         tokenUse: "access",
@@ -1397,7 +1282,7 @@ CloudFrontSingleCertStackSet:
   ApiGatewayAuthorizer:
     Type: AWS::ApiGateway::Authorizer
     Properties:
-      Name: CognitoTokenAuthorizer
+      Name: !Sub "CognitoTokenAuthorizer-${Environment}"
       RestApiId: !Ref ApiGatewayRestApi
       Type: TOKEN
       IdentitySource: method.request.header.Authorization
@@ -2062,6 +1947,7 @@ CloudFrontSingleCertStackSet:
   CloudFrontDistribution:
     Type: AWS::CloudFront::Distribution
     Properties:
+
       DistributionConfig:
         Enabled: true
 
@@ -2169,7 +2055,12 @@ CloudFrontSingleCertStackSet:
         ViewerCertificate:
           CloudFrontDefaultCertificate: true
         DefaultRootObject: index.html
-        
+      Tags:
+        - Key: Project
+          Value: !Ref WebDomain
+        - Key: Environment
+          Value: !Ref Environment
+
     DependsOn:
       - WebsiteS3Bucket
       - CloudFrontOriginAccessIdentity
