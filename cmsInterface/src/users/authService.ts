@@ -12,7 +12,6 @@ const region = import.meta.env.VITE_REGION
 
 
 export const cognitoClient = new CognitoIdentityProviderClient({
-# Cognito domain / host used for hosted UI and token URLs
   region: region,
 });
 
