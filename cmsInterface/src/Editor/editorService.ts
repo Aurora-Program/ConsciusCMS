@@ -49,18 +49,22 @@ function getEthicsTokenUrl(): string {
     const explicit = (import.meta.env as any).VITE_URL_API_ETHICS as string | undefined;
     if (explicit && explicit.length > 0) return explicit;
     try {
-        const u = new URL(pagesUrl);
-        const trimmed = u.pathname.endsWith('/pages') ? u.pathname.slice(0, -('/pages'.length)) : u.pathname;
-        u.pathname = `${trimmed.replace(/\/$/, '')}/ethics/token`;
+    const u = new URL(pagesUrl);
+    // Normalize trailing slash and drop '/pages' suffix if present (with or without trailing slash)
+    const noTrailing = u.pathname.replace(/\/$/, '');
+    const base = noTrailing.endsWith('/pages') ? noTrailing.slice(0, -('/pages'.length)) : noTrailing;
+    u.pathname = `${base}/ethics/token`;
         return u.toString();
     } catch {
-        return (pagesUrl || '').replace(/\/pages$/, '') + '/ethics/token';
+    return (pagesUrl || '').replace(/\/pages\/?$/, '') + '/ethics/token';
     }
 }
 
 async function getEthicsToken(purpose: string, page?: string): Promise<string> {
     await checkAccessTokenExpiration();
     const tokenUrl = getEthicsTokenUrl();
+    // Cache-buster to avoid any intermediary caching issues
+    const urlWithTs = tokenUrl + (tokenUrl.includes('?') ? '&' : '?') + `_ts=${Date.now()}`;
     const config = {
         headers: {
             'Accept': 'application/json',
@@ -70,7 +74,8 @@ async function getEthicsToken(purpose: string, page?: string): Promise<string> {
     };
     const body: any = { purpose };
     if (page) body.page = page;
-    const res = await axios.post(tokenUrl, body, config);
+    console.log('[ethics] requesting token', { url: urlWithTs, purpose, page });
+    const res = await axios.post(urlWithTs, body, config);
     const tok = (res?.data && (res.data.token || res.data.Token)) || (typeof res?.data === 'string' ? res.data : '');
     if (!tok) throw new Error('No ethics token returned by API');
     return tok as string;
@@ -251,6 +256,7 @@ export async function fetchPageByPage(payload: string){
 export async function requestPublishIntent(content:any, purpose: 'save-page'|'update-page'|'delete-page' = 'save-page'){
     // Call explicit ethics token endpoint
     const ethicsUrl = getEthicsTokenUrl();
+    const urlWithTs = ethicsUrl + (ethicsUrl.includes('?') ? '&' : '?') + `_ts=${Date.now()}`;
     const config = {
         headers: {
             'Accept': 'application/json',
@@ -259,7 +265,8 @@ export async function requestPublishIntent(content:any, purpose: 'save-page'|'up
         }
     };
     const payloadPage = (content && content.Page) ? content.Page : content;
-    const res = await axios.post(ethicsUrl, { purpose, page: payloadPage }, config);
+    console.log('[ethics] intent request', { url: urlWithTs, purpose, page: payloadPage });
+    const res = await axios.post(urlWithTs, { purpose, page: payloadPage }, config);
     const token = (res.data && (res.data.token || res.data.Token)) || '';
     const hints = res.data && (res.data.hints || res.data.message) ? (res.data.hints || { message: res.data.message }) : undefined;
     const expiresAt = (res.data && (res.data.expiresAt || res.data.expiresInSeconds)) || undefined;

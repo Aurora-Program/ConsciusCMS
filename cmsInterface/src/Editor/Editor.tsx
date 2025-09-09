@@ -681,7 +681,27 @@ useEffect(()=> {dispatch(loadSchemas())},[])
               <Button 
                 variant="primary" 
                 type="button"
-                onClick={() => setShowSaveConfirm(true)}
+                onClick={async () => {
+                  try{
+                    const payload = selectedPage;
+                    const purpose = (editMode === 'editing' ? 'update-page' : 'save-page');
+                    const action = await dispatch(requestPublishIntentAction({ content: payload, purpose }));
+                    if ((action as any).error) {
+                      console.error('requestPublishIntentAction (save button) rejected', (action as any).error);
+                      throw new Error('intent_failed');
+                    }
+                    const res: any = (action as any).payload;
+                    const token = res?.token || (res?.raw && res.raw.headers && (res.raw.headers['x-selfreview-token'] || res.raw.headers['X-SelfReview-Token']));
+                    const message = (res?.hints && (res.hints.message?.es || res.hints.message?.en)) || (res?.raw && res.raw.headers && (res.raw.headers['x-selfreview-es'] || res.raw.headers['x-selfreview-en']));
+                    setPublishToken(token || null);
+                    setPublishMessage(message || null);
+                    setPublishAction('save');
+                  }catch(err:any){
+                    console.error('requestPublishIntent (save button) failed', err);
+                  } finally {
+                    setShowSaveConfirm(true);
+                  }
+                }}
                 className="modern-btn"
               >
                 <i className="bi bi-check-lg me-2"></i>

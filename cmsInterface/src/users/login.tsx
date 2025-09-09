@@ -219,6 +219,7 @@ const Login = () => {
       <>
         <div className='loginContainer'>
           <div className='colIzquierda'>
+            hola
             <img src={url + '/' + loginImage} className='loginImage' />
           </div>
           <div className='colDerecha'>
