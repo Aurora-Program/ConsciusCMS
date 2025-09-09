@@ -545,7 +545,6 @@ useEffect(()=> {dispatch(loadSchemas())},[])
 
         <div    style={{display:"flex" }} >
 
-          // Editor Left (form) and Right (info/details) sections
             <div className="editorInfoDiv" >
             
             <div className={showDescription ? "description" : "noDescription"} >
@@ -569,7 +568,7 @@ useEffect(()=> {dispatch(loadSchemas())},[])
             
             </div>
 
-// Form section
+
             <div className="editorFormDiv"> 
   <Form id="pageForm" onSubmit={async (e) => {
       e.preventDefault();
@@ -599,7 +598,7 @@ useEffect(()=> {dispatch(loadSchemas())},[])
     }
     </Form>
             </div>
-// Details section
+
 
       <div className="editorDetailsDiv"  >
       
