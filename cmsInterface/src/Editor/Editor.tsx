@@ -147,8 +147,11 @@ const matchedFields = (components && selectedPage && selectedPage.Template)
 useEffect(()=> {dispatch(loadPages())},[])
 useEffect(()=> {dispatch(loadSchemas())},[])
 
-
     return (
+
+
+// Editor
+
     <AuroraPage variant="wide">
         {/* Editor Header */}
     <div className="profile-header">
@@ -515,7 +518,7 @@ useEffect(()=> {dispatch(loadSchemas())},[])
                   <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" strokeWidth="2"/>
                   <path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z" stroke="currentColor" strokeWidth="2"/>
                 </svg>
-                Edit Content
+                {t(editMode === "adding" ? t('editor.addingNew') : t('editor.editing'))} {selectedPage?.Page || ''}
               </h4>
               <small className="text-muted d-block">
                 <i className="bi bi-file-earmark-text me-1"></i>
@@ -536,10 +539,13 @@ useEffect(()=> {dispatch(loadSchemas())},[])
             </div>
           </div>
         </Modal.Header>
+
       
   <Modal.Body >
 
         <div    style={{display:"flex" }} >
+
+          // Editor Left (form) and Right (info/details) sections
             <div className="editorInfoDiv" >
             
             <div className={showDescription ? "description" : "noDescription"} >
@@ -563,7 +569,7 @@ useEffect(()=> {dispatch(loadSchemas())},[])
             
             </div>
 
-
+// Form section
             <div className="editorFormDiv"> 
   <Form id="pageForm" onSubmit={async (e) => {
       e.preventDefault();
@@ -593,7 +599,7 @@ useEffect(()=> {dispatch(loadSchemas())},[])
     }
     </Form>
             </div>
-
+// Details section
 
       <div className="editorDetailsDiv"  >
       
@@ -653,6 +659,8 @@ useEffect(()=> {dispatch(loadSchemas())},[])
        </div>
       </div>
         </Modal.Body>
+      
+      
         <Modal.Footer className="modern-modal-footer">
           <div className="modal-footer-content">
             <div className="footer-info">
@@ -843,10 +851,13 @@ useEffect(()=> {dispatch(loadSchemas())},[])
                   </Modal.Footer>
                 </Modal>
 
+                {/* Warning info modal: explains why low-quality content matters */}
                 <Modal show={showWarningInfo} onHide={() => setShowWarningInfo(false)} centered>
                   <Modal.Header closeButton className="modern-modal-header">
                     <Modal.Title className="modern-modal-title">Más información sobre contenido de baja calidad</Modal.Title>
                   </Modal.Header>
+
+                
                   <Modal.Body className="modern-modal-body">
                     <div>
                       <p>La información de baja calidad (falsa, sesgada o manipulada) tiene efectos acumulativos: dificulta la toma de decisiones informada, reduce la confianza en fuentes fiables y puede amplificar comportamientos dañinos en redes sociales y sistemas automatizados.</p>

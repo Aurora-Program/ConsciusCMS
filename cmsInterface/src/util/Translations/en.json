@@ -102,6 +102,8 @@
     "moveUp": "Move up"
   },
   "editor": {
+    "addingNew": "Adding New",
+    "editing": "Editing",
     "headerTitle": "Content Editor",
     "headerSubtitle": "Create, edit and manage your website content with our content management system",
     "tabPages": "Pages",

@@ -99,6 +99,8 @@
     "moveUp": "Monter"
   },
   "editor": {
+    "addingNew": "Ajout de nouveau",
+    "editing": "Modification de",
     "headerTitle": "Éditeur de Contenu",
     "headerSubtitle": "Créez, modifiez et gérez le contenu de votre site web avec notre système de gestion de contenu",
     "tabPages": "Pages",
