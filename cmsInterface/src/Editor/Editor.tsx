@@ -625,29 +625,29 @@ useEffect(()=> {dispatch(loadSchemas())},[])
   <div className="areaDiv" hidden={!showDetails}>
 
           <p className="sectionSide">
-         <span className="sectionTitle">  Updated </span>  <br/>
-          <span className="label">Updated by: </span> {selectedPage.updateUser}<br/>
-          <span className="label">Update on: </span> {selectedPage.updateTime}
+         <span className="sectionTitle">  {t('editor.updated')  } </span>  <br/>
+          <span className="label"> {t('editor.updatedBy')} </span> {selectedPage.updateUser}<br/>
+          <span className="label"> {t('editor.updatedOn')} </span> {selectedPage.updateTime}
           </p>
        
 
           <p className="sectionSide">
-         <span className="sectionTitle">  Version  </span>  <br/>
-          <span className="label">Version: </span> 1.0<br/>
+         <span className="sectionTitle">  {t('editor.version')}  </span>  <br/>
+          <span className="label">{t('editor.versionLabel')} </span> 1.0<br/>
           </p>
 
           <p className="sectionSide">
-         <span className="sectionTitle">  Approved </span>  <br/>
-         <span className="label">Approved: </span> { selectedPage.updateUser ? "yes" : "no"}<br/>
-          <span className="label">Approved by: </span> {selectedPage.updateUser}<br/>
-          <span className="label">Approved on: </span> {selectedPage.updateTime}
+         <span className="sectionTitle">  {t('editor.approved')} </span>  <br/>
+         <span className="label">{t('editor.approvedLabel')} </span> { selectedPage.updateUser ? "yes" : "no"}<br/>
+          <span className="label">{t('editor.approvedBy')} </span> {selectedPage.updateUser}<br/>
+          <span className="label">{t('editor.approvedOn')} </span> {selectedPage.updateTime}
           </p>
         
           <p className="sectionSide">
-         <span className="sectionTitle">  Published </span>  <br/>
-         <span className="label">Published: </span>{ selectedPage.updateUser ? "yes" : "no"}<br/>
-          <span className="label">Updated by: </span> {selectedPage.updateUser}<br/>
-          <span className="label">Update on: </span> {selectedPage.updateTime}
+         <span className="sectionTitle">  {t('editor.published')} </span>  <br/>
+         <span className="label">{t('editor.publishedLabel')} </span>{ selectedPage.updateUser ? "yes" : "no"}<br/>
+          <span className="label">{t('editor.updatedBy')} </span> {selectedPage.updateUser}<br/>
+          <span className="label">{t('editor.updatedOn')} </span> {selectedPage.updateTime}
           </p>
 
           

@@ -99,6 +99,17 @@
     "moveUp": "Monter"
   },
   "editor": {
+    "updated": "Mis à jour",
+    "updatedBy": "Mis à jour par :",
+    "updatedOn": "Mis à jour le :",
+    "version": "Version",
+    "versionLabel": "Version:",
+    "approved": "Aprobado",
+    "approvedLabel": "Aprobado:",
+    "approvedBy": "Aprobado por:",
+    "approvedOn": "Aprobado en:",
+    "published": "Publicado",
+    "publishedLabel": "Publicado:",
     "addingNew": "Ajout de nouveau",
     "editing": "Modification de",
     "headerTitle": "Éditeur de Contenu",
@@ -110,7 +121,7 @@
     "typeLabel": "Type",
     "nameLabel": "Nom",
     "lastUpdate": "Dernière mise à jour",
-    "updatedBy": "Mis à jour par",
+
     "actionsLabel": "Actions",
     "preview": "Aperçu",
     "edit": "Modifier",

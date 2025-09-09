@@ -320,7 +320,7 @@ useEffect(()=> {loadNewPage()},[selectedPage])
             <Modal.Title>
                 <Container>
                     <h3>
-                Edit Content 22222: {selectedPage.Page}
+                Edit Content 2: {selectedPage.Page}
                 
                 </h3>
 

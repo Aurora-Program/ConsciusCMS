@@ -102,6 +102,19 @@
     "moveUp": "Move up"
   },
   "editor": {
+    "updated": "Updated",
+    "updatedBy": "Updated by:",
+    "updatedOn": "Updated on:",
+    "version": "Version",
+    "versionLabel": "Version:",
+    "approved": "Approved",
+    "approvedLabel": "Approved:",
+    "approvedBy": "Approved by:",
+    "approvedOn": "Approved on:",
+    "published": "Published",
+    "publishedLabel": "Published:",
+    "loadingContent": "Loading content...",
+    "selectContent": "Select content to edit",
     "addingNew": "Adding New",
     "editing": "Editing",
     "headerTitle": "Content Editor",
@@ -113,7 +126,7 @@
     "typeLabel": "Type",
     "nameLabel": "Name",
     "lastUpdate": "Last update",
-    "updatedBy": "Updated by",
+
     "actionsLabel": "Actions",
     "preview": "Preview",
     "edit": "Edit",
