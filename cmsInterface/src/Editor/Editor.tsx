@@ -7,7 +7,7 @@ import "./editor.css"
 import "../profile.css"
 import { loadPages,  selectPageAction,  deletePageAction, newSelectedPage, updatePageAction} from "./editorSlice"
 import Field from "./Fields"
-import {  iSchemaPage, iPage, iSchemaField } from "../types"
+import {  iSchemaPage, iPage, iSchemaField, iPageValue } from "../types"
 import { Tab, Tabs } from "react-bootstrap"
 import { savePageAction } from "./editorSlice"
 import { requestPublishIntent, publishPage, publishDelete } from "./editorService"
@@ -57,14 +57,14 @@ const [publishToken, setPublishToken] = useState<string | null>(null)
 const [publishAction, setPublishAction] = useState<'save'|'delete'|'none'>('none')
 
 function filterPages(){
-    let temp = pages
-    if (filterTemplate !== ""){
-        temp = pages.filter(i => i.Template === filterTemplate)
-    }
-    if (filterName!==""){
-        temp = temp.filter(i=> i.Page.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().includes(filterName.toLowerCase()))
-    }
-    return temp
+  let temp = pages
+  if (filterTemplate !== ""){
+    temp = pages.filter((i: iPage) => i.Template === filterTemplate)
+  }
+  if (filterName!==""){
+    temp = temp.filter((i: iPage)=> i.Page.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().includes(filterName.toLowerCase()))
+  }
+  return temp
 }
 
 function selectBlock(v: number){
@@ -77,9 +77,9 @@ async function clickOnCreatePage(){
   await dispatch(selectSchema({ page: filterTemplate }));
   // build initial values from the loaded components for this template
   const values = components
-    .filter(item => item.component?.startsWith(filterTemplate + "/"))
-    .sort((a,b)=> (a.order ?? 0) - (b.order ?? 0))
-    .map(item => ({ component: item.component, value: emptyField(item) }));
+    .filter((item: iSchemaField) => item.component?.startsWith(filterTemplate + "/"))
+    .sort((a: iSchemaField,b: iSchemaField)=> (a.order ?? 0) - (b.order ?? 0))
+    .map((item: iSchemaField) => ({ component: item.component, value: emptyField(item) }));
   dispatch(newSelectedPage({Template: filterTemplate, Page:"", values:values}));
   setEditMode("adding");
   setShowContent(true);
@@ -118,7 +118,7 @@ function emptyField(schema: iSchemaField){
 const components = useAppSelector((state)=> state.schema.components)
 // fields that match the currently selected page template
 const matchedFields = (components && selectedPage && selectedPage.Template)
-  ? components.filter((item) => item.component === `${selectedPage.Template}/${item.name}`)
+  ? components.filter((item: iSchemaField) => item.component === `${selectedPage.Template}/${item.name}`)
   : []
 
 
@@ -147,7 +147,7 @@ useEffect(()=> {dispatch(loadSchemas())},[])
                       <path d="M16 17H8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                     {t('editor.tabPages')}
-                    <span className="editor-tab-count">{pages.filter(p => templates.some(t => t.CType === "page" && t.page === p.Template)).length}</span>
+                    <span className="editor-tab-count">{pages.filter((p: iPage) => templates.some((t: iSchemaPage) => t.CType === "page" && t.page === p.Template)).length}</span>
                   </span>
                 }>  
                    
@@ -157,7 +157,7 @@ useEffect(()=> {dispatch(loadSchemas())},[])
                     <PMASearch placeholder={t('editor.searchPlaceholder')} value={filterList} onChange={(e: React.ChangeEvent<HTMLInputElement>)=>setFilterList(e.target.value)} ></PMASearch>
                     <div className="editorMenuTableWrapper">
                         
-                            {[...templates.filter(i=> i.CType=="page" && i.page.includes(filterList))].sort((a,b)=> a.page.localeCompare(b.page)).map((item: iSchemaPage)=> 
+                            {[...templates.filter((i: iSchemaPage)=> i.CType=="page" && i.page.includes(filterList))].sort((a: iSchemaPage,b: iSchemaPage)=> a.page.localeCompare(b.page)).map((item: iSchemaPage)=> 
                              <Row className="editorMenuRow">
                                 <Col >
                              
@@ -165,11 +165,11 @@ useEffect(()=> {dispatch(loadSchemas())},[])
                                  ?   
                                 <button className="editor-template-button" onClick={()=>{setFilterTemplate(item.page); setNum(1) }}>
                                   <span className="editor-template-tag" data-template={item.page.toLowerCase()}>{item.page}</span>
-                                  <span className="editor-template-count">{pages.filter(p => p.Template === item.page).length}/{item.max || '∞'}</span>
+                                  <span className="editor-template-count">{pages.filter((p: iPage) => p.Template === item.page).length}/{item.max || '∞'}</span>
                                 </button> :
                                 <div className="editor-template-button active">
                                   <span className="editor-template-tag active" data-template={item.page.toLowerCase()}>{item.page}</span>
-                                  <span className="editor-template-count">{pages.filter(p => p.Template === item.page).length}/{item.max || '∞'}</span>
+                                  <span className="editor-template-count">{pages.filter((p: iPage) => p.Template === item.page).length}/{item.max || '∞'}</span>
                                 </div>
                                
                                 }   
@@ -189,7 +189,7 @@ useEffect(()=> {dispatch(loadSchemas())},[])
                     
                         <div className="ms-auto">
                            
-                        <Button variant= "primary" size="sm"  onClick={clickOnCreatePage} disabled={filterTemplate==="xxx" || pages.filter(i=>  i.Template === filterTemplate).length >= (templates.find(i => i.page === filterTemplate)?.max ?? 0) }  className="modern-add-btn" style={{fontSize: '0.8rem', padding: '0.35rem 0.8rem'}}>
+                        <Button variant= "primary" size="sm"  onClick={clickOnCreatePage} disabled={filterTemplate==="xxx" || pages.filter((i: iPage)=>  i.Template === filterTemplate).length >= (templates.find((i: iSchemaPage) => i.page === filterTemplate)?.max ?? 0) }  className="modern-add-btn" style={{fontSize: '0.8rem', padding: '0.35rem 0.8rem'}}>
                           <i className="bi bi-plus-circle"></i>{t('editor.addButton')}
                         </Button>
                         </div>
@@ -220,7 +220,7 @@ useEffect(()=> {dispatch(loadSchemas())},[])
          
                     {
 
-                        [...filterPages()].sort((a,b)=> (a.Page).localeCompare( b.Page )).filter((_, index)=> index >= (num -1) * block && index < num * block  ).map((item) =>
+                        [...filterPages()].sort((a: iPage,b: iPage)=> (a.Page).localeCompare( b.Page )).filter((_: any, index: number)=> index >= (num -1) * block && index < num * block  ).map((item: iPage) =>
   
     <>
           <div className="editorListTableTdExtra editorListTableTr"> 
@@ -322,7 +322,7 @@ useEffect(()=> {dispatch(loadSchemas())},[])
                       <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                     Partial Content
-                    <span className="editor-tab-count">{pages.filter(p => templates.some(t => t.CType === "partial" && t.page === p.Template)).length}</span>
+                    <span className="editor-tab-count">{pages.filter((p: iPage) => templates.some((t: iSchemaPage) => t.CType === "partial" && t.page === p.Template)).length}</span>
                   </span>
                 }>
                 <div className="editorTabDiv">
@@ -330,7 +330,7 @@ useEffect(()=> {dispatch(loadSchemas())},[])
                     
                     <PMASearch placeholder="Search..." value={filterList} onChange={(e: React.ChangeEvent<HTMLInputElement>)=>setFilterList(e.target.value)} ></PMASearch>
                     <div className="editorMenuTableWrapper">
-                            {[...templates.filter(i=> i.CType=="partial" && i.page.includes(filterList))].sort((a,b)=> a.page.localeCompare(b.page)).map((item: iSchemaPage)=> 
+                            {[...templates.filter((i: iSchemaPage)=> i.CType=="partial" && i.page.includes(filterList))].sort((a: iSchemaPage,b: iSchemaPage)=> a.page.localeCompare(b.page)).map((item: iSchemaPage)=> 
                              <Row className="editorMenuRow " >
                                 <Col >
                                 
@@ -338,11 +338,11 @@ useEffect(()=> {dispatch(loadSchemas())},[])
                                  ?   
                                 <button className="editor-template-button" onClick={()=>{setFilterTemplate(item.page); setNum(1) }}>
                                   <span className="editor-template-tag" data-template={item.page.toLowerCase()}>{item.page}</span>
-                                  <span className="editor-template-count">{pages.filter(p => p.Template === item.page).length}/{item.max || '∞'}</span>
+                                  <span className="editor-template-count">{pages.filter((p: iPage) => p.Template === item.page).length}/{item.max || '∞'}</span>
                                 </button> :
                                 <div className="editor-template-button active">
                                   <span className="editor-template-tag active" data-template={item.page.toLowerCase()}>{item.page}</span>
-                                  <span className="editor-template-count">{pages.filter(p => p.Template === item.page).length}/{item.max || '∞'}</span>
+                                  <span className="editor-template-count">{pages.filter((p: iPage) => p.Template === item.page).length}/{item.max || '∞'}</span>
                                 </div>
                                 }   
                                
@@ -392,7 +392,7 @@ useEffect(()=> {dispatch(loadSchemas())},[])
          
                     {
 
-                        [...filterPages()].sort((a,b)=> (a.Page).localeCompare( b.Page )).filter((_, index)=> index >= (num -1) * block && index < num * block  ).map((item) =>
+                        [...filterPages()].sort((a: iPage,b: iPage)=> (a.Page).localeCompare( b.Page )).filter((_: any, index: number)=> index >= (num -1) * block && index < num * block  ).map((item: iPage) =>
   
     <>
          <div className="editorListTableTdExtra editorListTableTr"> 
@@ -565,10 +565,10 @@ useEffect(()=> {dispatch(loadSchemas())},[])
         ? <div>Loading fields...</div>
         : (
           matchedFields
-            .sort((a,b)=> (a.order ?? 0) - (b.order ?? 0))
-            .map((item) => (
+            .sort((a: iSchemaField,b: iSchemaField)=> (a.order ?? 0) - (b.order ?? 0))
+            .map((item: iSchemaField) => (
               <div key={item.component}>
-                <Field Schema={item} component={item.component} name={item.name} value={selectedPage?.values?.find((v)=> v.component == item.component)?.value ??  emptyField(item) } editMode={editMode} />
+                <Field Schema={item} component={item.component} name={item.name} value={selectedPage?.values?.find((v: iPageValue)=> v.component === item.component)?.value ??  emptyField(item) } editMode={editMode} />
                 <hr/>
               </div>
             ))
@@ -704,9 +704,10 @@ useEffect(()=> {dispatch(loadSchemas())},[])
                           // Try to obtain a fresh intent token and keep the publish modal open
                           try{
                             const payload = publishAction === 'save' ? selectedPage : deletePage;
-                            const res = await requestPublishIntent(payload);
+                            const purpose = publishAction === 'delete' ? 'delete-page' : (editMode === 'editing' ? 'update-page' : 'save-page');
+                            const res = await requestPublishIntent(payload, purpose);
                             const token = res.token || (res.raw && res.raw.headers && (res.raw.headers['x-selfreview-token'] || res.raw.headers['X-SelfReview-Token']));
-                            const message = res.message || (res.raw && res.raw.headers && (res.raw.headers['x-selfreview-es'] || res.raw.headers['x-selfreview-en']));
+                            const message = (res.hints && (res.hints.message?.es || res.hints.message?.en)) || (res.raw && res.raw.headers && (res.raw.headers['x-selfreview-es'] || res.raw.headers['x-selfreview-en']));
                             setPublishToken(token || null);
                             setPublishMessage(message || null);
                             // keep publish modal open for user to confirm again
@@ -800,9 +801,9 @@ useEffect(()=> {dispatch(loadSchemas())},[])
                           onClick={async () => {
                             try{
                               if(!deletePage) return;
-                              const res = await requestPublishIntent(deletePage);
+                              const res = await requestPublishIntent(deletePage, 'delete-page');
                               const token = res.token || (res.raw && res.raw.headers && (res.raw.headers['x-selfreview-token'] || res.raw.headers['X-SelfReview-Token']));
-                              const message = res.message || (res.raw && res.raw.headers && (res.raw.headers['x-selfreview-es'] || res.raw.headers['x-selfreview-en']));
+                              const message = (res.hints && (res.hints.message?.es || res.hints.message?.en)) || (res.raw && res.raw.headers && (res.raw.headers['x-selfreview-es'] || res.raw.headers['x-selfreview-en']));
                               setPublishToken(token || null);
                               setPublishMessage(message || null);
                               setPublishAction('delete');
@@ -872,9 +873,10 @@ useEffect(()=> {dispatch(loadSchemas())},[])
                             // request publish intent token and show publish modal (save flow)
                             try{
                               const payload = selectedPage;
-                              const res = await requestPublishIntent(payload);
+                              const purpose = (editMode === 'editing' ? 'update-page' : 'save-page');
+                              const res = await requestPublishIntent(payload, purpose);
                               const token = res.token || (res.raw && res.raw.headers && (res.raw.headers['x-selfreview-token'] || res.raw.headers['X-SelfReview-Token']));
-                              const message = res.message || (res.raw && res.raw.headers && (res.raw.headers['x-selfreview-es'] || res.raw.headers['x-selfreview-en']));
+                              const message = (res.hints && (res.hints.message?.es || res.hints.message?.en)) || (res.raw && res.raw.headers && (res.raw.headers['x-selfreview-es'] || res.raw.headers['x-selfreview-en']));
                               setPublishToken(token || null);
                               setPublishMessage(message || null);
                               setPublishAction('save');
