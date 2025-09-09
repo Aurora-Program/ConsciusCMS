@@ -505,8 +505,8 @@ Resources:
       Timeout: 5
       Environment:
         Variables:
-          PAGES_TABLE: "Pages-${Environment}"
-          TOKENS_TABLE: "ConscienceTokens-${Environment}"
+          PAGES_TABLE: !Sub "Pages-${Environment}"
+          TOKENS_TABLE: !Sub "ConscienceTokens-${Environment}"
           TOKEN_TTL_SECONDS: "600" # 10 minutos
       Code:
         ZipFile: |
@@ -653,9 +653,9 @@ Resources:
 
                 const param = {
                   TableName: PAGES_TABLE,
-                  ConditionExpression: "attribute_exists(Page)"
-                  Item: JSON.parse(JSON.stringify(payload)),
-                  ExpressionAttributeValues: { ":p": payload.Page }
+                  // Asegura que solo se actualicen páginas existentes
+                  ConditionExpression: "attribute_exists(Page)",
+                  Item: JSON.parse(JSON.stringify(payload))
                 };
                 await dynamo.put(param);
                 body = payload;
@@ -2029,8 +2029,12 @@ Resources:
             CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad 
             OriginRequestPolicyId: 88a5eaf4-2fd4-4709-b370-b4c650ea3fcf
             ResponseHeadersPolicyId: 60669652-455b-4ae9-85a4-c4c02393f86c
-
-          - PathPattern: /prod/*
+          - PathPattern: !Join 
+              - ""
+              - 
+                - "/"
+                - !Ref Environment
+                - "/*"
             TargetOriginId:  ApiGatewayOrigin
             ViewerProtocolPolicy: redirect-to-https
             AllowedMethods:

@@ -5,11 +5,10 @@ import { useT } from "../util/useTranslation"
 import { loadSchemas, selectSchema } from "../Schema/schemaSlice"
 import "./editor.css"
 import "../profile.css"
-import { loadPages,  selectPageAction,  deletePageAction, newSelectedPage, updatePageAction} from "./editorSlice"
+import { loadPages,  selectPageAction,  newSelectedPage } from "./editorSlice"
 import Field from "./Fields"
 import {  iSchemaPage, iPage, iSchemaField, iPageValue } from "../types"
 import { Tab, Tabs } from "react-bootstrap"
-import { savePageAction } from "./editorSlice"
 import { requestPublishIntent, publishPage, publishDelete } from "./editorService"
 import Home from "../Pages/home"
 import About from '../Pages/about'
@@ -543,21 +542,16 @@ useEffect(()=> {dispatch(loadSchemas())},[])
 
 
             <div className="editorFormDiv"> 
-    <Form id="pageForm" onSubmit={async (e) => {
-          e.preventDefault();
-          const form = e.currentTarget;
-          if (form.checkValidity() === false) {
-              e.stopPropagation();
-          } else {
-              if (editMode === "editing"){
-                  await dispatch(updatePageAction(selectedPage));
-              } else {
-                  await dispatch(savePageAction(selectedPage));
-              }
-              setShowContent(false);
-              await dispatch(loadPages());
-          }
-    }}>
+  <Form id="pageForm" onSubmit={async (e) => {
+      e.preventDefault();
+      const form = e.currentTarget;
+      if (form.checkValidity() === false) {
+        e.stopPropagation();
+      } else {
+        // Enforce two-step ethics flow: open confirm modal instead of direct save
+        setShowSaveConfirm(true);
+      }
+  }}>
     {
       // show a loading message if there are no matching fields or no selected page yet
       // render the form when matchedFields are present and a selectedPage exists (covers both add and edit flows)
@@ -810,8 +804,6 @@ useEffect(()=> {dispatch(loadSchemas())},[])
                               setShowPublishModal(true);
                             }catch(err:any){
                               console.error('requestPublishIntent for delete failed', err);
-                              // fallback to direct delete
-                              if(deletePage?.Page) dispatch(deletePageAction({Page:deletePage.Page}));
                             } finally {
                               setShowConfirmDelete(false);
                             }
@@ -884,20 +876,8 @@ useEffect(()=> {dispatch(loadSchemas())},[])
                               setShowSaveConfirm(false);
                             }catch(err:any){
                               console.error('requestPublishIntent failed', err);
-                              // fallback to direct save if publish intent failed
-                              try{
-                                if (editMode === "editing"){
-                                  await dispatch(updatePageAction(selectedPage));
-                                } else {
-                                  await dispatch(savePageAction(selectedPage));
-                                }
-                                setShowSaveConfirm(false);
-                                setShowContent(false);
-                                await dispatch(loadPages());
-                              }catch(e){
-                                console.error('Save failed', e);
-                                setShowSaveConfirm(false);
-                              }
+                              // Do not bypass ethics token; inform user and keep modal flow
+                              setShowSaveConfirm(false);
                             }
                           }}>
                             {t('editor.confirmAndSave')}
