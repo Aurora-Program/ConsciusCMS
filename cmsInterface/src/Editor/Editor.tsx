@@ -688,7 +688,7 @@ useEffect(()=> {dispatch(loadSchemas())},[])
                           throw new Error('Missing publish token');
                         }
                         if (publishAction === 'save'){
-                          await publishPage(selectedPage, publishToken, 'no_nocivo');
+                          await publishPage(selectedPage, publishToken, 'no_nocivo', editMode === 'editing' ? 'PUT' : 'POST');
                         } else if (publishAction === 'delete'){
                           await publishDelete(deletePage, publishToken, 'no_nocivo');
                         }

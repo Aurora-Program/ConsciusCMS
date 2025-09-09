@@ -188,16 +188,8 @@ export async function deletePage(data: iSchemaField){
 export async function fetchPageByPage(payload: string){
     console.log("payload:"+payload)
     const url = import.meta.env.VITE_URL_API_PAGES + "/" + payload
-
-    const config = {
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-           
-        }
-    };
     try{
-        const res = await axios.get( url );
+    const res = await axios.get(url);
         console.log ("r: " + res['data'].Items)
     const response : any = res['data'].Items[0]
         return response
@@ -269,14 +261,35 @@ export async function requestPublishIntent(content:any, purpose: 'save-page'|'up
         }
     };
     try{
-    const payloadPage = (content && content.Page) ? content.Page : content;
-    const res = await axios.post(ethicsUrl, { purpose, page: payloadPage }, config);
-        const token = (res.data && (res.data.token || res.data.Token)) || '';
+        const payloadPage = (content && content.Page) ? content.Page : content;
+        // Preferred path: dedicated ethics endpoint
+        const res = await axios.post(ethicsUrl, { purpose, page: payloadPage }, config);
+        const directToken = (res.data && (res.data.token || res.data.Token)) || '';
         const hints = res.data && (res.data.hints || res.data.message) ? (res.data.hints || { message: res.data.message }) : undefined;
         const expiresAt = (res.data && res.data.expiresAt) || undefined;
-        return { token, hints, expiresAt, raw: res };
+        if (directToken) return { token: directToken, hints, expiresAt, raw: res };
+        // Fallback if no token returned (unexpected): try intent via /pages without ethics-token
+    }catch(_ignored){
+        // fall through to fallback path
+    }
+    // Fallback path: send the intended content to /pages without ethics-token to obtain a review token in headers
+    try{
+        const url = import.meta.env.VITE_URL_API_PAGES;
+        const res = await axios.post(url, content, {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${sessionStorage.getItem('accessToken') || ''}`
+            }
+        });
+        const headers: any = (res as any).headers || {};
+        const token = headers['x-selfreview-token'] || headers['X-SelfReview-Token'] || '';
+        const hints = (headers['x-selfreview-es'] || headers['x-selfreview-en'])
+            ? { message: { es: headers['x-selfreview-es'], en: headers['x-selfreview-en'] } }
+            : undefined;
+        return { token, hints, expiresAt: undefined, raw: res };
     }catch(err:any){
-        console.error('requestPublishIntent error', err && err.response ? err.response.data : err);
+        console.error('requestPublishIntent fallback(/pages) error', err && err.response ? err.response.data : err);
         const msg = err && err.response && err.response.data ? JSON.stringify(err.response.data) : err.message || String(err);
         throw new Error(`requestPublishIntent failed: ${msg}`);
     }
@@ -286,7 +299,7 @@ export async function requestPublishIntent(content:any, purpose: 'save-page'|'up
  * Publish a page (POST/PUT) including the self-review token and decision.
  * The backend expects a payload { token, decision, content }.
  */
-export async function publishPage(content:any, token:string, _decision:string){
+export async function publishPage(content:any, token:string, _decision:string, method: 'POST'|'PUT' = 'POST'){
     // Confirm save with ethics token by POSTing the content to /pages
     const url = import.meta.env.VITE_URL_API_PAGES;
     checkAccessTokenExpiration();
@@ -297,8 +310,7 @@ export async function publishPage(content:any, token:string, _decision:string){
         'ethics-token': token
     };
     try{
-        const config = { headers };
-        const res = await axios.post(url, content, config);
+    const res = await axios({ url, method, data: content, headers });
         return res.data;
     }catch(err:any){
         console.error('publishPage error', err && err.response ? err.response.data : err);
