@@ -26,6 +26,7 @@ function Home() {
                     <div className="hero-content">
 
                         <h1 className="auorora-title">
+                            Hola
                             {t('home.heroConstruction')}
                             <br />
                             {t('home.heroTitle')}
