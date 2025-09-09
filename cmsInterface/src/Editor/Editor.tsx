@@ -523,40 +523,42 @@ useEffect(()=> {dispatch(loadSchemas())},[])
       
   <Modal.Body >
 
-        <div style={{display:"flex"}}>
+        <div className="editor-modal-flex">
           {/* INFO SIDE PANEL */}
           <aside 
             className={`editorInfoDiv editor-side-panel ${showDescription ? 'expanded' : 'collapsed'} info-theme`} 
             aria-label="Información de la plantilla"
           >
             <div className="panel-inner">
-              <div className="panel-header">
-                <button
-                  type="button"
-                  aria-expanded={showDescription}
-                  aria-controls="panel-info-body"
-                  className="panel-toggle-btn"
-                  onClick={() => setShowDescription(v => !v)}
-                  title={showDescription ? t('editor.hideInfo') || 'Ocultar info' : t('editor.showInfo') || 'Mostrar info'}
+              <div className="panel-slide">
+                <div className="panel-header">
+                  <button
+                    type="button"
+                    aria-expanded={showDescription}
+                    aria-controls="panel-info-body"
+                    className="panel-toggle-btn"
+                    onClick={() => setShowDescription(v => !v)}
+                    title={showDescription ? t('editor.hideInfo') || 'Ocultar info' : t('editor.showInfo') || 'Mostrar info'}
+                  >
+                    <span className="icon" aria-hidden="true">ℹ️</span>
+                    <span className="panel-title">Info</span>
+                    <span className="chevron" aria-hidden="true" />
+                  </button>
+                </div>
+                <div 
+                  id="panel-info-body" 
+                  className="panel-body" 
+                  hidden={!showDescription}
                 >
-                  <span className="icon" aria-hidden="true">ℹ️</span>
-                  <span className="panel-title">Info</span>
-                  <span className="chevron" aria-hidden="true" />
-                </button>
-              </div>
-              <div 
-                id="panel-info-body" 
-                className="panel-body" 
-                hidden={!showDescription}
-              >
-                <h5 className="panel-heading-text mb-2">{templateInfo.page}</h5>
-                <div className="panel-scroll" dangerouslySetInnerHTML={{__html: templateInfo.description}} />
+                  <h5 className="panel-heading-text mb-2">{templateInfo.page}</h5>
+                  <div className="panel-scroll" dangerouslySetInnerHTML={{__html: templateInfo.description}} />
+                </div>
               </div>
             </div>
           </aside>
 
           {/* FORM MAIN CONTENT */}
-          <div className="editorFormDiv">
+          <div className="editorFormDiv editor-main-card">
   <Form id="pageForm" onSubmit={async (e) => {
       e.preventDefault();
       const form = e.currentTarget;
@@ -576,9 +578,15 @@ useEffect(()=> {dispatch(loadSchemas())},[])
           matchedFields
             .sort((a: iSchemaField,b: iSchemaField)=> (a.order ?? 0) - (b.order ?? 0))
             .map((item: iSchemaField) => (
-              <div key={item.component}>
-                <Field Schema={item} component={item.component} name={item.name} value={selectedPage?.values?.find((v: iPageValue)=> v.component === item.component)?.value ??  emptyField(item) } editMode={editMode} />
-                <hr/>
+              <div key={item.component} className="editor-field-block">
+                <Field 
+                  Schema={item} 
+                  component={item.component} 
+                  name={item.name} 
+                  value={selectedPage?.values?.find((v: iPageValue)=> v.component === item.component)?.value ??  emptyField(item) } 
+                  editMode={editMode} 
+                />
+                <div className="form-section-divider" />
               </div>
             ))
         )
@@ -589,50 +597,52 @@ useEffect(()=> {dispatch(loadSchemas())},[])
 
       <div className="editorDetailsDiv">
         <aside 
-          className={`editor-side-panel ${showDetails ? 'expanded' : 'collapsed'} details-theme`} 
+          className={`editor-side-panel panel-right ${showDetails ? 'expanded' : 'collapsed'} details-theme`} 
           aria-label="Detalles de la página"
         >
           <div className="panel-inner">
-            <div className="panel-header">
-              <button
-                type="button"
-                aria-expanded={showDetails}
-                aria-controls="panel-details-body"
-                className="panel-toggle-btn"
-                onClick={() => setShowDetails(v => !v)}
-                title={showDetails ? t('editor.hideDetails') || 'Ocultar detalles' : t('editor.showDetails') || 'Mostrar detalles'}
+            <div className="panel-slide">
+              <div className="panel-header">
+                <button
+                  type="button"
+                  aria-expanded={showDetails}
+                  aria-controls="panel-details-body"
+                  className="panel-toggle-btn"
+                  onClick={() => setShowDetails(v => !v)}
+                  title={showDetails ? t('editor.hideDetails') || 'Ocultar detalles' : t('editor.showDetails') || 'Mostrar detalles'}
+                >
+                  <span className="icon" aria-hidden="true">🧾</span>
+                  <span className="panel-title">Details</span>
+                  <span className="chevron" aria-hidden="true" />
+                </button>
+              </div>
+              <div 
+                id="panel-details-body" 
+                className="panel-body" 
+                hidden={!showDetails}
               >
-                <span className="icon" aria-hidden="true">🧾</span>
-                <span className="panel-title">Details</span>
-                <span className="chevron" aria-hidden="true" />
-              </button>
-            </div>
-            <div 
-              id="panel-details-body" 
-              className="panel-body" 
-              hidden={!showDetails}
-            >
-              <div className="panel-stats-group">
-                <div className="stat-block">
-                  <div className="stat-title">{t('editor.updated')}</div>
-                  <div className="stat-line"><strong>{t('editor.updatedBy')}:</strong> {selectedPage.updateUser || '-'}</div>
-                  <div className="stat-line"><strong>{t('editor.updatedOn')}:</strong> {selectedPage.updateTime || '-'}</div>
-                </div>
-                <div className="stat-block">
-                  <div className="stat-title">{t('editor.version')}</div>
-                  <div className="stat-line"><strong>{t('editor.versionLabel')}:</strong> 1.0</div>
-                </div>
-                <div className="stat-block">
-                  <div className="stat-title">{t('editor.approved')}</div>
-                  <div className="stat-line"><strong>{t('editor.approvedLabel')}:</strong> {selectedPage.updateUser ? 'yes' : 'no'}</div>
-                  <div className="stat-line"><strong>{t('editor.approvedBy')}:</strong> {selectedPage.updateUser || '-'}</div>
-                  <div className="stat-line"><strong>{t('editor.approvedOn')}:</strong> {selectedPage.updateTime || '-'}</div>
-                </div>
-                <div className="stat-block">
-                  <div className="stat-title">{t('editor.published')}</div>
-                  <div className="stat-line"><strong>{t('editor.publishedLabel')}:</strong> {selectedPage.updateUser ? 'yes' : 'no'}</div>
-                  <div className="stat-line"><strong>{t('editor.updatedBy')}:</strong> {selectedPage.updateUser || '-'}</div>
-                  <div className="stat-line"><strong>{t('editor.updatedOn')}:</strong> {selectedPage.updateTime || '-'}</div>
+                <div className="panel-stats-group">
+                  <div className="stat-block">
+                    <div className="stat-title">{t('editor.updated')}</div>
+                    <div className="stat-line"><strong>{t('editor.updatedBy')}:</strong> {selectedPage.updateUser || '-'}</div>
+                    <div className="stat-line"><strong>{t('editor.updatedOn')}:</strong> {selectedPage.updateTime || '-'}</div>
+                  </div>
+                  <div className="stat-block">
+                    <div className="stat-title">{t('editor.version')}</div>
+                    <div className="stat-line"><strong>{t('editor.versionLabel')}:</strong> 1.0</div>
+                  </div>
+                  <div className="stat-block">
+                    <div className="stat-title">{t('editor.approved')}</div>
+                    <div className="stat-line"><strong>{t('editor.approvedLabel')}:</strong> {selectedPage.updateUser ? 'yes' : 'no'}</div>
+                    <div className="stat-line"><strong>{t('editor.approvedBy')}:</strong> {selectedPage.updateUser || '-'}</div>
+                    <div className="stat-line"><strong>{t('editor.approvedOn')}:</strong> {selectedPage.updateTime || '-'}</div>
+                  </div>
+                  <div className="stat-block">
+                    <div className="stat-title">{t('editor.published')}</div>
+                    <div className="stat-line"><strong>{t('editor.publishedLabel')}:</strong> {selectedPage.updateUser ? 'yes' : 'no'}</div>
+                    <div className="stat-line"><strong>{t('editor.updatedBy')}:</strong> {selectedPage.updateUser || '-'}</div>
+                    <div className="stat-line"><strong>{t('editor.updatedOn')}:</strong> {selectedPage.updateTime || '-'}</div>
+                  </div>
                 </div>
               </div>
             </div>
