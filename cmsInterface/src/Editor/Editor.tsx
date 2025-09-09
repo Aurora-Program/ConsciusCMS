@@ -56,6 +56,28 @@ const [publishMessage, setPublishMessage] = useState<string | null>(null)
 const [publishToken, setPublishToken] = useState<string | null>(null)
 const [publishAction, setPublishAction] = useState<'save'|'delete'|'none'>('none')
 
+// When the save-confirm modal opens, request the ethics token up front
+useEffect(() => {
+  (async () => {
+    if (!showSaveConfirm) return;
+    try{
+      const payload = selectedPage;
+      const purpose = (editMode === 'editing' ? 'update-page' : 'save-page');
+      const action = await dispatch(requestPublishIntentAction({ content: payload, purpose }));
+      const res: any = (action as any).payload;
+      const token = res?.token || (res?.raw && res.raw.headers && (res.raw.headers['x-selfreview-token'] || res.raw.headers['X-SelfReview-Token']));
+      const message = (res?.hints && (res.hints.message?.es || res.hints.message?.en)) || (res?.raw && res.raw.headers && (res.raw.headers['x-selfreview-es'] || res.raw.headers['x-selfreview-en']));
+      setPublishToken(token || null);
+      setPublishMessage(message || null);
+      setPublishAction('save');
+    }catch(err:any){
+      console.error('requestPublishIntent on open failed', err);
+      setPublishToken(null);
+    }
+  })();
+// eslint-disable-next-line react-hooks/exhaustive-deps
+}, [showSaveConfirm]);
+
 function filterPages(){
   let temp = pages
   if (filterTemplate !== ""){
@@ -865,22 +887,19 @@ useEffect(()=> {dispatch(loadSchemas())},[])
                         <div className="footer-actions w-100 justify-content-end">
                           <Button variant="outline-secondary" onClick={() => setShowSaveConfirm(false)} className="modern-btn-outline me-2">{t('editor.cancel')}</Button>
                           <Button variant="primary" className="modern-btn" onClick={async () => {
-                            // request publish intent token and show publish modal (save flow)
+                            // Confirm and publish using the previously acquired token
                             try{
-                              const payload = selectedPage;
-                              const purpose = (editMode === 'editing' ? 'update-page' : 'save-page');
-          const action = await dispatch(requestPublishIntentAction({ content: payload, purpose }));
-          const res: any = (action as any).payload;
-          const token = res?.token || (res?.raw && res.raw.headers && (res.raw.headers['x-selfreview-token'] || res.raw.headers['X-SelfReview-Token']));
-          const message = (res?.hints && (res.hints.message?.es || res.hints.message?.en)) || (res?.raw && res.raw.headers && (res.raw.headers['x-selfreview-es'] || res.raw.headers['x-selfreview-en']));
-                              setPublishToken(token || null);
-                              setPublishMessage(message || null);
-                              setPublishAction('save');
-                              setShowPublishModal(true);
+                              if (!publishToken){
+                                throw new Error('Missing publish token');
+                              }
+                              const method = (editMode === 'editing' ? 'PUT' : 'POST');
+                              await dispatch(publishPageWithTokenAction({ content: selectedPage, token: publishToken, method }));
                               setShowSaveConfirm(false);
+                              setShowContent(false);
+                              setPublishAction('none');
+                              await dispatch(loadPages());
                             }catch(err:any){
-                              console.error('requestPublishIntent failed', err);
-                              // Do not bypass ethics token; inform user and keep modal flow
+                              console.error('publish from save-confirm failed', err);
                               setShowSaveConfirm(false);
                             }
                           }}>
