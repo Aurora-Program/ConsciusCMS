@@ -9,7 +9,8 @@ import { loadPages,  selectPageAction,  newSelectedPage } from "./editorSlice"
 import Field from "./Fields"
 import {  iSchemaPage, iPage, iSchemaField, iPageValue } from "../types"
 import { Tab, Tabs } from "react-bootstrap"
-import { requestPublishIntent, publishPage, publishDelete } from "./editorService"
+// Use Redux thunks for ethics-token flow
+import { requestPublishIntentAction, publishPageWithTokenAction, publishDeleteWithTokenAction } from "./editorSlice"
 import Home from "../Pages/home"
 import About from '../Pages/about'
 import Product from "../Pages/product"
@@ -682,9 +683,9 @@ useEffect(()=> {dispatch(loadSchemas())},[])
                           throw new Error('Missing publish token');
                         }
                         if (publishAction === 'save'){
-                          await publishPage(selectedPage, publishToken, 'no_nocivo', editMode === 'editing' ? 'PUT' : 'POST');
+                          await dispatch(publishPageWithTokenAction({ content: selectedPage, token: publishToken, method: (editMode === 'editing' ? 'PUT' : 'POST') }));
                         } else if (publishAction === 'delete'){
-                          await publishDelete(deletePage, publishToken, 'no_nocivo');
+                          await dispatch(publishDeleteWithTokenAction({ content: deletePage, token: publishToken }));
                         }
                         setShowPublishModal(false);
                         setShowContent(false);
@@ -699,7 +700,8 @@ useEffect(()=> {dispatch(loadSchemas())},[])
                           try{
                             const payload = publishAction === 'save' ? selectedPage : deletePage;
                             const purpose = publishAction === 'delete' ? 'delete-page' : (editMode === 'editing' ? 'update-page' : 'save-page');
-                            const res = await requestPublishIntent(payload, purpose);
+                            const action = await dispatch(requestPublishIntentAction({ content: payload, purpose }));
+                            const res: any = (action as any).payload;
                             const token = res.token || (res.raw && res.raw.headers && (res.raw.headers['x-selfreview-token'] || res.raw.headers['X-SelfReview-Token']));
                             const message = (res.hints && (res.hints.message?.es || res.hints.message?.en)) || (res.raw && res.raw.headers && (res.raw.headers['x-selfreview-es'] || res.raw.headers['x-selfreview-en']));
                             setPublishToken(token || null);
@@ -790,14 +792,15 @@ useEffect(()=> {dispatch(loadSchemas())},[])
                           <i className="bi bi-x-lg me-2"></i>
                           Cancel
                         </Button>
-                        <Button 
+        <Button 
                           variant="danger" 
                           onClick={async () => {
                             try{
                               if(!deletePage) return;
-                              const res = await requestPublishIntent(deletePage, 'delete-page');
-                              const token = res.token || (res.raw && res.raw.headers && (res.raw.headers['x-selfreview-token'] || res.raw.headers['X-SelfReview-Token']));
-                              const message = (res.hints && (res.hints.message?.es || res.hints.message?.en)) || (res.raw && res.raw.headers && (res.raw.headers['x-selfreview-es'] || res.raw.headers['x-selfreview-en']));
+          const action = await dispatch(requestPublishIntentAction({ content: deletePage, purpose: 'delete-page' }));
+          const res: any = (action as any).payload;
+          const token = res?.token || (res?.raw && res.raw.headers && (res.raw.headers['x-selfreview-token'] || res.raw.headers['X-SelfReview-Token']));
+          const message = (res?.hints && (res.hints.message?.es || res.hints.message?.en)) || (res?.raw && res.raw.headers && (res.raw.headers['x-selfreview-es'] || res.raw.headers['x-selfreview-en']));
                               setPublishToken(token || null);
                               setPublishMessage(message || null);
                               setPublishAction('delete');
@@ -847,9 +850,9 @@ useEffect(()=> {dispatch(loadSchemas())},[])
                 </Modal>
 
                 {/* Save confirmation modal: shows warning and requires explicit confirm */}
-                <Modal show={showSaveConfirm} onHide={() => setShowSaveConfirm(false)} centered>
+        <Modal show={showSaveConfirm} onHide={() => setShowSaveConfirm(false)} centered>
                   <Modal.Header closeButton className="modern-modal-header">
-                      <Modal.Title className="modern-modal-title">{t('editor.deleteContentTitle')}</Modal.Title>
+          <Modal.Title className="modern-modal-title">{t('editor.saveChanges')}</Modal.Title>
                     </Modal.Header>
                     <Modal.Body className="modern-modal-body">
                       <div>
@@ -866,9 +869,10 @@ useEffect(()=> {dispatch(loadSchemas())},[])
                             try{
                               const payload = selectedPage;
                               const purpose = (editMode === 'editing' ? 'update-page' : 'save-page');
-                              const res = await requestPublishIntent(payload, purpose);
-                              const token = res.token || (res.raw && res.raw.headers && (res.raw.headers['x-selfreview-token'] || res.raw.headers['X-SelfReview-Token']));
-                              const message = (res.hints && (res.hints.message?.es || res.hints.message?.en)) || (res.raw && res.raw.headers && (res.raw.headers['x-selfreview-es'] || res.raw.headers['x-selfreview-en']));
+          const action = await dispatch(requestPublishIntentAction({ content: payload, purpose }));
+          const res: any = (action as any).payload;
+          const token = res?.token || (res?.raw && res.raw.headers && (res.raw.headers['x-selfreview-token'] || res.raw.headers['X-SelfReview-Token']));
+          const message = (res?.hints && (res.hints.message?.es || res.hints.message?.en)) || (res?.raw && res.raw.headers && (res.raw.headers['x-selfreview-es'] || res.raw.headers['x-selfreview-en']));
                               setPublishToken(token || null);
                               setPublishMessage(message || null);
                               setPublishAction('save');

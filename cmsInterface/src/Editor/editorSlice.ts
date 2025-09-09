@@ -3,7 +3,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 import {  iEditorState, iSchemaField, iListComponent, iPageValue} from "../types";
 
-import {fetchPageByPage, fetchPages, addPage, savePage, deletePage, updatePage  } from './editorService.ts'
+import {fetchPageByPage, fetchPages, addPage, savePage, deletePage, updatePage, requestPublishIntent, publishPage, publishDelete } from './editorService.ts'
 
 
 
@@ -48,8 +48,30 @@ export const updatePageAction = createAsyncThunk("Page/updatePage", async(payloa
 
 export const deletePageAction = createAsyncThunk("Page/DeletePage", async(payload: {Page: string})=>
 {
-    return(deletePage(payload))
+    return(deletePage(payload as any))
 })
+
+// --- Explicit ethics/token flow thunks ---
+export const requestPublishIntentAction = createAsyncThunk(
+    "Page/RequestPublishIntent",
+    async (payload: { content: any; purpose: 'save-page'|'update-page'|'delete-page' }) => {
+        return requestPublishIntent(payload.content, payload.purpose);
+    }
+);
+
+export const publishPageWithTokenAction = createAsyncThunk(
+    "Page/PublishPageWithToken",
+    async (payload: { content: any; token: string; method: 'POST'|'PUT' }) => {
+        return publishPage(payload.content, payload.token, 'no_nocivo', payload.method);
+    }
+);
+
+export const publishDeleteWithTokenAction = createAsyncThunk(
+    "Page/PublishDeleteWithToken",
+    async (payload: { content: any; token: string }) => {
+        return publishDelete(payload.content, payload.token, 'no_nocivo');
+    }
+);
 // export const uploadImageAction = createAsyncThunk("Page/UploadImage", async(payload: any)=>
 // {
 //     return(uploadImage(payload))
@@ -190,6 +212,35 @@ const editorSlice =  createSlice(
                 state.Error = {status: true, titulo: action.error.message, description:action.error.stack}
 
             })
+
+            // Explicit ethics/token flow reducers
+            builder.addCase(publishPageWithTokenAction.fulfilled, (state, action) => {
+                const data: any = action.payload;
+                if (data && data.Page) {
+                    const idx = state.pages.findIndex(p => p.Page === data.Page);
+                    if (idx >= 0) {
+                        state.pages[idx] = { ...state.pages[idx], ...data } as any;
+                    } else {
+                        state.pages.push({ Page: data.Page, Template: data.Template, values: data.values || [] } as any);
+                    }
+                    state.selectedPage = data;
+                }
+            });
+            builder.addCase(publishPageWithTokenAction.rejected, (state, action) => {
+                state.Error = {status: true, titulo: action.error.message, description: action.error.stack};
+            });
+
+            builder.addCase(publishDeleteWithTokenAction.fulfilled, (state, action) => {
+                const arg: any = (action.meta as any)?.arg;
+                const pageName = arg && arg.content && arg.content.Page;
+                if (pageName) {
+                    state.pages = state.pages.filter(i => i.Page !== pageName);
+                }
+                state.selectedPage = {values:[], Page:"", Template:""};
+            });
+            builder.addCase(publishDeleteWithTokenAction.rejected, (state, action) => {
+                state.Error = {status: true, titulo: action.error.message, description: action.error.stack};
+            });
 
             // builder.addCase(uploadImageAction.fulfilled,(state,action)=>{    
             // }),

@@ -160,7 +160,7 @@ export async function addPage(data: any){
         
             }
     
-export async function deletePage(data: iSchemaField){
+export async function deletePage(data: any){
 
     const url = import.meta.env.VITE_URL_API_PAGES
     checkAccessTokenExpiration();
