@@ -1,0 +1,21 @@
+/* objects/layout.css */
+
+/* Contenedor principal con max-width */
+.o-container {
+  max-width: 72rem; /* ~1152px */
+  margin-inline: auto;
+  padding-inline: var(--space-4);
+}
+
+/* Sistema de grid */
+.o-grid {
+  display: grid;
+  gap: var(--space-4);
+}
+.o-grid--2 { grid-template-columns: repeat(2, 1fr); }
+.o-grid--3 { grid-template-columns: repeat(3, 1fr); }
+
+/* Stack vertical */
+.o-stack > * + * {
+  margin-top: var(--space-4);
+}

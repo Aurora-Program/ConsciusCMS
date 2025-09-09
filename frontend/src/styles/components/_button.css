@@ -1,0 +1,17 @@
+/* components/_button.css */
+.btn {
+  display: inline-flex; align-items: center; gap: var(--space-2);
+  padding: .625rem 1rem;
+  border-radius: var(--radius-md);
+  background: var(--color-brand-500);
+  color: white; border: 0; box-shadow: var(--shadow-sm);
+  font-size: var(--text-base);
+  transition: transform .02s ease, background-color .2s ease;
+}
+.btn:hover { background: var(--color-brand-600); }
+.btn:active { transform: translateY(1px); }
+.btn--ghost {
+  background: transparent; color: var(--color-brand-600);
+}
+.btn__icon { inline-size: 1.125em; block-size: 1.125em; }
+.btn--danger { background: var(--color-danger-600); }

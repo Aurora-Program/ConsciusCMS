@@ -6,11 +6,15 @@ import './aurora-brand.css'
 import './aurora-palette.css'
 import './aurora-design-system.css'  // Sistema de componentes estandarizados
 // New standardized Design System
-import './styles/aurora-tokens.css'
-import './styles/aurora-base.css'
-import './styles/aurora-utils.css'
-import './styles/aurora-layout.css'
-import './styles/aurora-components.css'
+import './styles/settings/aurora-tokens.css'
+import './styles/base/aurora-base.css'
+import './styles/utilities/aurora-utils.css'
+import './styles/objects/aurora-layout.css'
+import './styles/components/aurora-components.css'
+import './styles/espiral/espiral.css'
+import './constellacss/fn.css'
+import './constellacss/es.css'
+import './constellacss/fo.css'
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
 import { store } from './store';
 import { BrowserRouter } from 'react-router-dom';

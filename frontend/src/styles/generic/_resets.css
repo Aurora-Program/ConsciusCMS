@@ -1,0 +1,19 @@
+/* generic/_reset.css: usa modern-normalize o similar */
+
+/* base/_typography.css */
+html, body {
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  line-height: 1.5;
+}
+h1, h2, h3 { line-height: var(--leading-tight); }
+
+/* objects/_layout.css */
+.o-container { max-width: 72rem; margin-inline: auto; padding-inline: var(--space-4); }
+.o-stack > * + * { margin-top: var(--space-4); }
+
+/* utilities/_utilities.css */
+.u-hidden { display: none !important; }
+.u-center { display: grid; place-items: center; }
+.u-mt-4 { margin-top: var(--space-4) !important; }

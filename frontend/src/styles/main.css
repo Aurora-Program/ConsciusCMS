@@ -1,0 +1,20 @@
+/* main.css */
+
+/* 1. Variables globales / design tokens */
+@import url("./settings/_tokens.css");
+
+/* 2. Reset o normalize */
+@import url("./generic/_resets.css");
+
+/* 3. Estilos base (tipografía, body, enlaces) */
+@import url("./base/_typography.css");
+
+/* 4. Objetos / layouts reutilizables */
+@import url("./objects/_layout.css");
+
+/* 5. Componentes (botón, card, navbar, etc.) */
+@import url("./components/_button.css");
+@import url("./components/_card.css");
+
+/* 6. Utilidades rápidas */
+@import url("./utilities/_utilities.css");

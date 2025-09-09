@@ -1,5 +1,4 @@
 
-import './App.css';
 import Home from './Pages/home';
 import Foot from './Pages/foot';
 import Header from './Pages/header';
@@ -31,6 +30,8 @@ import EthicsI from './Pages/ethicsi';
 import InnvaLab from './Pages/innvalab';
 import IdeasPage from './Pages/ideas';
 import IdeaPage from './Pages/idea';
+import HomePage from './Pages/homepage';
+import LandingPage from './Pages/landing';
 
 function App() {
   return (
@@ -76,6 +77,9 @@ function App() {
           <Route path="/plataformas/harmonia" element={<Harmonia />} />
           <Route path="/plataformas/ethicsi" element={<EthicsI />} />
           <Route path="/plataformas/innvalab" element={<InnvaLab />} />
+          <Route path= "/homepage" element={<HomePage />} />
+          <Route path= "/landing" element={<LandingPage />} />
+
 
         </Routes>
       </main>

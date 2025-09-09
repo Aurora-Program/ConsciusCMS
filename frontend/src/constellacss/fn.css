@@ -1,0 +1,30 @@
+/* Constellacss – Función (semántica)
+	Clases bajas en especificidad y sin !important */
+
+.fn--Pagina { display: block; }
+.fn--Seccion { display: block; }
+.fn--Componente { display: block; }
+
+.fn--Titulo { font-weight: 700; line-height: 1.2; margin: 0; }
+.fn--Subtitulo { font-weight: 500; line-height: 1.3; margin: 0; }
+.fn--Titulo--lg { font-size: 1.75rem; }
+
+.fn--Hero { display: block; }
+.fn--Menu { display: block; }
+.fn--MenuItem { display: inline-block; }
+.fn--Card { display: block; }
+
+/* Semántica de listas y tarjetas */
+.fn--List { display: block; }
+.fn--ListItem { display: block; }
+.fn--CardTitle { font-weight: 600; }
+.fn--CardSubtitle { font-weight: 500; opacity: .9; }
+
+/* Jerarquías sugeridas (aplica varias en orden de general→específico)
+	.fn--Pagina .fn--Portada .fn--Titulo, etc. */
+
+/* Mejora de presentación del hero */
+.fn--Hero { padding-block: var(--aurora-spacing-xl, 48px); background: var(--aurora-bg-subtle, #f8fafc); }
+.fn--Hero .fn--Titulo { font-size: clamp(2rem, 4vw, 3rem); }
+.fn--Hero .fn--Subtitulo { font-size: clamp(1.05rem, 2vw, 1.25rem); }
+

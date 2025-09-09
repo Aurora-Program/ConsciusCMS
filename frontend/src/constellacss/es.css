@@ -1,0 +1,52 @@
+/* Constellacss – Estructura (layout/objects) */
+
+.es--inline { display: inline-block; }
+.es--block { display: block; }
+.es--full-width { width: 100%; }
+.es--center { margin-left: auto; margin-right: auto; }
+
+.es--container { max-width: var(--aurora-max-width, 1200px); padding-inline: var(--aurora-spacing-md, 16px); margin-inline: auto; }
+
+.es--stack > * + * { margin-top: var(--aurora-spacing-md, 16px); }
+.es--stack-lg > * + * { margin-top: var(--aurora-spacing-lg, 24px); }
+.es--stack-xl > * + * { margin-top: var(--aurora-spacing-xl, 48px); }
+
+.es--grid { display: grid; gap: var(--aurora-spacing-md, 16px); }
+.es--grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.es--grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.es--grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.es--gap-sm { gap: var(--aurora-spacing-sm, 8px); }
+.es--gap-md { gap: var(--aurora-spacing-md, 16px); }
+.es--gap-lg { gap: var(--aurora-spacing-lg, 24px); }
+
+.es--row { display: flex; flex-direction: row; gap: var(--aurora-spacing-md, 16px); }
+.es--col { display: flex; flex-direction: column; gap: var(--aurora-spacing-md, 16px); }
+.es--wrap { flex-wrap: wrap; }
+
+/* Responsive helpers */
+@media (max-width: 900px) {
+	.es--grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+	.es--grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 600px) {
+	.es--grid-2, .es--grid-3, .es--grid-4 { grid-template-columns: 1fr; }
+}
+
+/* Padding utilities */
+.es--p-sm { padding: var(--aurora-spacing-sm, 8px); }
+.es--p-md { padding: var(--aurora-spacing-md, 16px); }
+.es--p-lg { padding: var(--aurora-spacing-lg, 24px); }
+
+/* Sección: ritmo vertical estándar */
+.es--section-pad { padding-block: var(--aurora-spacing-xl, 48px); }
+
+/* Listas comunes */
+.es--list-grid { display: grid; gap: var(--aurora-spacing-md, 16px); grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 900px) { .es--list-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .es--list-grid { grid-template-columns: 1fr; } }
+
+/* Centering utilities */
+.es--text-center { text-align: center; }
+.es--items-center { align-items: center; }
+.es--justify-center { justify-content: center; }
+

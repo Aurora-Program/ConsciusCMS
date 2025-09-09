@@ -1,0 +1,37 @@
+/* settings/_tokens.css */
+:root {
+  /* color */
+  --color-bg: #ffffff;
+  --color-fg: #0f172a;
+  --color-brand-50: #eff6ff;
+  --color-brand-500: #3b82f6;
+  --color-brand-600: #2563eb;
+  --color-danger-600: #dc2626;
+
+  /* spacing (8px scale) */
+  --space-1: .25rem; /* 4px */
+  --space-2: .5rem;  /* 8px */
+  --space-3: .75rem; /* 12px */
+  --space-4: 1rem;   /* 16px */
+  --space-6: 1.5rem; /* 24px */
+  --space-8: 2rem;   /* 32px */
+
+  /* radius & shadow */
+  --radius-sm: .375rem;
+  --radius-md: .75rem;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.06);
+
+  /* typography */
+  --font-sans: ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
+  --text-sm: .875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --leading-tight: 1.25;
+}
+html[data-theme="dark"]{
+  --color-bg: #0b1220;
+  --color-fg: #e5e7eb;
+  --color-brand-50: #0b1220;
+  --color-brand-500: #60a5fa;
+  --color-brand-600: #3b82f6;
+}

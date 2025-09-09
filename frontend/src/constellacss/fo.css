@@ -1,0 +1,83 @@
+/* Constellacss – Forma (skin/themes) */
+
+.fo--standard {
+	color: var(--aurora-text, #111827);
+	font-family: var(--aurora-font-sans, system-ui, sans-serif);
+}
+
+.fo--muted { color: var(--aurora-muted, #6b7280); }
+.fo--acentuada { color: var(--aurora-primary-600, #2563eb); }
+
+.fo--elevada { box-shadow: var(--aurora-shadow-md, 0 4px 6px rgba(0,0,0,.07)); background: var(--aurora-surface, #fff); border-radius: var(--aurora-radius-md, 8px); }
+.fo--bordered { border: 1px solid var(--aurora-surface-gray, #e5e7eb); border-radius: var(--aurora-radius, 8px); }
+
+/* Hero skin */
+.fo--hero {
+	background: var(--aurora-gradient-primary, linear-gradient(135deg, #1e4a7a, #2563eb));
+	color: var(--aurora-surface-white, #fff);
+}
+
+/* Title highlight badge (works well over hero) */
+.fo--title-highlight {
+	background: rgba(255, 255, 255, 0.1);
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	padding: 0.25em 0.6em;
+	border-radius: var(--aurora-radius, 8px);
+	box-shadow: 0 1px 2px rgba(0,0,0,.12) inset;
+}
+
+/* Skins de tarjeta/lista */
+.fo--card { background: var(--aurora-surface, #fff); border: 1px solid var(--aurora-surface-gray, #e5e7eb); border-radius: var(--aurora-radius, 8px); }
+
+/* Elegant card variant: soft gradient + subtle highlight */
+.fo--card-elegant {
+	background:
+		linear-gradient(180deg, rgba(255,255,255,0.9), var(--aurora-surface, #fff))
+		, radial-gradient(800px 400px at 85% 0%, rgba(37,99,235,0.08), rgba(37,99,235,0) 60%);
+	border: 1px solid var(--aurora-surface-gray, #e5e7eb);
+	border-radius: var(--aurora-radius, 8px);
+	box-shadow: var(--aurora-shadow-sm, 0 1px 3px rgba(0,0,0,.1));
+	backdrop-filter: saturate(110%);
+}
+.fo--card-elegant:hover {
+	box-shadow: var(--aurora-shadow-md, 0 4px 6px rgba(0,0,0,.07));
+}
+
+/* Temas: definen tokens locales */
+.fo--theme-andromeda {
+	--color-fg: var(--aurora-primary-dark, #0f172a);
+	--color-brand-600: var(--aurora-primary-600, #2563eb);
+}
+
+/* Alias opcional para docs/ejemplos */
+:root {
+	--color-fg: var(--aurora-text, #111827);
+	--color-brand-600: var(--aurora-primary-600, #2563eb);
+	--space-4: var(--aurora-spacing-md, 16px);
+	--space-6: var(--aurora-spacing-lg, 24px);
+	--shadow-md: var(--aurora-shadow-md);
+	--font-sans: var(--aurora-font-sans);
+	--text-lg: 1.125rem;
+}
+
+	/* Radius utilities */
+	.fo--rounded { border-radius: var(--aurora-radius, 8px); }
+	.fo--rounded-md { border-radius: var(--aurora-radius-md, 8px); }
+	.fo--rounded-lg { border-radius: var(--aurora-radius-lg, 12px); }
+
+	/* Button-like skins */
+	.fo--btn { display: inline-block; text-decoration: none; transition: box-shadow .2s ease, transform .05s ease, background-color .2s ease, color .2s ease; cursor: pointer; }
+	.fo--btn:focus-visible { outline: 2px solid var(--aurora-primary-600, #2563eb); outline-offset: 2px; }
+	.fo--btn:active { transform: translateY(1px); }
+
+	.fo--btn-outline { border: 1px solid var(--aurora-surface-gray, #e5e7eb); background: transparent; color: var(--aurora-text); }
+	.fo--btn-outline:hover { background: var(--aurora-surface, #fff); }
+
+	.fo--btn-elevated { background: var(--aurora-surface, #fff); box-shadow: var(--aurora-shadow-md); color: var(--aurora-text); }
+	.fo--btn-elevated:hover { box-shadow: var(--aurora-shadow-lg); }
+
+	/* Botones por intención */
+	.fo--btn-primary { background: var(--aurora-primary-600, #2563eb); color: #fff; border: 1px solid transparent; }
+	.fo--btn-primary:hover { filter: brightness(1.05); }
+	.fo--btn-secondary { background: var(--aurora-bg, #fff); color: var(--aurora-text); border: 1px solid var(--aurora-surface-gray, #e5e7eb); }
+
