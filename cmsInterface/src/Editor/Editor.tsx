@@ -56,27 +56,7 @@ const [publishMessage, setPublishMessage] = useState<string | null>(null)
 const [publishToken, setPublishToken] = useState<string | null>(null)
 const [publishAction, setPublishAction] = useState<'save'|'delete'|'none'>('none')
 
-// When the save-confirm modal opens, request the ethics token up front
-useEffect(() => {
-  (async () => {
-    if (!showSaveConfirm) return;
-    try{
-      const payload = selectedPage;
-      const purpose = (editMode === 'editing' ? 'update-page' : 'save-page');
-      const action = await dispatch(requestPublishIntentAction({ content: payload, purpose }));
-      const res: any = (action as any).payload;
-      const token = res?.token || (res?.raw && res.raw.headers && (res.raw.headers['x-selfreview-token'] || res.raw.headers['X-SelfReview-Token']));
-      const message = (res?.hints && (res.hints.message?.es || res.hints.message?.en)) || (res?.raw && res.raw.headers && (res.raw.headers['x-selfreview-es'] || res.raw.headers['x-selfreview-en']));
-      setPublishToken(token || null);
-      setPublishMessage(message || null);
-      setPublishAction('save');
-    }catch(err:any){
-      console.error('requestPublishIntent on open failed', err);
-      setPublishToken(null);
-    }
-  })();
-// eslint-disable-next-line react-hooks/exhaustive-deps
-}, [showSaveConfirm]);
+// Token is now requested only on Save button click to avoid duplicate requests
 
 function filterPages(){
   let temp = pages
@@ -518,7 +498,7 @@ useEffect(()=> {dispatch(loadSchemas())},[])
                   <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke="currentColor" strokeWidth="2"/>
                   <path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4Z" stroke="currentColor" strokeWidth="2"/>
                 </svg>
-                {t(editMode === "adding" ? t('editor.addingNew') : t('editor.editing'))} {selectedPage?.Page || ''}
+                {editMode === "adding" ? t('editor.addingNew') : t('editor.editing')} {selectedPage?.Page || ''}
               </h4>
               <small className="text-muted d-block">
                 <i className="bi bi-file-earmark-text me-1"></i>
@@ -543,33 +523,40 @@ useEffect(()=> {dispatch(loadSchemas())},[])
       
   <Modal.Body >
 
-        <div    style={{display:"flex" }} >
+        <div style={{display:"flex"}}>
+          {/* INFO SIDE PANEL */}
+          <aside 
+            className={`editorInfoDiv editor-side-panel ${showDescription ? 'expanded' : 'collapsed'} info-theme`} 
+            aria-label="Información de la plantilla"
+          >
+            <div className="panel-inner">
+              <div className="panel-header">
+                <button
+                  type="button"
+                  aria-expanded={showDescription}
+                  aria-controls="panel-info-body"
+                  className="panel-toggle-btn"
+                  onClick={() => setShowDescription(v => !v)}
+                  title={showDescription ? t('editor.hideInfo') || 'Ocultar info' : t('editor.showInfo') || 'Mostrar info'}
+                >
+                  <span className="icon" aria-hidden="true">ℹ️</span>
+                  <span className="panel-title">Info</span>
+                  <span className="chevron" aria-hidden="true" />
+                </button>
+              </div>
+              <div 
+                id="panel-info-body" 
+                className="panel-body" 
+                hidden={!showDescription}
+              >
+                <h5 className="panel-heading-text mb-2">{templateInfo.page}</h5>
+                <div className="panel-scroll" dangerouslySetInnerHTML={{__html: templateInfo.description}} />
+              </div>
+            </div>
+          </aside>
 
-            <div className="editorInfoDiv" >
-            
-            <div className={showDescription ? "description" : "noDescription"} >
-            <div>
-            <button onClick={()=> {if(showDescription) setShowDescription(false); else setShowDescription(true)}} className="infoButton">&#9432;</button>
-            <span hidden ={!showDescription} className="areaTitle" >Info</span>
-            <hr style={{margin:"0px"}}></hr>
-            </div>
-            <div hidden ={!showDescription}>
-            
-         
-            <div style={{padding:"10px"}}>
-             <h5>{templateInfo.page}:</h5>
-             <div dangerouslySetInnerHTML = {{__html: templateInfo.description}}></div>
-             </div>
-            </div>
-            </div>
-          
-           
-            
-            
-            </div>
-
-
-            <div className="editorFormDiv"> 
+          {/* FORM MAIN CONTENT */}
+          <div className="editorFormDiv">
   <Form id="pageForm" onSubmit={async (e) => {
       e.preventDefault();
       const form = e.currentTarget;
@@ -600,62 +587,58 @@ useEffect(()=> {dispatch(loadSchemas())},[])
             </div>
 
 
-      <div className="editorDetailsDiv"  >
-      
-
-            <div className=  {showDetails ? "details" : "noDetails"}    >
-               
-             
-                        
-               <div style={{display:"flex", justifyContent:"right",  verticalAlign:"center"}}>         
-       
-     <div>
-        <span className=" areaTitle"  hidden={!showDetails} > Details </span>
-        <button onClick={()=>{if(showDetails) setShowDetails(false); else setShowDetails(true)  }} className="infoButton" style={{fontSize:"30px"
-        
-    }}>☰
-    </button>
-    </div>
-        </div>
-        <hr style={{margin:"0px"}}></hr>
-        
-        
-        
-  <div className="areaDiv" hidden={!showDetails}>
-
-          <p className="sectionSide">
-         <span className="sectionTitle">  {t('editor.updated')  } </span>  <br/>
-          <span className="label"> {t('editor.updatedBy')} </span> {selectedPage.updateUser}<br/>
-          <span className="label"> {t('editor.updatedOn')} </span> {selectedPage.updateTime}
-          </p>
-       
-
-          <p className="sectionSide">
-         <span className="sectionTitle">  {t('editor.version')}  </span>  <br/>
-          <span className="label">{t('editor.versionLabel')} </span> 1.0<br/>
-          </p>
-
-          <p className="sectionSide">
-         <span className="sectionTitle">  {t('editor.approved')} </span>  <br/>
-         <span className="label">{t('editor.approvedLabel')} </span> { selectedPage.updateUser ? "yes" : "no"}<br/>
-          <span className="label">{t('editor.approvedBy')} </span> {selectedPage.updateUser}<br/>
-          <span className="label">{t('editor.approvedOn')} </span> {selectedPage.updateTime}
-          </p>
-        
-          <p className="sectionSide">
-         <span className="sectionTitle">  {t('editor.published')} </span>  <br/>
-         <span className="label">{t('editor.publishedLabel')} </span>{ selectedPage.updateUser ? "yes" : "no"}<br/>
-          <span className="label">{t('editor.updatedBy')} </span> {selectedPage.updateUser}<br/>
-          <span className="label">{t('editor.updatedOn')} </span> {selectedPage.updateTime}
-          </p>
-
-          
-
-        </div>
-        
-      
-        </div>
-       </div>
+      <div className="editorDetailsDiv">
+        <aside 
+          className={`editor-side-panel ${showDetails ? 'expanded' : 'collapsed'} details-theme`} 
+          aria-label="Detalles de la página"
+        >
+          <div className="panel-inner">
+            <div className="panel-header">
+              <button
+                type="button"
+                aria-expanded={showDetails}
+                aria-controls="panel-details-body"
+                className="panel-toggle-btn"
+                onClick={() => setShowDetails(v => !v)}
+                title={showDetails ? t('editor.hideDetails') || 'Ocultar detalles' : t('editor.showDetails') || 'Mostrar detalles'}
+              >
+                <span className="icon" aria-hidden="true">🧾</span>
+                <span className="panel-title">Details</span>
+                <span className="chevron" aria-hidden="true" />
+              </button>
+            </div>
+            <div 
+              id="panel-details-body" 
+              className="panel-body" 
+              hidden={!showDetails}
+            >
+              <div className="panel-stats-group">
+                <div className="stat-block">
+                  <div className="stat-title">{t('editor.updated')}</div>
+                  <div className="stat-line"><strong>{t('editor.updatedBy')}:</strong> {selectedPage.updateUser || '-'}</div>
+                  <div className="stat-line"><strong>{t('editor.updatedOn')}:</strong> {selectedPage.updateTime || '-'}</div>
+                </div>
+                <div className="stat-block">
+                  <div className="stat-title">{t('editor.version')}</div>
+                  <div className="stat-line"><strong>{t('editor.versionLabel')}:</strong> 1.0</div>
+                </div>
+                <div className="stat-block">
+                  <div className="stat-title">{t('editor.approved')}</div>
+                  <div className="stat-line"><strong>{t('editor.approvedLabel')}:</strong> {selectedPage.updateUser ? 'yes' : 'no'}</div>
+                  <div className="stat-line"><strong>{t('editor.approvedBy')}:</strong> {selectedPage.updateUser || '-'}</div>
+                  <div className="stat-line"><strong>{t('editor.approvedOn')}:</strong> {selectedPage.updateTime || '-'}</div>
+                </div>
+                <div className="stat-block">
+                  <div className="stat-title">{t('editor.published')}</div>
+                  <div className="stat-line"><strong>{t('editor.publishedLabel')}:</strong> {selectedPage.updateUser ? 'yes' : 'no'}</div>
+                  <div className="stat-line"><strong>{t('editor.updatedBy')}:</strong> {selectedPage.updateUser || '-'}</div>
+                  <div className="stat-line"><strong>{t('editor.updatedOn')}:</strong> {selectedPage.updateTime || '-'}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
       </div>
         </Modal.Body>
       
