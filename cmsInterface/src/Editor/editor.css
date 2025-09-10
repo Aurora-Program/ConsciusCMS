@@ -1460,4 +1460,20 @@ margin-bottom:2px;
     color: var(--color-primary);
 }
 
+/* --------------------------------------
+     Final Centering Override for Main Form
+--------------------------------------- */
+.editor-modal-flex > .editorFormDiv {
+    flex: 0 0 auto;
+    width: auto !important;
+    max-width: 900px;
+    margin: 0 auto;
+    /* keep card width stable regardless of side panels */
+}
+
+@media (max-width: 1200px) {
+    .editor-modal-flex { padding: 0 12px; }
+    .editor-modal-flex > .editorFormDiv { max-width: 100%; }
+}
+
 /* Modern Input Enhancement */
