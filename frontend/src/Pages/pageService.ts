@@ -1,12 +1,12 @@
 import axios from "axios";
-import { iSchemaField, iSchemaPage } from "./PAGESSlice";
+import { iSchemaField, iSchemaPage } from "../types";
 
 
-const url_bucket = import.meta.env.VITE_URL_API_BUCKET + "/" + import.meta.env.VITE_CONTENT_BUCKET_NAME
+const url_bucket = (import.meta.env.VITE_URL_API_BUCKET || '') + "/" + (import.meta.env.VITE_CONTENT_BUCKET_NAME || '')
 
 // (old iSchemaPageTable removed - not used)
 
-export  const downloadFile = async (name) =>
+export  const downloadFile = async (name: string) =>
     {
         const res = await fetch(url_bucket + "/"  + name, {
             method: 'GET',
@@ -21,7 +21,7 @@ export  const downloadFile = async (name) =>
             return (imageObjectURL)
     }
 
-export const uploadImage = async (file)=> {
+export const uploadImage = async (file: File)=> {
 
     console.log("file name:" + file.name)
         // 👇 Uploading the file using the fetch API to the server
@@ -53,7 +53,7 @@ export const uploadImage = async (file)=> {
 
 
 
-export async function addPage(data){
+export async function addPage(data: any){
 
     const url = import.meta.env.VITE_URL_API_PAGES
 
@@ -72,7 +72,7 @@ export async function addPage(data){
 
     }
 
-    export async function savePage(data){
+    export async function savePage(data: any){
 
         const url = import.meta.env.VITE_URL_API_PAGES
     
@@ -95,7 +95,7 @@ export async function addPage(data){
 
 
     
-export async function deletePage(data: iSchemaField){
+export async function deletePage(data: any){
 
     const url = import.meta.env.VITE_URL_API_PAGES
 
@@ -121,7 +121,7 @@ export async function deletePage(data: iSchemaField){
 export async function fetchPageByPage(payload: string){
     console.log("payload:"+payload)
     const url = import.meta.env.VITE_URL_API_PAGES + "/" + payload
-    const url_bucket = import.meta.env.VITE_CONTENT_BUCKET_URL
+    // const pageBucket = import.meta.env.VITE_CONTENT_BUCKET_URL // (unused, removed)
 
     const config = {
         headers: {
@@ -134,40 +134,9 @@ export async function fetchPageByPage(payload: string){
 
 
     console.log ("r: " + res['data'].Items)
-    const response : iSchemaField[] = res['data'].Items[0]
+    const response : any = res['data'].Items[0]
 
-    const loadData = () => {
-
-        let tempprojects = [];
-      
-     
-
-        [...response.values.find(v => v.name == "Title")?.value].sort((a,b)=> a.order - b.order)?.map((i)=>
-       { 
-            let tempslides = [];
-            
-             console.log( i.value);
-             [...i.value?.find(v=>v.Schema.name == "Diapositivas")?.value].sort((a,b)=> a.order - b.order)?.map(d =>{
-               
-                tempslides.push({name: d?.value?.find(v=> v.Schema.name == "Titulo").value?.text, layout: d.value?.find(v=> v.Schema.name == "Pantalla completa")?.value?.value,  image:url_bucket+ "/" + d.value?.find(v=> v.Schema.name == "Fotografia")?.value?.name, color:d.value?.find(v=> v.Schema.name == "Color de la fuente")?.value?.value, nameAlt: d?.value?.find(v=> v.Schema.name == "Titulo Alternativo")?.value?.text, layoutAlt: d.value?.find(v=> v.Schema.name == "Pantalla completa alternativa")?.value?.value, imageAlt: d.value?.find(v=> v.Schema.name == "Fotografía Alternativa")?.value?.name ? url_bucket+ "/" + d.value?.find(v=> v.Schema.name == "Fotografía Alternativa")?.value?.name : undefined,  nameAlt: d?.value?.find(v=> v.Schema.name == "Titulo Alternativo")?.value?.text, nameDes: d?.value?.find(v=> v.Schema.name == "TituloDes")?.value?.text,  nameDesAlt: d?.value?.find(v=> v.Schema.name == "TituloDesAlt")?.value?.text  })})
-          
-              tempprojects.push( {name: i?.value?.find(v => v.Schema.name == "Nombre")?.value?.text, description:i?.value?.find(v => v.Schema.name == "Descripcion")?.value?.text, descriptionEn:i?.value?.find(v => v.Schema.name == "DescripcionEn")?.value?.text, descriptionCat:i?.value?.find(v => v.Schema.name == "DescripcionCat")?.value?.text, fichero:i?.value?.find(v => v.Schema.name == "Fichero ")?.value?.name,   slides:tempslides    
-             
-
-
-                })}
-    
-    
-        )
-      
-      
-    
-      return (res.values)
-    
-        
-      }
-
-      const r = {selectedPage: response, data: response.values}
+    const r = {selectedPage: response, data: response?.values}
 
      return r
 
@@ -179,22 +148,34 @@ export async function fetchPageByPage(payload: string){
 
     export async function fetchPages(filter?: string | RegExp){
 
-    const url = import.meta.env.VITE_URL_API_PAGES
-    console.log("=== FETCH PAGES DEBUG ===");
-    console.log("API URL:", url);
-    
-    const config = {
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-          
+        const url = import.meta.env.VITE_URL_API_PAGES
+        const debugFlag = import.meta.env.VITE_ENV_DEBUG === 'true'
+        if (debugFlag) {
+            console.log("=== FETCH PAGES DEBUG START ===")
+            console.log("VITE_URL_API_PAGES:", url)
+            console.log("ALL env keys:", Object.keys(import.meta.env).filter(k=>k.startsWith('VITE_')))
         }
-    };
+
+        if (!url) {
+            console.error('[fetchPages] VITE_URL_API_PAGES no está definido. Crea .env.local o .env con la variable. Abortando fetch.')
+            return []
+        }
+    
+    const token = sessionStorage.getItem('accessToken')
+    const baseHeaders: Record<string,string> = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+    }
+    if (token) baseHeaders['Authorization'] = `Bearer ${token}` // probar con auth desde el inicio
+
+    const config = { headers: baseHeaders } as const
     
     try {
         let res = await axios.get( url, config );
-        console.log("API Response Status:", res.status);
-        console.log("API Response Data:", res['data']);
+        if (debugFlag) {
+            console.log("API Response Status:", res.status);
+            console.log("API Response Data shape keys:", Object.keys(res['data'] || {}))
+        }
 
         // helper to normalize a list of items into our payload shape
         const normalizeItems = (items: any[]): any[] => {
@@ -250,11 +231,11 @@ export async function fetchPageByPage(payload: string){
             }
         }
 
-        console.log('Final payload length:', payload.length)
+    if (debugFlag) console.log('Final payload length (pre-filter):', payload.length)
 
         // If caller provided a filter, apply a best-effort client-side filter
         if (filter) {
-            console.log('Applying client-side filter to pages:', filter)
+            if (debugFlag) console.log('Applying client-side filter to pages:', filter)
             const test = typeof filter === 'string'
                 ? (v: string) => String(v || '').toLowerCase().includes(filter.toLowerCase())
                 : (v: string) => {
@@ -266,21 +247,21 @@ export async function fetchPageByPage(payload: string){
                 const candidate = String(p.Template || p.template || p.Type || p.Page || p.page || p.Title || p.Name || '')
                 return test(candidate)
             })
-            console.log('Filtered payload length:', payload.length)
+            if (debugFlag) console.log('Filtered payload length:', payload.length)
         }
 
-        console.log('=== END FETCH PAGES DEBUG ===')
+    if (debugFlag) console.log('=== FETCH PAGES DEBUG END ===')
         return payload
 
     } catch (error) {
-        console.error("Error fetching pages:", error);
-        console.log("=== FETCH PAGES ERROR ===");
+    console.error("[fetchPages] Error:", error);
+    console.log("=== FETCH PAGES ERROR ===");
         return [];
     }
 }
 
     
-    export async function editPage(data: iSchemaField){
+    export async function editPage(data: any){
 
         const url = import.meta.env.VITE_URL_API_PAGES
     

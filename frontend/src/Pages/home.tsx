@@ -122,6 +122,7 @@ function Home() {
                     <section className="featured-section">
                         <h2 className="featured-title">Our Mission</h2>
                         <p className="featured-subtitle">
+                            Hola
                             Bridging the gap between artificial intelligence capabilities and human values 
                             through research, education, and ethical innovation.
                         </p>
