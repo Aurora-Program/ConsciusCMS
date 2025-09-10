@@ -449,34 +449,41 @@ height: 7%;
 /* --------------------------------------
      Modern Side Panels (Info & Details)
 --------------------------------------- */
-.editor-side-panel {
+/* Centered layout with overlay side panels */
+.editor-modal-flex {
     position: relative;
+    width: 100%;
+    min-height: 520px;
+    display: flex;
+    justify-content: center;
+    padding: 0 56px; /* space for collapsed bars */
+}
+
+.editor-side-panel {
+    position: absolute;
+    top: 0;
+    bottom: 0;
     display: flex;
     flex-direction: column;
     background: var(--bg-surface, #ffffff);
     border: 1px solid var(--color-gray-200, #e5e7eb);
     border-radius: 12px;
-    margin: 0 12px 0 0;
-    width: 300px; /* logical full width */
-    max-width: 300px;
-    min-width: 300px; /* keep layout space fixed */
-    transition: box-shadow 0.35s ease, background 0.35s ease;
+    width: 300px;
+    transition: width .35s ease, box-shadow .35s ease, background .35s ease;
     box-shadow: var(--shadow-sm, 0 2px 6px rgba(0,0,0,0.06));
     overflow: hidden;
+    z-index: 5;
 }
+.editor-side-panel.panel-right { right: 0; }
+.editor-side-panel:not(.panel-right) { left: 0; }
 
-.editor-modal-flex { display:flex; width:100%; justify-content:center; gap:16px; }
-
-/* Panel internal sliding content */
-.panel-slide { height:100%; transform: translateX(0); transition: transform .35s ease, opacity .35s ease; }
-.editor-side-panel.collapsed .panel-slide { transform: translateX(-88%); opacity: .3; }
-.editor-side-panel.panel-right.collapsed .panel-slide { transform: translateX(88%); }
-
-.editor-side-panel.collapsed { min-width:56px; width:300px; cursor: pointer; }
-.editor-side-panel.collapsed .panel-header { padding:6px 4px; }
-.editor-side-panel.collapsed .panel-toggle-btn { justify-content:center; padding:10px 8px; }
-.editor-side-panel.collapsed .panel-toggle-btn .panel-title { display:none; }
+/* Collapsed state: just a narrow bar with icon */
+.editor-side-panel.collapsed { width:56px; cursor: pointer; }
+.editor-side-panel.collapsed .panel-body { display:none; }
+.editor-side-panel.collapsed .panel-toggle-btn { justify-content:center; padding:14px 6px; }
+.editor-side-panel.collapsed .panel-toggle-btn .panel-title,
 .editor-side-panel.collapsed .panel-toggle-btn .chevron { display:none; }
+.panel-slide { height:100%; }
 
 .editor-side-panel.info-theme {
     background: linear-gradient(145deg, var(--color-info-50, #eef6ff) 0%, #ffffff 70%);
@@ -561,6 +568,7 @@ height: 7%;
 
 /* Responsive adjustments */
 @media (max-width: 1200px) {
+    .editor-modal-flex { padding: 0 12px; }
     .editor-side-panel { display:none; }
 }
 
