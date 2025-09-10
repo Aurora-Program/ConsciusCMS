@@ -11,7 +11,7 @@ import type { RootState, AppDispatch } from '../store';
     * ESection: lista fractal de items (cards)
     * EComponente: render atómico de título / subtítulo / contenido
   - Fuente de datos: Redux state pages.pages (ya cargado por loadPages())
-  - Cada item: Template === 'exmaples' (según payload proporcionado)
+  - Cada item: Template === 'examples' (según payload proporcionado)
 */
 
 export default function ExampleListPage() {
@@ -20,12 +20,12 @@ export default function ExampleListPage() {
 
   useEffect(() => { dispatch(loadPages()); }, [dispatch]);
 
-  const exampleItems = pages.filter((p: any) => p.Template === 'exmaples');
+  const exampleItems = pages.filter((p: any) => p.Template === 'examples');
 
   return (
     <EPage fn={["Pagina","Ejemplos"]} es={["container","stack"]} fo="standard">
       <ESection fn={["Seccion","ListadoEjemplos"]} es={["stack","section-pad"]} fo="standard">
-        <EComponente as="h1" fn="TituloPagina" es="inline" fo={["title-highlight"]}>Ejemplos (Template: exmaples)</EComponente>
+        <EComponente as="h1" fn="TituloPagina" es="inline" fo={["title-highlight"]}>Ejemplos (Template: examples)</EComponente>
         <ESection fn="Lista" as="div" es={["list-grid"]} fo="standard">
           {exampleItems.map((item: any) => (
             <ESection key={item.Page} fn={["Item","Card"]} as="article" es={["stack","p-md"]} fo={["card-elegant","rounded"]}>
