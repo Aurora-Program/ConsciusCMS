@@ -1,5 +1,7 @@
 
 import Home from './Pages/home';
+import LandingPage from './Pages/landing';
+import ExampleListPage from './Pages/examples-list';
 import Foot from './Pages/foot';
 import Header from './Pages/header';
 import Article from './Pages/article';
@@ -31,7 +33,7 @@ import InnvaLab from './Pages/innvalab';
 import IdeasPage from './Pages/ideas';
 import IdeaPage from './Pages/idea';
 import HomePage from './Pages/homepage';
-import LandingPage from './Pages/landing';
+
 
 function App() {
   return (
@@ -43,6 +45,8 @@ function App() {
     
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/landing" element={<LandingPage />} />
+          <Route path="/examples" element={<ExampleListPage />} />
           <Route path="/home" element={<Home />} />
           <Route path="/articles" element={<Articles />} />
           <Route path="/article/:id" element={<Article />} />
@@ -63,10 +67,9 @@ function App() {
           <Route path="/labs" element={<Labs />} />
           <Route path="/acerca" element={<Acerca />} />
           <Route path="/chatbot" element={<Chatbot />} />
-          <Route path="/chatbot" element={<Chatbot />} />
           <Route path="/design-system" element={<DesignSystemDemo />} />
           <Route path="/example" element={<ExamplePage />} />
-          <Route path="/projects" element={<Projects />} />
+          {/* duplicate /projects removed */}
           <Route path="/products" element={<Products />} />
           <Route path="/product/:name" element={<Product />} />
           <Route path="/harmonia" element={<Harmonia />} />
@@ -78,7 +81,8 @@ function App() {
           <Route path="/plataformas/ethicsi" element={<EthicsI />} />
           <Route path="/plataformas/innvalab" element={<InnvaLab />} />
           <Route path= "/homepage" element={<HomePage />} />
-          <Route path= "/landing" element={<LandingPage />} />
+
+          <Route path="*" element={<div style={{padding:'2rem'}}><h2>Ruta no encontrada</h2><p>No coincide esta URL. ¿Seguro que estás ejecutando el dev server de <code>frontend</code> y no el de <code>cmsInterface</code>? </p><p>Rutas disponibles: / , /landing , /examples , /projects ...</p></div>} />
 
 
         </Routes>
