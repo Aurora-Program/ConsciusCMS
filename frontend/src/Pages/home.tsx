@@ -26,7 +26,8 @@ function Home() {
                     <div className="hero-content">
 
                         <h1 className="auorora-title">
-       
+                            {/* eslint-disable-next-line react/no-unescaped-entities */}Hola
+                            
                             {t('home.heroConstruction')}
                             <br />
                             {t('home.heroTitle')}
