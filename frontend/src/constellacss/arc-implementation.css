@@ -1,0 +1,380 @@
+/**
+ * ARC Implementation - CSS Classes
+ * Arquetipos, Roles y Composición
+ * 
+ * Sistema de clases CSS que implementa la arquitectura ARC
+ * con prefijos fn-- (función), es-- (estructura), fo-- (forma)
+ */
+
+/* ========================================
+   ARQUETIPOS BASE
+   ======================================== */
+
+.arc-hero {
+  position: relative;
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.arc-titulo {
+  margin: 0;
+  line-height: 1.2;
+}
+
+.arc-cta {
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.arc-seccion {
+  position: relative;
+  width: 100%;
+}
+
+.arc-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.arc-boton {
+  cursor: pointer;
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+/* ========================================
+   ROLES DE FUNCIÓN (fn--)
+   ======================================== */
+
+/* Hero Functions */
+.fn--hero_presentacion {
+  background: linear-gradient(135deg, var(--color-primary-600) 0%, var(--color-primary-800) 100%);
+  color: white;
+  text-align: center;
+}
+
+.fn--hero_secundario {
+  background: var(--color-surface-100);
+  color: var(--color-text-primary);
+  text-align: center;
+}
+
+/* Titulo Functions */
+.fn--titulo_principal {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 700;
+  color: inherit;
+  margin-bottom: var(--space-lg);
+}
+
+.fn--titulo_seccion {
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  font-weight: 600;
+  color: inherit;
+  margin-bottom: var(--space-md);
+}
+
+/* CTA Functions */
+.fn--cta_primaria {
+  font-weight: 600;
+  font-size: 1.125rem;
+  text-transform: none;
+  letter-spacing: 0.025em;
+}
+
+.fn--cta_secundaria {
+  font-weight: 500;
+  font-size: 1rem;
+  text-transform: none;
+  letter-spacing: 0.025em;
+}
+
+/* Seccion Functions */
+.fn--seccion_contenido {
+  padding: var(--space-xl) 0;
+}
+
+.fn--seccion_apoyo {
+  padding: var(--space-lg) 0;
+  background: var(--color-surface-50);
+}
+
+/* ========================================
+   ROLES DE ESTRUCTURA (es--)
+   ======================================== */
+
+/* Stack Structures */
+.es--estructura_stackcentered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-lg);
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+}
+
+.es--estructura_gridresponsive {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-xl);
+  padding: 0 var(--space-lg);
+}
+
+.es--estructura_flexrow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.es--estructura_container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+}
+
+.es--estructura_buttongroup {
+  display: inline-flex;
+  gap: var(--space-md);
+  align-items: center;
+}
+
+.es--estructura_inline {
+  display: inline;
+}
+
+/* ========================================
+   ROLES DE FORMA (fo--)
+   ======================================== */
+
+/* Brand Primary Large */
+.fo--forma_brandprimarylg {
+  background: linear-gradient(135deg, var(--color-primary-500) 0%, var(--color-primary-700) 100%);
+  border-radius: var(--radius-lg);
+  box-shadow: 
+    0 10px 25px rgba(0, 0, 0, 0.1),
+    0 4px 10px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(10px);
+}
+
+/* Card Professional */
+.fo--forma_cardprofessional {
+  background: white;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-subtle);
+  box-shadow: 
+    0 4px 6px rgba(0, 0, 0, 0.05),
+    0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.fo--forma_cardprofessional:hover {
+  box-shadow: 
+    0 8px 25px rgba(0, 0, 0, 0.1),
+    0 4px 10px rgba(0, 0, 0, 0.05);
+  transform: translateY(-2px);
+}
+
+/* Heading Brand */
+.fo--forma_headingbrand {
+  background: linear-gradient(135deg, var(--color-primary-600), var(--color-accent-500));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+}
+
+/* Boton Brand */
+.fo--forma_botonbrand {
+  background: linear-gradient(135deg, var(--color-primary-500) 0%, var(--color-primary-700) 100%);
+  color: white;
+  padding: var(--space-md) var(--space-xl);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  box-shadow: 
+    0 4px 6px rgba(0, 0, 0, 0.1),
+    0 1px 3px rgba(0, 0, 0, 0.06);
+  transition: all 0.15s ease;
+}
+
+.fo--forma_botonbrand:hover {
+  background: linear-gradient(135deg, var(--color-primary-600) 0%, var(--color-primary-800) 100%);
+  box-shadow: 
+    0 8px 15px rgba(0, 0, 0, 0.2),
+    0 4px 6px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+.fo--forma_botonbrand:active {
+  transform: translateY(0);
+  box-shadow: 
+    0 2px 4px rgba(0, 0, 0, 0.2),
+    0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Boton Secundario */
+.fo--forma_botonsecundario {
+  background: transparent;
+  color: var(--color-primary-600);
+  padding: var(--space-md) var(--space-xl);
+  border: 2px solid var(--color-primary-500);
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  transition: all 0.15s ease;
+}
+
+.fo--forma_botonsecundario:hover {
+  background: var(--color-primary-500);
+  color: white;
+  border-color: var(--color-primary-600);
+  box-shadow: 
+    0 4px 6px rgba(0, 0, 0, 0.1),
+    0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+/* Seccion Limpia */
+.fo--forma_seccionlimpia {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+}
+
+/* ========================================
+   COMBINACIONES ESPECÍFICAS ARC
+   ======================================== */
+
+/* Hero + Presentacion + StackCentered + BrandPrimaryLg */
+.arc-hero.fn--hero_presentacion.es--estructura_stackcentered.fo--forma_brandprimarylg {
+  padding: var(--space-3xl) var(--space-lg);
+  background: linear-gradient(135deg, 
+    var(--color-primary-600) 0%, 
+    var(--color-primary-800) 50%,
+    var(--color-accent-700) 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.arc-hero.fn--hero_presentacion.es--estructura_stackcentered.fo--forma_brandprimarylg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 30% 70%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+/* Titulo + Principal + HeadingBrand */
+.arc-titulo.fn--titulo_principal.fo--forma_headingbrand {
+  text-align: center;
+  margin-bottom: var(--space-xl);
+  position: relative;
+}
+
+/* CTA + Primaria + BotonBrand */
+.arc-cta.fn--cta_primaria.fo--forma_botonbrand {
+  min-width: 180px;
+  height: 48px;
+  font-size: 1.125rem;
+}
+
+/* CTA + Secundaria + BotonSecundario */
+.arc-cta.fn--cta_secundaria.fo--forma_botonsecundario {
+  min-width: 160px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.arc-cta.fn--cta_secundaria.fo--forma_botonsecundario:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+  color: white;
+}
+
+/* ========================================
+   RESPONSIVE ADAPTATIONS
+   ======================================== */
+
+@media (max-width: 768px) {
+  .es--estructura_stackcentered {
+    padding: 0 var(--space-md);
+    gap: var(--space-md);
+  }
+  
+  .es--estructura_buttongroup {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .es--estructura_buttongroup .arc-cta {
+    width: 100%;
+    min-width: unset;
+  }
+  
+  .fo--forma_botonbrand,
+  .fo--forma_botonsecundario {
+    padding: var(--space-sm) var(--space-lg);
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .arc-hero.fn--hero_presentacion {
+    min-height: 50vh;
+    padding: var(--space-2xl) var(--space-sm);
+  }
+  
+  .fn--titulo_principal {
+    font-size: clamp(2rem, 8vw, 3rem);
+  }
+  
+  .fn--titulo_seccion {
+    font-size: clamp(1.5rem, 6vw, 2rem);
+  }
+}
+
+/* ========================================
+   DEBUG Y DESARROLLO
+   ======================================== */
+
+[data-arc-system="active"] {
+  position: relative;
+}
+
+/* Solo en modo debug */
+.arc-debug [data-arc-system="active"]::after {
+  content: attr(data-arquetipo) " " attr(data-roles);
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: rgba(255, 0, 0, 0.8);
+  color: white;
+  font-size: 10px;
+  padding: 2px 4px;
+  border-radius: 2px;
+  z-index: 1000;
+  pointer-events: none;
+  font-family: monospace;
+  white-space: nowrap;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

@@ -2,13 +2,16 @@
 /* Modern Aurora Menu Styles */
 
 .modern-navigation {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+    width: 100%;
+    background: linear-gradient(135deg, rgba(240, 230, 140, 0.96) 0%, rgba(255, 215, 0, 0.93) 50%, rgba(255, 140, 0, 0.96) 100%);
+    backdrop-filter: blur(12px);
+    border-bottom: 2px solid rgba(255, 140, 0, 0.3);
+    box-shadow: 
+        0 2px 12px rgba(255, 140, 0, 0.15),
+        0 4px 24px rgba(0, 0, 0, 0.08);
     position: sticky;
-    top: 0;
-    z-index: 1000;
+    top: 80px;
+    z-index: 999;
 }
 
 .modern-navbar {
@@ -17,8 +20,9 @@
 }
 
 .nav-container {
-    max-width: 1200px;
-    margin: 0 auto;
+    width: 100%;
+    max-width: none;
+    margin: 0;
     padding: 0 2rem;
 }
 
@@ -26,10 +30,11 @@
     display: flex;
     align-items: center;
     font-weight: 700;
-    color: var(--aurora-blue) !important;
+    color: rgba(30, 74, 122, 0.9) !important;
     text-decoration: none;
     transition: all 0.3s ease;
     font-size: 1.2rem;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .nav-brand:hover {
@@ -42,11 +47,12 @@
 }
 
 .modern-toggle {
-    border: 2px solid var(--aurora-orange);
+    border: 2px solid rgba(30, 74, 122, 0.8);
     border-radius: 8px;
     padding: 0.5rem;
-    background: var(--aurora-orange);
+    background: rgba(30, 74, 122, 0.9);
     transition: all 0.3s ease;
+    color: white;
 }
 
 .modern-toggle:focus {
@@ -88,18 +94,19 @@
     padding: 1rem 1.25rem;
     border-radius: 12px;
     text-decoration: none;
-    color: var(--aurora-blue) !important;
-    font-weight: 500;
+    color: rgba(30, 74, 122, 0.9) !important;
+    background: rgba(255, 255, 255, 0.3);
+    font-weight: 600;
     font-size: 1rem;
     transition: all 0.3s ease;
-    border: 2px solid transparent;
-    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .modern-nav-link:hover {
-    background: rgba(255, 140, 0, 0.1);
-    border-color: var(--aurora-orange);
-    color: var(--aurora-blue) !important;
+    background: rgba(255, 140, 0, 0.2);
+    border-color: rgba(255, 140, 0, 0.4);
+    color: rgba(30, 74, 122, 1) !important;
     transform: translateX(8px);
 }
 

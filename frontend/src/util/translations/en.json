@@ -44,6 +44,71 @@
       "heroSubtitle": "Open response to ensure the transition to advanced electronic intelligences preserves human dignity, creativity and ecosystem balance",
       "heroDescription": "A community initiative for an ethical and safe transition to advanced Electronic Intelligence (EI) systems, promoting symbiotic, distributed EI educated by their communities.",
       
+      "problem": {
+        "title": "The Information Sustainability Challenge",
+        "entropy": {
+          "title": "Entropy Growth",
+          "desc": "Digital systems accumulate complexity, duplicated content, and technical debt over time."
+        },
+        "ethics": {
+          "title": "Ethical Friction",
+          "desc": "Publishing lacks reflective pauses that ensure responsible impact and conscious decision-making."
+        },
+        "semantic": {
+          "title": "Semantic Drift",
+          "desc": "Content meaning degrades without structured taxonomies and consistent translation frameworks."
+        }
+      },
+      
+      "response": {
+        "title": "ConsciusCMS Response",
+        "intro": "A next-generation CMS built on three foundational pillars:",
+        "pillars": {
+          "semantic": {
+            "icon": "🏗️",
+            "title": "Semantic Architecture",
+            "desc": "EspiralML + Constellacss: Three-axis composition (Function + Structure + Form) ensures readable, maintainable, and agent-friendly interfaces."
+          },
+          "ethics": {
+            "icon": "⚖️",
+            "title": "Ethics Flow",
+            "desc": "Two-step publish confirmation with conscience tokens creates reflective friction, ensuring responsible content publication and editorial decisions."
+          },
+          "i18n": {
+            "icon": "🌍",
+            "title": "Global Semantics",
+            "desc": "Structured translation system with ETexto components ensures consistent meaning across languages while supporting cultural adaptation."
+          }
+        }
+      },
+      
+      "feature": {
+        "coreTitle": "Semantic + Ethical Core",
+        "coreIntro": "A compositional layer (EspiralML) + tokenized conscience actions ensure integrity in automation and design evolution.",
+        "line1": "Templates + JSON schema drive reproducible structures.",
+        "line2": "i18n layer ensures global narratives remain consistent.",
+        "line3": "Ethics publish flow adds reflective friction before impact."
+      },
+      
+      "values": {
+        "integrity": {
+          "title": "Integrity",
+          "desc": "Transparent processes and verifiable actions."
+        },
+        "clarity": {
+          "title": "Clarity", 
+          "desc": "Readable semantics over accidental complexity."
+        },
+        "sustainability": {
+          "title": "Sustainability",
+          "desc": "Resource awareness & informational balance."
+        },
+        "community": {
+          "title": "Community",
+          "desc": "Shared stewardship & open evolution."
+        }
+      },
+      
     
       "ctaReadManifiesto": "Read Manifiesto",
       "ctaExplorePlatforms": "Explore Platforms",
@@ -129,11 +194,109 @@
         "subtitle": "Stay connected with Aurora Program development"
       }
     ,
-    "platforms": {
+  "platforms": {
       "ethicsi": { "title": "EthicsI Foundation" },
       "innvalab": { "title": "InnvaLab" },
       "harmonia": { "title": "Harmonia Coop" }
     }
+    },
+    "conscius": {
+      "hero": {
+        "title": "ConsciusCMS: Conscious Content Infrastructure",
+        "subtitle": "Informational sustainability for the AI era.",
+        "cta": "Learn More"
+      },
+      "section": {
+        "problem": {"title": "The Problem: Informational Sustainability", "body": "Noise, automation and erosion of trust threaten the knowledge web."},
+        "response": {"title": "The Response: A CMS with Conscience", "body": "A reflective publish flow introducing an ethical pause."},
+        "token": {"title": "Conscience Token Flow", "body": "A context prompt issues a token that must be redeemed to publish."},
+        "standard": {"title": "Toward a Sustainability Standard", "body": "Open, serverless, fast to deploy and ethics aware."},
+        "community": {"title": "Community Driven", "body": "Built by an open ecosystem of contributors."},
+        "values": {"title": "Core Principles", "items": ["Integrity","Clarity","Sustainability","Community"]}
+      },
+      "footer": {"cta": "Join the Aurora Program", "join": "Get Started"}
+    },
+    "consciuscms": {
+      "home": {
+        "problem": {
+          "title": "The Information Sustainability Challenge",
+          "entropy": {
+            "title": "Entropy Growth",
+            "desc": "Digital systems accumulate complexity, duplicated content, and technical debt over time."
+          },
+          "ethics": {
+            "title": "Ethical Friction",
+            "desc": "Publishing lacks reflective pauses that ensure responsible impact and conscious decision-making."
+          },
+          "semantic": {
+            "title": "Semantic Drift",
+            "desc": "Content meaning degrades without structured taxonomies and consistent translation frameworks."
+          }
+        },
+        "response": {
+          "title": "ConsciusCMS Response",
+          "intro": "A next-generation CMS built on three foundational pillars:",
+          "pillars": {
+            "semantic": {
+              "icon": "🏗️",
+              "title": "Semantic Architecture",
+              "desc": "EspiralML + Constellacss: Three-axis composition (Function + Structure + Form) ensures readable, maintainable, and agent-friendly interfaces."
+            },
+            "ethics": {
+              "icon": "⚖️",
+              "title": "Ethics Flow",
+              "desc": "Two-step publish confirmation with conscience tokens creates reflective friction, ensuring responsible content publication and editorial decisions."
+            },
+            "i18n": {
+              "icon": "🌍",
+              "title": "Global Semantics",
+              "desc": "Structured translation system with ETexto components ensures consistent meaning across languages while supporting cultural adaptation."
+            }
+          }
+        },
+        "features": {
+          "title": "Technical Excellence",
+          "templates": {
+            "title": "Template Manifests",
+            "desc": "JSON-driven page contracts with schema validation ensure structural integrity and enable dynamic form generation."
+          },
+          "constellacss": {
+            "title": "Constellacss System",
+            "desc": "Three-axis CSS architecture (fn/es/fo) prevents style collision and enables clean semantic composition."
+          },
+          "automation": {
+            "title": "Agent-Ready",
+            "desc": "Clear semantic structure and documented patterns enable seamless human-AI collaboration in content creation."
+          }
+        },
+        "sustainability": {
+          "title": "Information Sustainability",
+          "intro": "We measure and optimize for long-term digital health:",
+          "metrics": {
+            "entropy": {
+              "title": "Entropy Control",
+              "desc": "<10% template duplication, automated detection of structural drift"
+            },
+            "reuse": {
+              "title": "Component Reuse",
+              "desc": ">3.0 reuse ratio, consolidated design patterns"
+            },
+            "i18n": {
+              "title": "Translation Integrity",
+              "desc": "Zero orphaned keys, p95 <2ms resolution latency"
+            }
+          }
+        },
+        "philosophy": {
+          "title": "Liberty & Beauty",
+          "quote": "\"Create with intention, refine with care, sustain with conscience.\"",
+          "desc": "ConsciusCMS embodies guided freedom: templates orient without imprisoning, beauty emerges from structural clarity, and ethical pauses ensure conscious evolution."
+        },
+        "cta": {
+          "title": "Ready to Build Consciously?",
+          "desc": "Join the evolution toward sustainable, ethical, and beautiful digital content management."
+        }
+      }
     },
     "ideas": {
       "listTitle": "Ideas",

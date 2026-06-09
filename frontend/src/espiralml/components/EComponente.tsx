@@ -3,7 +3,7 @@ import composeClass, { Axes } from './composeClass'
 
 type Mode = 'text' | 'button' | 'link'
 
-type EComponenteProps = Axes & {
+type EComponenteProps = Axes & React.HTMLAttributes<HTMLElement> & {
   as?: keyof JSX.IntrinsicElements | React.ElementType
   mode?: Mode
   href?: string
@@ -15,6 +15,8 @@ type EComponenteProps = Axes & {
   disabled?: boolean
   target?: string
   rel?: string
+  src?: string
+  alt?: string
 }
 
 export default function EComponente({ as, mode = 'text', href, fn = 'Componente', es, fo, className, children, fallback = null, onClick, ...rest }: EComponenteProps) {

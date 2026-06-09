@@ -1,0 +1,452 @@
+/**
+ * ConstellaCSS - Forma Pura (fo)
+ * Sistema optimizado de estilos visuales funcionales
+ */
+
+/* ========================================
+   FUNCIONES PURAS DE FORMA (fo)
+   ======================================== */
+
+/* Tokens de diseño base */
+:root {
+  /* Colores de marca */
+  --color-brand-primary: #0066cc;
+  --color-brand-secondary: #004499;
+  --color-brand-accent: #ff6b35;
+  --color-brand-text: #1a202c;
+  --color-brand-muted: #718096;
+  
+  /* Espaciado */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  
+  /* Tipografía */
+  --font-brand: 'Inter', system-ui, sans-serif;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
+  
+  /* Sombras */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  
+  /* Radios */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+}
+
+/* Estilos de marca puros */
+.fo--brand {
+  background: linear-gradient(135deg, var(--color-brand-primary), var(--color-brand-secondary));
+  color: white;
+}
+
+.fo--brand-page {
+  font-family: var(--font-brand);
+  line-height: 1.6;
+  color: var(--color-brand-text);
+}
+
+.fo--brand-gradient {
+  background: linear-gradient(135deg, var(--color-brand-primary), var(--color-brand-secondary));
+  color: white;
+}
+
+.fo--brand-card {
+  background: white;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  border: 1px solid #e2e8f0;
+}
+
+.fo--brand-stat-card {
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: var(--space-xl);
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.fo--brand-stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+}
+
+/* Tipografía pura */
+.fo--text-gradient {
+  background: linear-gradient(135deg, var(--color-brand-primary), var(--color-brand-accent));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-size: var(--font-size-4xl);
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.fo--brand-text {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: var(--font-size-xl);
+  font-weight: 400;
+}
+
+.fo--muted {
+  color: var(--color-brand-muted);
+  font-size: var(--font-size-lg);
+}
+
+.fo--accent {
+  color: var(--color-brand-accent);
+  font-weight: 600;
+}
+
+.fo--professional {
+  color: var(--color-brand-text);
+  font-weight: 500;
+}
+
+.fo--large {
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+}
+
+/* Botones puros */
+.fo--brand-button {
+  background: var(--color-brand-primary);
+  color: white;
+  padding: var(--space-md) var(--space-xl);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.fo--brand-button:hover {
+  background: var(--color-brand-secondary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lg);
+}
+
+.fo--brand-button-outline {
+  background: transparent;
+  color: white;
+  border: 2px solid white;
+  padding: var(--space-md) var(--space-xl);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.fo--brand-button-outline:hover {
+  background: white;
+  color: var(--color-brand-primary);
+}
+
+.fo--primary-button {
+  background: var(--color-brand-primary);
+  color: white;
+  padding: var(--space-lg) var(--space-2xl);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+  font-size: var(--font-size-lg);
+}
+
+.fo--primary-button:hover {
+  background: var(--color-brand-secondary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lg);
+}
+
+.fo--secondary-button {
+  background: transparent;
+  color: var(--color-brand-primary);
+  border: 2px solid var(--color-brand-primary);
+  padding: var(--space-lg) var(--space-2xl);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  font-size: var(--font-size-lg);
+}
+
+.fo--secondary-button:hover {
+  background: var(--color-brand-primary);
+  color: white;
+}
+
+/* Espaciado puro */
+.fo--spaced {
+  gap: var(--space-lg);
+}
+
+.fo--center {
+  text-align: center;
+}
+
+/* Estados de contexto puros */
+.fo--standard {
+  background: #f7fafc;
+  color: var(--color-brand-text);
+}
+
+.fo--card {
+  background: white;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+}
+
+.fo--stat {
+  text-align: center;
+  padding: var(--space-xl);
+}
+
+.fo--feature {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+  box-shadow: var(--shadow-md);
+  transition: transform 0.2s ease;
+}
+
+.fo--feature:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Números y estadísticas */
+.fn--BrandNumber {
+  font-size: var(--font-size-3xl);
+  font-weight: 800;
+  color: var(--color-brand-primary);
+  margin-bottom: var(--space-sm);
+}
+
+.fn--BrandLabel {
+  font-size: var(--font-size-sm);
+  color: var(--color-brand-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+/* Iconos */
+.feature-icon {
+  font-size: var(--font-size-3xl);
+  margin-bottom: var(--space-lg);
+  display: flex;
+  justify-content: center;
+}
+
+/* Responsividad */
+@media (max-width: 768px) {
+  .fo--text-gradient {
+    font-size: var(--font-size-3xl);
+  }
+  
+  .fo--brand-text {
+    font-size: var(--font-size-lg);
+  }
+  
+  .fo--primary-button,
+  .fo--secondary-button {
+    padding: var(--space-md) var(--space-lg);
+    font-size: var(--font-size-base);
+  }
+}
+
+/* ========================================
+   FONDOS RICOS - FUNCIONES PURAS (fo)
+   ======================================== */
+
+.fo--RichBgStats {
+  background: var(--gradient-corp-subtle);
+  background-size: 200% 200%;
+  animation: subtleGradient 10s ease infinite;
+  position: relative;
+}
+
+.fo--RichBgFeatures {
+  background: var(--gradient-corp-secondary);
+  background-size: 300% 300%;
+  animation: gradientShift 12s ease infinite;
+  position: relative;
+  color: white;
+}
+
+.fo--RichBgCTA {
+  background: var(--gradient-corp-accent);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+  position: relative;
+}
+
+.fo--RichBgHero {
+  background: var(--gradient-corp-primary);
+  background-size: 300% 300%;
+  animation: gradientShift 8s ease infinite;
+  position: relative;
+}
+
+/* ========================================
+   PATRONES - FUNCIONES PURAS (fo)
+   ======================================== */
+
+.fo--PatternDots::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: var(--pattern-dots);
+  background-size: 20px 20px;
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.fo--PatternGrid::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: var(--pattern-grid);
+  background-size: 40px 40px;
+  opacity: 0.1;
+  pointer-events: none;
+}
+
+.fo--PatternDiagonal::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: var(--pattern-diagonal);
+  background-size: 8px 8px;
+  opacity: 0.1;
+  pointer-events: none;
+}
+
+.fo--PatternMesh::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: var(--gradient-corp-mesh);
+  opacity: 0.2;
+  pointer-events: none;
+}
+
+/* ========================================
+   ICONOS - FUNCIONES PURAS (fo)
+   ======================================== */
+
+.fo--IconDecorative {
+  position: absolute;
+  font-size: 8rem;
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.fo--IconStats {
+  top: 10%; right: 5%;
+  color: var(--color-corp-blue);
+}
+
+.fo--IconFeatures {
+  top: 15%; left: 5%;
+  color: white;
+}
+
+.fo--IconCTA {
+  bottom: 10%; right: 8%;
+  color: white;
+}
+
+.fo--IconCard {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: white;
+  margin: 0 auto var(--space-md);
+  position: relative;
+  z-index: 1;
+}
+
+.fo--IconCardBlue {
+  background: var(--gradient-corp-blue);
+}
+
+.fo--IconCardPurple {
+  background: var(--gradient-corp-purple);
+}
+
+.fo--IconCardEmerald {
+  background: var(--gradient-corp-emerald);
+}
+
+.fo--IconCardAmber {
+  background: var(--gradient-corp-amber);
+}
+
+.fo--IconFeatureCard {
+  width: 70px;
+  height: 70px;
+  border-radius: var(--radius-corp-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--color-corp-navy);
+  background: rgba(255, 255, 255, 0.9);
+  margin-bottom: var(--space-lg);
+  position: relative;
+  z-index: 1;
+}
+
+/* ========================================
+   ANIMACIONES - FUNCIONES PURAS (fo)
+   ======================================== */
+
+@keyframes subtleGradient {
+  0%, 100% { background-position: 0% 0%; }
+  50% { background-position: 100% 100%; }
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}

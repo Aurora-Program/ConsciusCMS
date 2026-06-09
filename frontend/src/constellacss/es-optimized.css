@@ -1,0 +1,138 @@
+/**
+ * ConstellaCSS - Estructura Pura (es)
+ * Sistema optimizado de layout funcional
+ */
+
+/* ========================================
+   FUNCIONES PURAS DE ESTRUCTURA (es)
+   ======================================== */
+
+/* Layouts fluidos puros */
+.es--fluid {
+  width: 100%;
+  max-width: 100vw;
+  min-height: 100vh;
+}
+
+.es--container {
+  max-width: min(90%, 1200px);
+  margin-inline: auto;
+  padding-inline: var(--space-container, 1rem);
+}
+
+.es--section {
+  padding-block: var(--space-section, 4rem);
+}
+
+/* Sistemas de grid puros */
+.es--grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-grid, 2rem);
+}
+
+.es--grid-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--space-grid, 2rem);
+}
+
+.es--grid-4 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-grid, 1.5rem);
+}
+
+/* Sistemas flexbox puros */
+.es--row {
+  display: flex;
+  flex-direction: row;
+  gap: var(--space-row, 1rem);
+}
+
+.es--column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-column, 1rem);
+}
+
+.es--stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-stack, 2rem);
+}
+
+/* Posicionamiento puro */
+.es--center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.es--text-center {
+  text-align: center;
+}
+
+.es--hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Sistemas de tarjetas puras */
+.es--card {
+  border-radius: var(--radius-card, 0.5rem);
+  overflow: hidden;
+}
+
+.es--brand-container {
+  --space-container: 2rem;
+}
+
+.es--brand-hero {
+  background: linear-gradient(135deg, var(--color-brand-primary, #0066cc), var(--color-brand-secondary, #004499));
+  color: white;
+}
+
+.es--brand-row {
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.es--brand-card {
+  padding: var(--space-card, 2rem);
+  box-shadow: var(--shadow-card, 0 4px 6px -1px rgb(0 0 0 / 0.1));
+}
+
+/* Sistemas responsivos puros */
+@media (max-width: 768px) {
+  .es--grid-4 {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+  }
+  
+  .es--hero {
+    min-height: 80vh;
+    padding-inline: 1rem;
+  }
+  
+  .es--container {
+    --space-container: 1rem;
+  }
+  
+  .es--section {
+    --space-section: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .es--grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .es--row {
+    flex-direction: column;
+  }
+}

@@ -1,106 +1,77 @@
 import { Link } from 'react-router-dom'
 import './footer.css'
-import { useT } from '../util/useTranslation'
+import { useT } from '../espiralml/i18n'
+import { ESection, EComponente, ETexto } from '../espiralml/components'
+import '../styles/espiral/conscius-theme.css'
+import '../styles/espiral/conscius-tokens.css'
 
 function Foot() {
-    const t = useT()
+    const { t } = useT()
     
     return (
-        <>
-            <footer className="modern-footer">
-                <div className="footer-container">
-                    <div className="footer-content">
-                        <div className="footer-section">
-                            <div className="footer-brand">
-                                <h3 className="footer-title">
-                                    <span className="footer-gradient-text">Aurora</span>Program
-                                </h3>
-                                <p className="footer-tagline">
-                                    {t('footer.tagline')}
-                                </p>
-                                <div className="ai-collaboration">
-                                    <p className="ai-credit">
-                                        <i className="fas fa-robot aurora-icon"></i>
-                                        {t('footer.aiCredit')}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div className="footer-section">
-                            <h4>{t('footer.navigation')}</h4>
-                            <div className="footer-links">
-                                <Link to="/home">{t('nav.home')}</Link>
-                                <Link to="/manifiesto">{t('nav.Manifiesto')}</Link>
-                                <Link to="/plataformas">{t('nav.platforms')}</Link>
-                                <Link to="/labs">{t('nav.labs')}</Link>
-                            </div>
-                        </div>
-                        
-                        <div className="footer-section">
-                            <h4>{t('footer.platforms')}</h4>
-                            <div className="footer-links">
-                                <Link to="/plataformas/ethicsi">{t('home.platforms.ethicsi.title')}</Link>
-                                <Link to="/plataformas/innvalab">{t('home.platforms.innvalab.title')}</Link>
-                                <Link to="/plataformas/harmonia">{t('home.platforms.harmonia.title')}</Link>
-                            </div>
-                        </div>
-                        
-                        <div className="footer-section">
-                            <h4>{t('footer.resources')}</h4>
-                            <div className="footer-links">
-                                <Link to="/articles">{t('nav.articles')}</Link>
-                                <Link to="/docs">{t('nav.docs')}</Link>
-                                <Link to="/gobernanza">Gobernanza</Link>
-                                <Link to="/roadmap">Roadmap</Link>
-                            </div>
-                        </div>
-                        
-                        <div className="footer-section">
-                            <h4>{t('footer.support')}</h4>
-                            <div className="footer-links">
-                                <Link to="/faq">FAQ</Link>
-                                <Link to="/contacto">{t('nav.contact')}</Link>
-                                <Link to="/codigo">Código de Conducta</Link>
-                                <Link to="/privacidad">{t('footer.legal.privacy')}</Link>
-                            </div>
-                        </div>
-                        
-                        <div className="footer-section">
-                            <h4>{t('footer.followUs')}</h4>
-                            <div className="footer-social">
-                                <a href="https://github.com/Aurora-Program" target="_blank" rel="noopener noreferrer" className="social-link github">
-                                    <i className="fab fa-github"></i>
-                                    <span>GitHub</span>
-                                </a>
-                                <a href="https://medium.com/@pab.man.alvarez/list/aurora-program-169646e4abe9" target="_blank" rel="noopener noreferrer" className="social-link medium">
-                                    <i className="fab fa-medium"></i>
-                                    <span>Medium</span>
-                                </a>
-                                <a href="https://www.linkedin.com/company/107873626/" target="_blank" rel="noopener noreferrer" className="social-link linkedin">
-                                    <i className="fab fa-linkedin"></i>
-                                    <span>LinkedIn</span>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div className="footer-bottom">
-                        <div className="footer-copyright">
-                            <p>{t('footer.copyright')}</p>
-                            <p className="ai-attribution">
-                                <span className="aurora-gradient-text">🤝</span> 
-                                {t('footer.aiAttribution')}
-                            </p>
-                        </div>
-                        <div className="footer-legal">
-                            <Link to="/privacy">{t('footer.legal.privacy')}</Link>
-                            <Link to="/terms">{t('footer.legal.terms')}</Link>
-                        </div>
-                    </div>
-                </div>
-            </footer>
-        </>
+        <ESection as='footer' fn={['Footer','Principal']} es={['container']} fo={['glass','rounded']} style={{marginTop:'3rem', backdropFilter:'blur(12px)', border:'1px solid rgba(255,255,255,0.1)'}}>
+            <ESection fn='FooterContent' es={['grid-auto-fit']} fo='standard' style={{padding:'2.5rem 0 1.5rem'}}>
+                {/* MARCA Y DESCRIPCIÓN */}
+                <EComponente fn='FooterBrand' es='stack' fo='standard'>
+                    <EComponente fn='BrandMark' es={['inline']} fo='standard' style={{gap:'0.75rem', alignItems:'center'}}>
+                        <EComponente as='img' fn='LogoFooter' src='/aurora-logo-mark.svg' alt='Aurora' style={{width:'42px'}} />
+                        <ETexto as='h3' fn='TituloFooter' fo='brand-gradient-text' k='footer.brandTitle' fallback='Aurora Program' />
+                    </EComponente>
+                    <ETexto as='p' fn='DescFooter' fo='muted' k='footer.tagline' fallback='Ethical electronic intelligence for sustainable digital evolution.' />
+                    <EComponente fn='AICredit' fo='standard' style={{marginTop:'1rem'}}>
+                        <ETexto as='p' fn='CreditoIA' fo='muted' style={{fontSize:'0.875rem'}} k='footer.aiCredit' fallback='🤝 Created through Human+AI collaboration' />
+                    </EComponente>
+                </EComponente>
+
+                {/* NAVEGACIÓN */}
+                <EComponente fn='FooterNav' es='stack' fo='standard'>
+                    <ETexto as='h4' fn='TituloNav' fo='brand-accent' k='footer.navigation' fallback='Navigation' />
+                    <ESection fn='LinksNav' es='stack' fo='standard' style={{gap:'0.5rem'}}>
+                        <Link to='/' className='fn--Link fo--muted' style={{textDecoration:'none'}}>{t('nav.home', 'Home')}</Link>
+                        <Link to='/consciuscms' className='fn--Link fo--muted' style={{textDecoration:'none'}}>ConsciusCMS</Link>
+                        <Link to='/manifiesto' className='fn--Link fo--muted' style={{textDecoration:'none'}}>{t('nav.Manifiesto', 'Manifesto')}</Link>
+                        <Link to='/plataformas' className='fn--Link fo--muted' style={{textDecoration:'none'}}>{t('nav.platforms', 'Platforms')}</Link>
+                        <Link to='/examples' className='fn--Link fo--muted' style={{textDecoration:'none'}}>Examples</Link>
+                    </ESection>
+                </EComponente>
+
+                {/* PLATAFORMAS */}
+                <EComponente fn='FooterPlatforms' es='stack' fo='standard'>
+                    <ETexto as='h4' fn='TituloPlataformas' fo='brand-accent' k='footer.platforms' fallback='Platforms' />
+                    <ESection fn='LinksPlataformas' es='stack' fo='standard' style={{gap:'0.5rem'}}>
+                        <Link to='/plataformas/ethicsi' className='fn--Link fo--muted' style={{textDecoration:'none'}}>EthicsI Foundation</Link>
+                        <Link to='/plataformas/innvalab' className='fn--Link fo--muted' style={{textDecoration:'none'}}>InnvaLab</Link>
+                        <Link to='/plataformas/harmonia' className='fn--Link fo--muted' style={{textDecoration:'none'}}>Harmonia Coop</Link>
+                    </ESection>
+                </EComponente>
+
+                {/* RECURSOS */}
+                <EComponente fn='FooterResources' es='stack' fo='standard'>
+                    <ETexto as='h4' fn='TituloRecursos' fo='brand-accent' k='footer.resources' fallback='Resources' />
+                    <ESection fn='LinksRecursos' es='stack' fo='standard' style={{gap:'0.5rem'}}>
+                        <Link to='/documentation' className='fn--Link fo--muted' style={{textDecoration:'none'}}>{t('nav.docs', 'Documentation')}</Link>
+                        <Link to='/articles' className='fn--Link fo--muted' style={{textDecoration:'none'}}>{t('nav.articles', 'Articles')}</Link>
+                        <Link to='/labs' className='fn--Link fo--muted' style={{textDecoration:'none'}}>{t('nav.labs', 'Labs')}</Link>
+                    </ESection>
+                </EComponente>
+            </ESection>
+
+            {/* PIE INFERIOR */}
+            <ESection fn='FooterBottom' es={['inline']} fo='standard' style={{padding:'1.5rem 0', borderTop:'1px solid rgba(255,255,255,0.1)', justifyContent:'space-between', alignItems:'center'}}>
+                <ETexto as='p' fn='Copyright' fo='muted' k='footer.copyright' fallback='© 2025 Aurora Program. All rights reserved.' />
+                <ESection fn='SocialLinks' es={['inline']} fo='standard' style={{gap:'1rem'}}>
+                    <EComponente as='a' fn='SocialLink' href='https://github.com/Aurora-Program' target='_blank' rel='noopener noreferrer' fo='muted' style={{textDecoration:'none'}}>
+                        <ETexto k='footer.social.github' fallback='GitHub' />
+                    </EComponente>
+                    <EComponente as='a' fn='SocialLink' href='https://medium.com/@pab.man.alvarez/list/aurora-program-169646e4abe9' target='_blank' rel='noopener noreferrer' fo='muted' style={{textDecoration:'none'}}>
+                        <ETexto k='footer.social.medium' fallback='Medium' />
+                    </EComponente>
+                    <EComponente as='a' fn='SocialLink' href='https://www.linkedin.com/company/107873626/' target='_blank' rel='noopener noreferrer' fo='muted' style={{textDecoration:'none'}}>
+                        <ETexto k='footer.social.linkedin' fallback='LinkedIn' />
+                    </EComponente>
+                </ESection>
+            </ESection>
+        </ESection>
     )
 }
 

@@ -1,0 +1,31 @@
+{
+  "meta": {
+    "name": "Aurora Core Palette",
+    "version": "1.0.0",
+    "updated": "2025-09-10",
+    "source": "Generated for ConsciusCMS tokens"
+  },
+  "primitives": {
+    "indigo": {"700": "#4338ca", "900": "#1e1b4b"},
+    "blue": {"500": "#3b82f6", "600": "#2563eb"},
+    "cyan": {"400": "#22d3ee"},
+    "gold": {"300": "#f0e68c"},
+    "amber": {"500": "#f59e0b"},
+    "emerald": {"400": "#34d399"},
+    "rose": {"400": "#fb7185"},
+    "neutral": {"50": "#f8fafc", "100": "#f1f5f9", "200": "#e2e8f0", "700": "#334155", "900": "#0f172a"}
+  },
+  "semantic": {
+    "bg.primary": "linear-gradient(140deg,#0f172a 0%,#12274a 40%,#1e3a8a 72%,#4338ca 100%)",
+    "text.primary": "#f1f5f9",
+    "text.muted": "#cbd5e1",
+    "accent.primary": "#f0e68c",
+    "accent.secondary": "#f59e0b",
+    "focus.ring": "#2563eb",
+    "border.glow": "#f0e68c"
+  },
+  "derivatives": {
+    "gradient.brand": "linear-gradient(110deg,#2563eb,#4338ca,#f0e68c)",
+    "gradient.pulse": "radial-gradient(circle at 25% 30%,rgba(59,130,246,0.35),rgba(59,130,246,0) 60%),radial-gradient(circle at 75% 70%,rgba(67,56,202,0.30),rgba(67,56,202,0) 65%)"
+  }
+}

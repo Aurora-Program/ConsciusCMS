@@ -1,0 +1,250 @@
+/**
+ * ConstellaCSS - Sistema de Utilidades Super Eficiente
+ * Funciones puras combinables para máxima optimización
+ */
+
+/* ========================================
+   SISTEMA DE COMPOSICIÓN FUNCIONAL
+   ======================================== */
+
+/* Funciones puras de composición - Sin efectos secundarios */
+.pure-fn {
+  /* Función pura base - entrada determinista, salida predecible */
+  --fn-pure: true;
+}
+
+/* Composición de funciones semánticas */
+.fn-brand-compose {
+  /* fn(brand) + fn(professional) + fn(modern) */
+  --semantic-composition: brand-professional-modern;
+}
+
+.fn-hero-compose {
+  /* fn(hero) + fn(impact) + fn(trust) */
+  --semantic-composition: hero-impact-trust;
+}
+
+.fn-content-compose {
+  /* fn(content) + fn(readable) + fn(engaging) */
+  --semantic-composition: content-readable-engaging;
+}
+
+/* ========================================
+   SISTEMA DE PIPELINE FUNCIONAL
+   ======================================== */
+
+/* Pipeline de transformación pura */
+.pipe-brand {
+  /* Input: Datos -> Transformación: Brand -> Output: Styled Brand */
+  filter: saturate(1.1) brightness(1.05);
+  transform: translateZ(0); /* Optimización hardware */
+}
+
+.pipe-professional {
+  /* Input: Content -> Transformación: Professional -> Output: Professional Content */
+  font-feature-settings: 'kern' 1, 'liga' 1;
+  text-rendering: optimizeLegibility;
+}
+
+.pipe-performance {
+  /* Input: Element -> Transformación: Performance -> Output: Optimized Element */
+  will-change: transform;
+  contain: layout style paint;
+}
+
+/* ========================================
+   MEMOIZACIÓN DE ESTILOS
+   ======================================== */
+
+/* Cache de estilos calculados - Evita re-renders */
+.memo-brand-primary {
+  /* Memoización: Estilo calculado una vez, reutilizado */
+  --cached-brand-primary: var(--color-brand-primary);
+  color: var(--cached-brand-primary);
+}
+
+.memo-layout-hero {
+  /* Memoización: Layout hero optimizado */
+  --cached-hero-height: 100vh;
+  --cached-hero-align: center;
+  min-height: var(--cached-hero-height);
+  align-items: var(--cached-hero-align);
+}
+
+/* ========================================
+   INMUTABILIDAD VISUAL
+   ======================================== */
+
+/* Estilos inmutables - No cambian durante el ciclo de vida */
+.immutable-spacing {
+  /* Espaciado inmutable basado en proporción áurea */
+  --space-phi: 1.618rem;
+  --space-phi-2: calc(var(--space-phi) * 1.618);
+  --space-phi-3: calc(var(--space-phi-2) * 1.618);
+}
+
+.immutable-typography {
+  /* Tipografía inmutable - Escala modular perfecta */
+  --type-scale: 1.25;
+  --font-size-base: 1rem;
+  --font-size-lg: calc(var(--font-size-base) * var(--type-scale));
+  --font-size-xl: calc(var(--font-size-lg) * var(--type-scale));
+}
+
+/* ========================================
+   COMPOSICIÓN DE ORDEN SUPERIOR
+   ======================================== */
+
+/* Higher Order Component para estilos */
+.hoc-card {
+  /* HOC: Envuelve elementos con funcionalidad de tarjeta */
+  background: white;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+
+.hoc-interactive {
+  /* HOC: Añade interactividad pura */
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.hoc-accessible {
+  /* HOC: Garantiza accesibilidad */
+  outline-offset: 2px;
+  outline: 2px solid transparent;
+}
+
+.hoc-accessible:focus-visible {
+  outline-color: var(--color-brand-primary);
+}
+
+/* ========================================
+   CURRYING DE ESTILOS
+   ======================================== */
+
+/* Curry: Función que retorna función */
+.curry-margin {
+  /* curry(margin) -> function(size) -> styled element */
+  --margin-fn: var(--space-md);
+}
+
+.curry-margin--sm {
+  --margin-fn: var(--space-sm);
+  margin: var(--margin-fn);
+}
+
+.curry-margin--md {
+  --margin-fn: var(--space-md);
+  margin: var(--margin-fn);
+}
+
+.curry-margin--lg {
+  --margin-fn: var(--space-lg);
+  margin: var(--margin-fn);
+}
+
+/* ========================================
+   SISTEMA DE LAZY EVALUATION
+   ======================================== */
+
+/* Evaluación lazy para mejor performance */
+.lazy-load {
+  /* No evalúa estilos hasta que sea necesario */
+  content-visibility: auto;
+  contain-intrinsic-size: 0 500px;
+}
+
+.lazy-animation {
+  /* Animación lazy - Solo activa cuando es visible */
+  animation-play-state: paused;
+}
+
+.lazy-animation:hover,
+.lazy-animation.in-viewport {
+  animation-play-state: running;
+}
+
+/* ========================================
+   OPTIMIZACIONES DE PERFORMANCE
+   ======================================== */
+
+/* GPU acceleration para elementos críticos */
+.gpu-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Contenment para aislamiento de rendering */
+.contained {
+  contain: layout style paint;
+}
+
+/* Optimización de repaint */
+.paint-optimized {
+  will-change: transform, opacity;
+}
+
+/* ========================================
+   UTILIDADES FUNCIONALES COMBINABLES
+   ======================================== */
+
+/* Sistema de composición modular */
+.u-brand-gradient {
+  background: linear-gradient(135deg, var(--color-brand-primary), var(--color-brand-secondary));
+}
+
+.u-text-gradient {
+  background: linear-gradient(135deg, var(--color-brand-primary), var(--color-brand-accent));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.u-shadow-soft {
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -1px rgb(0 0 0 / 0.06);
+}
+
+.u-shadow-strong {
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 10px 10px -5px rgb(0 0 0 / 0.04);
+}
+
+.u-transition-smooth {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.u-hover-lift:hover {
+  transform: translateY(-2px);
+}
+
+.u-hover-scale:hover {
+  transform: scale(1.02);
+}
+
+/* ========================================
+   SISTEMA DE DEBUGGING PURO
+   ======================================== */
+
+/* Debug helpers que no afectan el layout */
+.debug-semantic::before {
+  content: attr(data-semantic);
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: rgba(255, 0, 0, 0.8);
+  color: white;
+  font-size: 10px;
+  padding: 2px 4px;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.debug-structure {
+  outline: 1px solid rgba(0, 255, 0, 0.5);
+}
+
+.debug-form {
+  background-color: rgba(0, 0, 255, 0.1) !important;
+}

@@ -209,6 +209,22 @@
       }
     }
   },
+  "conscius": {
+    "hero": {
+      "title": "ConsciusCMS: Infraestructura de Contenido Consciente",
+      "subtitle": "Sostenibilidad informacional para la era de la IA.",
+      "cta": "Saber más"
+    },
+    "section": {
+      "problem": {"title": "El Problema: Sostenibilidad Informacional", "body": "Ruido, automatización y erosión de confianza amenazan la web de conocimiento."},
+      "response": {"title": "La Respuesta: Un CMS con Conciencia", "body": "Un flujo de publicación reflexivo que introduce una pausa ética."},
+      "token": {"title": "Flujo del Token de Conciencia", "body": "Un prompt contextual emite un token que debe canjearse para publicar."},
+      "standard": {"title": "Hacia un Estándar de Sostenibilidad", "body": "Abierto, serverless, rápido de desplegar y consciente."},
+      "community": {"title": "Impulsado por la Comunidad", "body": "Creado por un ecosistema abierto de contribuidores."},
+      "values": {"title": "Principios Clave", "items": ["Integridad","Claridad","Sostenibilidad","Comunidad"]}
+    },
+    "footer": {"cta": "Únete al Programa Aurora", "join": "Comenzar"}
+  },
 
   "ethicsi": {
     "title": "EthicsI",

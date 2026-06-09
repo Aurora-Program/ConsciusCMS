@@ -313,7 +313,7 @@ Resources:
   UserPool:
     Type: AWS::Cognito::UserPool
     Properties:
-      UserPoolName: !Sub "ConcidusCMSUserPool-${Environment}"
+      UserPoolName: !Sub "consciusCMSUserPool-${Environment}"
       UsernameAttributes:
         - email
 
@@ -335,7 +335,7 @@ Resources:
         AllowAdminCreateUserOnly: true
         InviteMessageTemplate:
           EmailMessage: |
-                <h4> bienvenido a Concidus CMS - Web editor</h4>
+                <h4> bienvenido a conscius CMS - Web editor</h4>
                 <p>Hola <strong>{username}</strong>,</p>
                 <p>Nos complace darte la bienvenida a <strong>[Nombre de la Plataforma</strong>!</p>
                 <p>Hemos creado tu usuario y ya puedes acceder a tu cuenta. Para comenzar, por favor sigue estos pasos:</p>
@@ -351,9 +351,9 @@ Resources:
                 </ol>
 
   
-                <p>?Gracias por unirte a <strong>Concidus CMS - Wed Editor</strong>! Estamos emocionados de que formes parte de nuestra comunidad.</p>
+                <p>?Gracias por unirte a <strong>conscius CMS - Wed Editor</strong>! Estamos emocionados de que formes parte de nuestra comunidad.</p>
 
-          EmailSubject: Invitacion de acceso a Concidus CMS Website!!
+          EmailSubject: Invitacion de acceso a conscius CMS Website!!
 
       Schema:
         - Name: email
@@ -518,9 +518,12 @@ Resources:
           const PAGES_TABLE = process.env.PAGES_TABLE || "Pages";
           const TOKENS_TABLE = process.env.TOKENS_TABLE || "ConscienceTokens";
           const TOKEN_TTL_SECONDS = parseInt(process.env.TOKEN_TTL_SECONDS || "600", 10);
+          const DEFAULT_PAGES_LIMIT = parseInt(process.env.DEFAULT_PAGES_LIMIT || "200", 10);
+          const MAX_PAGES_LIMIT = parseInt(process.env.MAX_PAGES_LIMIT || "1000", 10);
 
           const headers = {
             'Content-Type': 'application/json',
+            
             'Access-Control-Allow-Origin': '*',
             'Access-Control-Allow-Methods': 'OPTIONS, GET, PUT, POST, DELETE',
             'Access-Control-Allow-Headers': '*',
@@ -605,11 +608,52 @@ Resources:
 
               // 2) CRUD de Pages
               else if (resource === "/pages" && method === "GET") {
+                const qs = event.queryStringParameters || {};
+                const requestedLimit = parseInt(qs.limit || "", 10);
+                const safeLimit = Number.isFinite(requestedLimit) && requestedLimit > 0
+                  ? Math.min(requestedLimit, MAX_PAGES_LIMIT)
+                  : DEFAULT_PAGES_LIMIT;
+
+                let exclusiveStartKey;
+                if (qs.nextKey) {
+                  try {
+                    exclusiveStartKey = JSON.parse(Buffer.from(qs.nextKey, "base64").toString("utf8"));
+                  } catch (_) {
+                    throw new Error("Invalid nextKey.");
+                  }
+                }
+
                 const paramis = {
                   TableName: PAGES_TABLE,
                   ProjectionExpression: "Page,Template,updateTime,updateUser"
                 };
-                body = await dynamo.scan(paramis);
+                const allItems = [];
+                let lastEvaluatedKey = exclusiveStartKey;
+
+                do {
+                  const remaining = safeLimit - allItems.length;
+                  const pageResult = await dynamo.scan({
+                    ...paramis,
+                    ExclusiveStartKey: lastEvaluatedKey,
+                    Limit: remaining
+                  });
+                  allItems.push(...(pageResult.Items || []));
+                  lastEvaluatedKey = pageResult.LastEvaluatedKey;
+                } while (lastEvaluatedKey && allItems.length < safeLimit);
+
+                const items = allItems;
+
+                let nextKey = null;
+                if (lastEvaluatedKey) {
+                  nextKey = Buffer.from(JSON.stringify(lastEvaluatedKey), "utf8").toString("base64");
+                }
+
+                body = {
+                  Items: items,
+                  Count: items.length,
+                  Limit: safeLimit,
+                  NextKey: nextKey
+                };
               }
               else if (resource === "/pages/{page}" && method === "GET") {
                 const dpage = decodeURI(event.pathParameters.page);
@@ -1147,6 +1191,131 @@ Resources:
       MemorySize: 128
       Timeout: 3
 
+  # Lambda Function for RSS Feed Generation
+  GenerateRssFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "GenerateRss-${Environment}"
+      Handler: index.handler
+      Role: !GetAtt MicroserviceExecutionRole.Arn
+      Runtime: nodejs20.x
+      MemorySize: 256
+      Timeout: 10
+      Environment:
+        Variables:
+          PAGES_TABLE: !Sub "Pages-${Environment}"
+          SITE_URL: !Sub "https://${WebDomain}"
+          FEED_TITLE: "ConsciusCMS Feed"
+          FEED_DESC: "Latest updates from ConsciusCMS"
+      Code:
+        ZipFile: |
+          const { DynamoDB } = require('@aws-sdk/client-dynamodb');
+          const { DynamoDBDocument } = require('@aws-sdk/lib-dynamodb');
+          
+          const ddb = DynamoDBDocument.from(new DynamoDB());
+          const TABLE = process.env.PAGES_TABLE;
+          const SITE_URL = process.env.SITE_URL;
+          const FEED_TITLE = process.env.FEED_TITLE || "ConsciusCMS Feed";
+          const FEED_DESC = process.env.FEED_DESC || "Latest updates";
+
+          const rfc822 = (d) => new Date(d).toUTCString();
+
+          const xmlEscape = (s="") =>
+            s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
+          const buildItem = (p) => {
+            const slug = p.Page || p.slug?.S || p.Page?.S;
+            const url = `${SITE_URL}/${slug}`;
+            const title = p.title?.S || p.Title?.S || slug;
+            const summary = p.summary?.S || p.Summary?.S || p.description?.S || "";
+            const pub = p.publishedAt?.S || p.PublishedAt?.S || p.updatedAt?.S || p.UpdatedAt?.S || new Date().toISOString();
+            const guid = p.id?.S || p.Id?.S || url;
+            const tags = p.tags?.L || p.Tags?.L || [];
+            const cats = tags.map(t => `<category>${xmlEscape(t.S || t)}</category>`).join("") || "";
+
+            return `
+              <item>
+                <title>${xmlEscape(title)}</title>
+                <link>${url}</link>
+                <guid isPermaLink="false">${xmlEscape(guid)}</guid>
+                <pubDate>${rfc822(pub)}</pubDate>
+                <description><![CDATA[${summary}]]></description>
+                ${cats}
+              </item>`;
+          };
+
+          const rssWrap = (items) => `<?xml version="1.0" encoding="UTF-8"?>
+          <rss version="2.0">
+          <channel>
+            <title>${xmlEscape(FEED_TITLE)}</title>
+            <link>${SITE_URL}</link>
+            <description>${xmlEscape(FEED_DESC)}</description>
+            <lastBuildDate>${rfc822(Date.now())}</lastBuildDate>
+            ${items.join("\n")}
+          </channel>
+          </rss>`;
+
+          exports.handler = async (event) => {
+            const headers = {
+              'Content-Type': 'application/rss+xml; charset=utf-8',
+              'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=86400',
+              'Access-Control-Allow-Origin': '*',
+              'Access-Control-Allow-Methods': 'GET, OPTIONS',
+              'Access-Control-Allow-Headers': '*',
+            };
+
+            try {
+              // Routes: /rss.xml, /tags/{tag}/rss.xml
+              const path = event.rawPath || event.path || "";
+              const tagMatch = path.match(/\/tags\/([^/]+)\/rss\.xml$/);
+              const tagFilter = tagMatch ? decodeURIComponent(tagMatch[1]) : null;
+
+              // Fetch pages from DynamoDB
+              const res = await ddb.scan({
+                TableName: TABLE,
+                Limit: 200,
+                // Note: Adjust FilterExpression based on your actual schema
+                // FilterExpression: "#pub = :true AND #vis = :public",
+                // ExpressionAttributeNames: { "#pub":"published", "#vis":"visibility" },
+                // ExpressionAttributeValues: { ":true": true, ":public": "public" }
+              });
+
+              let items = (res.Items || [])
+                .filter(p => {
+                  // Filter by tag if specified
+                  if (tagFilter) {
+                    const tags = p.tags?.L || p.Tags?.L || [];
+                    return tags.some(t => (t.S || t) === tagFilter);
+                  }
+                  return true;
+                })
+                .sort((a, b) => {
+                  const aDate = a.publishedAt?.S || a.PublishedAt?.S || a.updatedAt?.S || a.UpdatedAt?.S || 0;
+                  const bDate = b.publishedAt?.S || b.PublishedAt?.S || b.updatedAt?.S || b.UpdatedAt?.S || 0;
+                  return new Date(bDate) - new Date(aDate);
+                })
+                .slice(0, 50)
+                .map(buildItem);
+
+              const body = rssWrap(items);
+              const etag = `"${Buffer.from(body).toString("base64").slice(0,27)}"`;
+
+              return {
+                statusCode: 200,
+                headers: { ...headers, "ETag": etag },
+                body
+              };
+
+            } catch (err) {
+              console.error('RSS Generation Error:', err);
+              return {
+                statusCode: 500,
+                headers,
+                body: '<?xml version="1.0" encoding="UTF-8"?><error>RSS feed temporarily unavailable</error>'
+              };
+            }
+          };
+
   # Lambda Function for RecordLogin
 
 
@@ -1192,6 +1361,8 @@ Resources:
       - ApiGatewayGetFileMethod
       - ApiGatewayPostEthicsTokenMethod
       - ApiGatewayOptionsEthicsTokenMethod
+      - ApiGatewayRssXmlGetMethod
+      - ApiGatewayTagRssXmlGetMethod
 
   # Cognito Token Authorizer Lambda
   CognitoTokenAuthorizer:
@@ -1713,6 +1884,63 @@ Resources:
             method.response.header.Access-Control-Allow-Methods: true
             method.response.header.Access-Control-Allow-Origin: true
 
+  # RSS Feed Resources
+  ApiGatewayRssXmlResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ParentId: !GetAtt ApiGatewayRestApi.RootResourceId
+      PathPart: rss.xml
+
+  ApiGatewayRssXmlGetMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiGatewayRssXmlResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GenerateRssFunction.Arn}/invocations
+    DependsOn:
+      - GenerateRssFunction
+
+  ApiGatewayTagsResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ParentId: !GetAtt ApiGatewayRestApi.RootResourceId
+      PathPart: tags
+
+  ApiGatewayTagValueResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ParentId: !Ref ApiGatewayTagsResource
+      PathPart: "{tag}"
+
+  ApiGatewayTagRssXmlResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ParentId: !Ref ApiGatewayTagValueResource
+      PathPart: rss.xml
+
+  ApiGatewayTagRssXmlGetMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiGatewayTagRssXmlResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GenerateRssFunction.Arn}/invocations
+    DependsOn:
+      - GenerateRssFunction
+
   DDBAccessPagesEthicsTokenLambdaInvokePermission:
     Type: AWS::Lambda::Permission
     Properties:
@@ -1907,6 +2135,23 @@ Resources:
       Principal: cognito-idp.amazonaws.com
       SourceArn: !GetAtt UserPool.Arn
 
+  # RSS Lambda Invoke Permissions
+  GenerateRssLambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt GenerateRssFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayRestApi}/*/GET/rss.xml
+
+  GenerateRssTagLambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt GenerateRssFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayRestApi}/*/GET/tags/*/rss.xml
+
   CloudFrontOriginAccessIdentity:
     Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
     Properties:
@@ -2029,6 +2274,49 @@ Resources:
             CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad 
             OriginRequestPolicyId: 88a5eaf4-2fd4-4709-b370-b4c650ea3fcf
             ResponseHeadersPolicyId: 60669652-455b-4ae9-85a4-c4c02393f86c
+          
+          # RSS Feed caching behavior
+          - PathPattern: !Join 
+              - ""
+              - 
+                - "/"
+                - !Ref Environment
+                - "/rss.xml"
+            TargetOriginId: ApiGatewayOrigin
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods:
+              - HEAD
+              - GET
+              - OPTIONS
+            CachedMethods:
+              - GET
+              - HEAD
+            Compress: true
+            # Cache RSS feeds for 10 minutes
+            CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad
+            OriginRequestPolicyId: 88a5eaf4-2fd4-4709-b370-b4c650ea3fcf
+
+          # RSS Tag feeds caching behavior
+          - PathPattern: !Join 
+              - ""
+              - 
+                - "/"
+                - !Ref Environment
+                - "/tags/*/rss.xml"
+            TargetOriginId: ApiGatewayOrigin
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods:
+              - HEAD
+              - GET
+              - OPTIONS
+            CachedMethods:
+              - GET
+              - HEAD
+            Compress: true
+            # Cache RSS feeds for 10 minutes
+            CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad
+            OriginRequestPolicyId: 88a5eaf4-2fd4-4709-b370-b4c650ea3fcf
+            
           - PathPattern: !Join 
               - ""
               - 

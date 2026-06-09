@@ -1,0 +1,161 @@
+/* Conscius Design Tokens (Aurora Program) */
+:root {
+  /* Color Palette Base */
+  --conscius-color-indigo-900:#1e1b4b;
+  --conscius-color-indigo-700:#4338ca;
+  --conscius-color-blue-600:#2563eb;
+  --conscius-color-blue-500:#3b82f6;
+  --conscius-color-cyan-400:#22d3ee;
+  --conscius-color-gold-300:#f0e68c;
+  --conscius-color-amber-500:#f59e0b;
+  --conscius-color-emerald-400:#34d399;
+  --conscius-color-rose-400:#fb7185;
+  --conscius-color-neutral-50:#f8fafc;
+  --conscius-color-neutral-100:#f1f5f9;
+  --conscius-color-neutral-200:#e2e8f0;
+  --conscius-color-neutral-700:#334155;
+  --conscius-color-neutral-900:#0f172a;
+
+  /* Brand Semantic Mapping */
+  --conscius-brand-bg: linear-gradient(140deg,#0f172a 0%,#12274a 40%,#1e3a8a 72%,#4338ca 100%);
+  --conscius-brand-surface: linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02));
+  --conscius-brand-gradient: linear-gradient(110deg,var(--conscius-color-blue-600),var(--conscius-color-indigo-700),var(--conscius-color-gold-300));
+  --conscius-brand-accent: var(--conscius-color-gold-300);
+  --conscius-brand-accent-strong: var(--conscius-color-amber-500);
+  --conscius-brand-fg: var(--conscius-color-neutral-700);
+  --conscius-brand-fg-muted: #64748b;
+
+  /* Enhanced Background Layers - Luminous Era */
+  --conscius-bg-cosmic: 
+    radial-gradient(circle at 25% 20%, rgba(37,99,235,0.25) 0%, rgba(30,58,138,0) 60%),
+    radial-gradient(circle at 80% 70%, rgba(67,56,202,0.20) 0%, rgba(30,58,138,0) 65%),
+    radial-gradient(circle at 10% 80%, rgba(240,230,140,0.35) 0%, rgba(240,230,140,0) 55%),
+    linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 30%, #cbd5e1 70%, #94a3b8 100%);
+
+  /* Floating Elements Background - Brighter */
+  --conscius-bg-floating:
+    radial-gradient(2px 2px at center, rgba(240,230,140,0.8), transparent),
+    radial-gradient(1px 1px at center, rgba(37,99,235,0.7), transparent);
+
+  /* Elevation & Shadow */
+  --conscius-shadow-xs: 0 1px 2px rgba(0,0,0,.35);
+  --conscius-shadow-sm: 0 2px 6px -1px rgba(0,0,0,.4),0 1px 3px -1px rgba(0,0,0,.35);
+  --conscius-shadow-md: 0 4px 24px -6px rgba(0,0,0,.45),0 2px 8px -2px rgba(0,0,0,.35);
+  --conscius-shadow-glow: 0 0 0 1px rgba(240,230,140,.3),0 0 0 8px rgba(240,230,140,0);
+
+  /* Radii */
+  --conscius-radius-sm:6px;
+  --conscius-radius:12px;
+  --conscius-radius-lg:22px;
+  --conscius-radius-pill:999px;
+
+  /* Spacing Scale (augment extends aurora) */
+  --conscius-space-1:4px;
+  --conscius-space-2:8px;
+  --conscius-space-3:12px;
+  --conscius-space-4:16px;
+  --conscius-space-6:24px;
+  --conscius-space-8:32px;
+  --conscius-space-10:40px;
+  --conscius-space-12:48px;
+
+  /* Typography */
+  --conscius-font-sans: var(--aurora-font-sans, 'Inter', system-ui, sans-serif);
+  --conscius-font-mono: 'JetBrains Mono', 'Cascadia Code', monospace;
+  --conscius-line-tight:1.15;
+  --conscius-line-normal:1.35;
+
+  --conscius-text-xs:.75rem;
+  --conscius-text-sm:.875rem;
+  --conscius-text-base:1rem;
+  --conscius-text-lg:1.125rem;
+  --conscius-text-xl:1.25rem;
+  --conscius-text-2xl:1.5rem;
+  --conscius-text-3xl:1.875rem;
+  --conscius-text-4xl:2.25rem;
+  --conscius-text-5xl:3rem;
+
+  /* Motion */
+  --conscius-ease-standard:cubic-bezier(.4,.0,.2,1);
+  --conscius-ease-emphatic:cubic-bezier(.83,0,.17,1);
+  --conscius-duration-fast:120ms;
+  --conscius-duration-medium:240ms;
+  --conscius-duration-slow:480ms;
+}
+
+/* Dark Mode Hook (optional future) */
+:root[data-theme='dark'] {
+  --conscius-brand-bg: linear-gradient(140deg,#0b1220 0%,#162a46 40%,#1e3a8a 72%,#4338ca 100%);
+}
+
+/* Token-driven Constellacss Bridges */
+.fo--brand-surface { background: var(--conscius-brand-surface); backdrop-filter: blur(14px) saturate(160%); border:1px solid rgba(255,255,255,0.1); }
+.fo--brand-glow-border { position:relative; }
+.fo--brand-glow-border::before { content:""; position:absolute; inset:0; border-radius:inherit; padding:1px; background:var(--conscius-brand-gradient); -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude; }
+
+/* Typographic Utilities */
+.fn--Titulo.fn--Display { font-size: var(--conscius-text-5xl); line-height: var(--conscius-line-tight); letter-spacing:-.02em; }
+.fn--Titulo.fn--HeroMinor { font-size: var(--conscius-text-3xl); line-height: var(--conscius-line-tight); }
+
+/* Motion / Entrance */
+@keyframes ascendFade { from { opacity:0; transform: translateY(28px) scale(.98);} 65% { opacity:1; } to { opacity:1; transform:translateY(0) scale(1);} }
+.animate-ascend { animation: ascendFade var(--conscius-duration-medium) var(--conscius-ease-standard) forwards; }
+.animate-ascend-delayed { animation: ascendFade var(--conscius-duration-medium) var(--conscius-ease-standard) .15s forwards; }
+
+/* Interactive Accent */
+.fo--accent-ring { position:relative; }
+.fo--accent-ring:focus-visible { outline:none; box-shadow:0 0 0 3px rgba(37,99,235,.6),0 0 0 5px rgba(240,230,140,.7); }
+
+/* Badge Variant */
+.fo--badge-accent { background: linear-gradient(120deg,var(--conscius-color-blue-600),var(--conscius-color-indigo-700)); color:#fff; padding:.35rem .75rem; border-radius: var(--conscius-radius-pill); font-size:var(--conscius-text-xs); letter-spacing:.05em; text-transform:uppercase; display:inline-flex; gap:.35rem; align-items:center; }
+
+/* Animated gradient text (bridge) */
+.fo--animated-gradient-text { background: var(--conscius-brand-gradient); background-size:200% 200%; -webkit-background-clip:text; background-clip:text; color:transparent; animation: gradientShift 8s linear infinite; }
+@keyframes gradientShift { 0% { background-position:0% 50%; } 50% { background-position:100% 50%; } 100% { background-position:0% 50%; } }
+
+/* Enhanced Background Effects */
+.fo--cosmic-bg {
+  background: var(--conscius-bg-cosmic);
+  position: relative;
+  overflow: hidden;
+}
+
+.fo--cosmic-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--conscius-bg-floating);
+  background-size: 100px 100px, 150px 150px;
+  animation: cosmicFloat 30s ease-in-out infinite;
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+@keyframes cosmicFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.3; }
+  25% { transform: translate(20px, -15px) scale(1.05); opacity: 0.5; }
+  50% { transform: translate(-15px, 10px) scale(0.95); opacity: 0.4; }
+  75% { transform: translate(10px, -5px) scale(1.02); opacity: 0.6; }
+}
+
+/* Floating particles overlay */
+.fo--particles::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: 
+    radial-gradient(1px 1px at 25% 35%, rgba(240,230,140,0.8), transparent),
+    radial-gradient(1px 1px at 75% 65%, rgba(37,99,235,0.6), transparent),
+    radial-gradient(1px 1px at 45% 85%, rgba(67,56,202,0.7), transparent);
+  background-size: 150px 100px;
+  animation: particlesDrift 40s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes particlesDrift {
+  0% { transform: translateX(0px) translateY(0px); }
+  25% { transform: translateX(-20px) translateY(10px); }
+  50% { transform: translateX(15px) translateY(-15px); }
+  75% { transform: translateX(-10px) translateY(5px); }
+  100% { transform: translateX(0px) translateY(0px); }
+}

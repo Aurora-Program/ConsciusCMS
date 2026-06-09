@@ -1,0 +1,384 @@
+/**
+ * RBAC-Style CSS Implementation
+ * Implementación de clases para el sistema de roles puros
+ */
+
+/* ========================================
+   FUNCIONES (fn) - Semántica/UX
+   ======================================== */
+
+/* Hero Functions */
+.fn--Hero {
+  --semantic-component: hero;
+  --accessibility-landmark: true;
+}
+
+.fn--HeroPresentacion {
+  --hero-type: presentation;
+  --hero-priority: primary;
+}
+
+.fn--Landmark {
+  --landmark-role: main;
+}
+
+/* Titulo Functions */
+.fn--Titulo {
+  --semantic-component: heading;
+  --text-element: true;
+}
+
+.fn--TituloPrincipal {
+  --heading-type: primary;
+  --heading-importance: highest;
+}
+
+.fn--TituloSeccion {
+  --heading-type: section;
+  --heading-importance: high;
+}
+
+.fn--Heading {
+  --text-role: heading;
+}
+
+/* Seccion Functions */
+.fn--Seccion {
+  --semantic-component: section;
+  --container-element: true;
+}
+
+.fn--SeccionContenido {
+  --section-type: content;
+  --section-role: main;
+}
+
+.fn--SeccionDestacada {
+  --section-type: featured;
+  --section-importance: high;
+}
+
+.fn--ContentArea {
+  --content-role: main;
+}
+
+.fn--Featured {
+  --featured-element: true;
+}
+
+/* CTA Functions */
+.fn--CTA {
+  --semantic-component: call-to-action;
+  --interactive-element: true;
+}
+
+.fn--CTAPrimaria {
+  --cta-type: primary;
+  --cta-priority: highest;
+}
+
+.fn--CTASecundaria {
+  --cta-type: secondary;
+  --cta-priority: medium;
+}
+
+.fn--Interactive {
+  --interaction-enabled: true;
+  cursor: pointer;
+}
+
+/* ========================================
+   ESTRUCTURA (es) - Layout/Objects
+   ======================================== */
+
+/* Container Structures */
+.es--container {
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--space-lg);
+  padding-right: var(--space-lg);
+}
+
+.es--stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing, var(--space-lg));
+}
+
+.es--center {
+  align-items: center;
+  text-align: center;
+}
+
+.es--grid {
+  display: grid;
+  grid-template-columns: var(--grid-columns, repeat(auto-fit, minmax(300px, 1fr)));
+  gap: var(--grid-gap, var(--space-xl));
+}
+
+.es--responsive {
+  --grid-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+/* Inline Structures */
+.es--inline {
+  display: inline-block;
+}
+
+.es--flow {
+  margin-bottom: var(--flow-space, var(--space-sm));
+}
+
+/* Button Group Structures */
+.es--buttongroup {
+  display: flex;
+  gap: var(--gap, var(--space-md));
+  align-items: center;
+}
+
+.es--flex {
+  display: flex;
+}
+
+.es--gap {
+  gap: var(--gap, var(--space-md));
+}
+
+/* Wrapper Structures */
+.es--wrapper {
+  padding: var(--padding, var(--space-lg));
+}
+
+/* ========================================
+   FORMA (fo) - Skin/Visual Tokens
+   ======================================== */
+
+/* Brand Forms */
+.fo--brand {
+  --brand-context: active;
+}
+
+.fo--primary {
+  --variant: primary;
+  --importance: high;
+}
+
+.fo--secondary {
+  --variant: secondary;
+  --importance: medium;
+}
+
+.fo--large {
+  --size-variant: large;
+  --scale-factor: 1.5;
+}
+
+/* Rich Backgrounds */
+.fo--RichBgHero {
+  background: var(--background, var(--gradient-corp-primary));
+  background-size: 300% 300%;
+  animation: gradientShift 8s ease infinite;
+  position: relative;
+  color: var(--text-color, white);
+  padding: var(--padding, var(--space-2xl));
+  min-height: 60vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Heading Forms */
+.fo--heading {
+  font-family: var(--font-family, var(--font-corp-display));
+  font-weight: var(--font-weight, 700);
+  font-size: var(--font-size, clamp(2.5rem, 5vw, 4rem));
+  line-height: var(--line-height, 1.1);
+  margin: 0;
+}
+
+.fo--gradient-text {
+  background: var(--text-gradient, var(--gradient-corp-secondary));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 200% 200%;
+  animation: gradientShift 6s ease infinite;
+}
+
+/* Button Forms */
+.fo--button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--button-padding, var(--space-md) var(--space-xl));
+  background: var(--button-bg, var(--color-corp-primary));
+  color: var(--button-color, white);
+  border: var(--button-border, none);
+  border-radius: var(--button-radius, var(--radius-corp-md));
+  font-family: var(--font-corp-primary);
+  font-weight: 600;
+  font-size: 1rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all var(--transition-corp-smooth);
+  box-shadow: var(--button-shadow, var(--shadow-corp-md));
+  position: relative;
+  overflow: hidden;
+}
+
+.fo--button:hover {
+  transform: var(--button-hover-transform, translateY(-2px));
+  box-shadow: var(--shadow-corp-lg);
+}
+
+.fo--button:active {
+  transform: translateY(0);
+}
+
+.fo--interactive {
+  --interaction-feedback: enabled;
+}
+
+.fo--outline {
+  background: var(--button-bg, transparent);
+  border: var(--button-border, 2px solid var(--color-corp-primary));
+  color: var(--button-color, var(--color-corp-primary));
+}
+
+.fo--outline:hover {
+  background: var(--color-corp-primary);
+  color: white;
+}
+
+/* Card Forms */
+.fo--card {
+  background: var(--card-bg, var(--color-corp-white));
+  padding: var(--card-padding, var(--space-xl));
+  border-radius: var(--card-radius, var(--radius-corp-lg));
+  box-shadow: var(--card-shadow, var(--shadow-corp-lg));
+  border: var(--card-border, 1px solid rgba(255,255,255,0.2));
+  transition: all var(--transition-corp-smooth);
+}
+
+.fo--professional {
+  --professional-context: active;
+}
+
+.fo--shadow {
+  box-shadow: var(--shadow-corp-lg);
+}
+
+.fo--card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-corp-xl);
+}
+
+/* Section Forms */
+.fo--clean {
+  background: var(--section-bg, transparent);
+  padding: var(--section-padding, var(--space-xl) 0);
+  border: var(--section-border, none);
+}
+
+.fo--minimal {
+  --minimal-context: active;
+}
+
+.fo--featured {
+  background: var(--section-bg, var(--color-corp-light-gray, #f8fafc));
+  padding: var(--section-padding, var(--space-2xl) 0);
+  border: var(--section-border, 1px solid rgba(0,0,0,0.1));
+}
+
+.fo--highlighted {
+  --highlight-context: active;
+}
+
+/* ========================================
+   ANIMACIONES
+   ======================================== */
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ========================================
+   UTILIDADES DE DEPURACIÓN
+   ======================================== */
+
+[data-arquetipo] {
+  position: relative;
+}
+
+[data-arquetipo]::before {
+  content: "Arquetipo: " attr(data-arquetipo);
+  position: absolute;
+  top: -1.5rem;
+  left: 0;
+  font-size: 0.75rem;
+  color: rgba(0,0,0,0.5);
+  background: rgba(255,255,0,0.1);
+  padding: 0.25rem 0.5rem;
+  border-radius: 3px;
+  font-family: monospace;
+  z-index: 1000;
+  display: none;
+}
+
+/* Activar modo debug */
+.debug-rbac [data-arquetipo]::before {
+  display: block;
+}
+
+/* ========================================
+   RESPONSIVE OVERRIDES
+   ======================================== */
+
+@media (max-width: 768px) {
+  .fo--RichBgHero {
+    min-height: 50vh;
+    padding: var(--space-xl);
+  }
+  
+  .fo--heading {
+    font-size: clamp(2rem, 4vw, 3rem);
+  }
+  
+  .es--buttongroup {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .fo--button {
+    width: 100%;
+    max-width: 280px;
+  }
+}
+
+/* ========================================
+   TOKENS DE INTEGRACIÓN CON CONSCIUS
+   ======================================== */
+
+/* Importar tokens del sistema ConstellaCSS existente */
+:root {
+  /* Asegurar compatibilidad con tokens existentes */
+  --color-corp-primary: var(--color-brand-primary, #0066cc);
+  --color-corp-white: var(--color-brand-white, #ffffff);
+  --gradient-corp-primary: var(--gradient-brand-primary, linear-gradient(135deg, #667eea 0%, #764ba2 100%));
+  --gradient-corp-secondary: var(--gradient-brand-secondary, linear-gradient(135deg, #f093fb 0%, #f5576c 100%));
+  --font-corp-display: var(--font-brand-display, 'Inter', system-ui, sans-serif);
+  --font-corp-primary: var(--font-brand-primary, 'Inter', system-ui, sans-serif);
+  --space-md: var(--space-medium, 1rem);
+  --space-lg: var(--space-large, 1.5rem);
+  --space-xl: var(--space-extra-large, 2rem);
+  --space-2xl: var(--space-2x-large, 3rem);
+  --radius-corp-md: var(--radius-medium, 0.5rem);
+  --radius-corp-lg: var(--radius-large, 0.75rem);
+  --shadow-corp-md: var(--shadow-medium, 0 4px 6px -1px rgb(0 0 0 / 0.1));
+  --shadow-corp-lg: var(--shadow-large, 0 10px 15px -3px rgb(0 0 0 / 0.1));
+  --shadow-corp-xl: var(--shadow-extra-large, 0 20px 25px -5px rgb(0 0 0 / 0.1));
+  --transition-corp-smooth: var(--transition-smooth, all 0.3s ease);
+}

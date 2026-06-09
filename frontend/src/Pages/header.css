@@ -4,14 +4,28 @@
   position: sticky;
   top: 0;
   z-index: 1000;
-  background: rgba(30, 74, 122, 0.95);
+  width: 100%;
+  background: linear-gradient(135deg, rgba(30, 74, 122, 0.98) 0%, rgba(37, 99, 235, 0.95) 50%, rgba(67, 56, 202, 0.98) 100%);
   backdrop-filter: blur(20px) saturate(180%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 
-    0 1px 3px rgba(0, 0, 0, 0.12),
-    0 1px 2px rgba(0, 0, 0, 0.24),
-    0 8px 32px rgba(30, 74, 122, 0.3);
+    0 2px 8px rgba(0, 0, 0, 0.15),
+    0 4px 16px rgba(30, 74, 122, 0.4),
+    0 0 32px rgba(37, 99, 235, 0.2);
   transition: all 0.3s ease;
+}
+
+/* Header Menu Wrapper */
+.header-menu-wrapper {
+  background: rgba(255, 255, 255, 0.95);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.header-integrated-menu {
+  background: transparent;
+  box-shadow: none;
+  border-bottom: none;
+  position: static;
 }
 
 .aurora-modern-header::before {
@@ -29,9 +43,10 @@
 }
 
 .aurora-header-container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 1.5rem;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0 2rem;
   position: relative;
 }
 

@@ -1,0 +1,304 @@
+/* ConsciusCMS - ConstellaCSS Tokens Customization */
+/* Extending ConstellaCSS with ConsciusCMS-specific design tokens */
+
+:root {
+  /* ConsciusCMS Brand Colors */
+  --conscius-brand-primary: #34A085;
+  --conscius-brand-secondary: #2D7B70;
+  --conscius-brand-accent: #10B981;
+  --conscius-brand-light: #E6F7F3;
+  --conscius-brand-dark: #1F2937;
+  
+  /* Aurora Design System Override for ConsciusCMS */
+  --aurora-primary-600: var(--conscius-brand-primary);
+  --aurora-primary-700: var(--conscius-brand-secondary);
+  --aurora-success: var(--conscius-brand-accent);
+  
+  /* Typography Scale */
+  --conscius-text-xs: 0.75rem;
+  --conscius-text-sm: 0.875rem;
+  --conscius-text-base: 1rem;
+  --conscius-text-lg: 1.125rem;
+  --conscius-text-xl: 1.25rem;
+  --conscius-text-2xl: 1.5rem;
+  --conscius-text-3xl: 1.875rem;
+  --conscius-text-4xl: 2.25rem;
+  
+  /* Spacing System */
+  --conscius-space-xs: 0.25rem;
+  --conscius-space-sm: 0.5rem;
+  --conscius-space-md: 1rem;
+  --conscius-space-lg: 1.5rem;
+  --conscius-space-xl: 2rem;
+  --conscius-space-2xl: 3rem;
+  --conscius-space-3xl: 4rem;
+  
+  /* Shadow System */
+  --conscius-shadow-sm: 0 1px 2px rgba(52, 160, 133, 0.1);
+  --conscius-shadow-md: 0 4px 6px rgba(52, 160, 133, 0.15);
+  --conscius-shadow-lg: 0 8px 16px rgba(52, 160, 133, 0.2);
+  --conscius-shadow-xl: 0 16px 32px rgba(52, 160, 133, 0.25);
+  
+  /* Gradient System */
+  --conscius-gradient-primary: linear-gradient(135deg, var(--conscius-brand-primary) 0%, var(--conscius-brand-secondary) 100%);
+  --conscius-gradient-accent: linear-gradient(135deg, var(--conscius-brand-accent) 0%, var(--conscius-brand-primary) 100%);
+  --conscius-gradient-hero: linear-gradient(135deg, var(--conscius-brand-light) 0%, rgba(255, 255, 255, 0.9) 100%);
+}
+
+/* ConsciusCMS Extended Function Classes */
+.fn--ConsciusCMS { 
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  color: var(--conscius-brand-dark);
+}
+
+.fn--BrandHero { 
+  background: var(--conscius-gradient-hero);
+  padding: var(--conscius-space-3xl) var(--conscius-space-lg);
+  border-radius: var(--aurora-radius-lg, 12px);
+}
+
+.fn--BrandTitle {
+  background: var(--conscius-gradient-primary);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 800;
+  font-size: var(--conscius-text-4xl);
+  line-height: 1.1;
+}
+
+.fn--BrandSubtitle {
+  color: var(--conscius-brand-dark);
+  opacity: 0.8;
+  font-size: var(--conscius-text-lg);
+  font-weight: 500;
+}
+
+.fn--StatCard {
+  text-align: center;
+  padding: var(--conscius-space-xl);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fn--StatNumber {
+  font-size: var(--conscius-text-3xl);
+  font-weight: 800;
+  color: var(--conscius-brand-primary);
+  margin-bottom: var(--conscius-space-sm);
+}
+
+.fn--StatLabel {
+  font-size: var(--conscius-text-sm);
+  color: var(--conscius-brand-dark);
+  opacity: 0.7;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ConsciusCMS Extended Structure Classes */
+.es--brand-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--conscius-space-lg);
+}
+
+.es--brand-grid {
+  display: grid;
+  gap: var(--conscius-space-xl);
+}
+
+.es--brand-grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.es--brand-grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.es--brand-grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+.es--brand-stack > * + * { 
+  margin-top: var(--conscius-space-lg); 
+}
+
+.es--brand-row {
+  display: flex;
+  align-items: center;
+  gap: var(--conscius-space-lg);
+}
+
+.es--brand-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* Responsive Brand Grid */
+@media (max-width: 1024px) {
+  .es--brand-grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .es--brand-grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 640px) {
+  .es--brand-grid-2,
+  .es--brand-grid-3,
+  .es--brand-grid-4 { 
+    grid-template-columns: 1fr; 
+  }
+  
+  .es--brand-row {
+    flex-direction: column;
+    gap: var(--conscius-space-md);
+  }
+}
+
+/* ConsciusCMS Extended Form Classes */
+.fo--brand-card {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px) saturate(110%);
+  border: 1px solid rgba(52, 160, 133, 0.1);
+  border-radius: var(--aurora-radius-lg, 12px);
+  box-shadow: var(--conscius-shadow-md);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  position: relative;
+}
+
+.fo--brand-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--conscius-shadow-lg);
+  border-color: rgba(52, 160, 133, 0.3);
+}
+
+.fo--brand-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--conscius-gradient-primary);
+}
+
+.fo--brand-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--conscius-space-sm);
+  padding: var(--conscius-space-md) var(--conscius-space-xl);
+  background: var(--conscius-gradient-primary);
+  color: white;
+  text-decoration: none;
+  border-radius: var(--aurora-radius-lg, 12px);
+  font-weight: 600;
+  font-size: var(--conscius-text-base);
+  box-shadow: var(--conscius-shadow-md);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: none;
+  cursor: pointer;
+}
+
+.fo--brand-button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--conscius-shadow-lg);
+  text-decoration: none;
+  color: white;
+}
+
+.fo--brand-button:active {
+  transform: translateY(0);
+}
+
+.fo--brand-button-outline {
+  background: transparent;
+  color: var(--conscius-brand-primary);
+  border: 2px solid var(--conscius-brand-primary);
+}
+
+.fo--brand-button-outline:hover {
+  background: var(--conscius-brand-light);
+  color: var(--conscius-brand-primary);
+}
+
+.fo--brand-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--conscius-space-xs);
+  padding: var(--conscius-space-sm) var(--conscius-space-md);
+  background: var(--conscius-brand-light);
+  color: var(--conscius-brand-primary);
+  border-radius: var(--aurora-radius, 8px);
+  font-size: var(--conscius-text-sm);
+  font-weight: 600;
+  border: 1px solid rgba(52, 160, 133, 0.2);
+}
+
+.fo--brand-panel {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px) saturate(120%);
+  border: 1px solid rgba(52, 160, 133, 0.15);
+  border-radius: var(--aurora-radius-lg, 12px);
+  padding: var(--conscius-space-2xl);
+  box-shadow: var(--conscius-shadow-md);
+}
+
+.fo--brand-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  background: var(--conscius-gradient-primary);
+  color: white;
+  border-radius: var(--aurora-radius, 8px);
+  font-size: var(--conscius-text-xl);
+  box-shadow: var(--conscius-shadow-sm);
+}
+
+/* Utility Classes */
+.fo--text-gradient {
+  background: var(--conscius-gradient-primary);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.fo--glassmorphism {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.fo--brand-shadow {
+  box-shadow: var(--conscius-shadow-md);
+}
+
+.fo--brand-shadow-lg {
+  box-shadow: var(--conscius-shadow-lg);
+}
+
+/* Animation Classes */
+.fo--animate-fade-in {
+  animation: conscius-fade-in 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fo--animate-slide-up {
+  animation: conscius-slide-up 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes conscius-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes conscius-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

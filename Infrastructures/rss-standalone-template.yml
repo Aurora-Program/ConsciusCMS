@@ -1,0 +1,336 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: RSS Feed functionality for ConsciusCMS - Self-contained template
+
+Parameters:
+  Environment:
+    Description: Environment (prod, dev, test)
+    Type: String
+    Default: dev
+  WebDomain:
+    Description: Website Domain
+    Type: String
+    Default: example.com
+  ExistingApiGatewayId:
+    Description: Existing API Gateway REST API ID
+    Type: String
+  ExistingPagesTable:
+    Description: Existing DynamoDB Pages table name
+    Type: String
+  ExistingMicroserviceRole:
+    Description: Existing Lambda execution role ARN
+    Type: String
+  ExistingApiGatewayRootId:
+    Description: Existing API Gateway Root Resource ID
+    Type: String
+
+Resources:
+
+  # Store API Gateway info in SSM for future reference
+  ApiGatewayIdParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub '/consciuscms/${Environment}/api-gateway-id'
+      Type: String
+      Value: !Ref ExistingApiGatewayId
+      Description: API Gateway ID for RSS feeds
+
+  ApiGatewayRootIdParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !Sub '/consciuscms/${Environment}/api-gateway-root-id'
+      Type: String
+      Value: !Ref ExistingApiGatewayRootId
+      Description: API Gateway Root Resource ID
+
+  # Lambda Function for RSS Feed Generation
+  GenerateRssFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub "GenerateRss-${Environment}"
+      Handler: index.handler
+      Role: !Ref ExistingMicroserviceRole
+      Runtime: nodejs20.x
+      MemorySize: 256
+      Timeout: 10
+      Environment:
+        Variables:
+          PAGES_TABLE: !Ref ExistingPagesTable
+          SITE_URL: !Sub "https://${WebDomain}"
+          FEED_TITLE: "ConsciusCMS Feed"
+          FEED_DESC: "Latest updates from ConsciusCMS"
+      Code:
+        ZipFile: |
+          const { DynamoDB } = require('@aws-sdk/client-dynamodb');
+          const { DynamoDBDocument } = require('@aws-sdk/lib-dynamodb');
+          
+          const ddb = DynamoDBDocument.from(new DynamoDB());
+          const TABLE = process.env.PAGES_TABLE;
+          const SITE_URL = process.env.SITE_URL;
+          const FEED_TITLE = process.env.FEED_TITLE || "ConsciusCMS Feed";
+          const FEED_DESC = process.env.FEED_DESC || "Latest updates";
+
+          const rfc822 = (d) => new Date(d).toUTCString();
+
+          const xmlEscape = (s="") =>
+            s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
+          const buildItem = (p) => {
+            const slug = p.Page || p.slug?.S || p.Page?.S;
+            const url = `${SITE_URL}/${slug}`;
+            const title = p.title?.S || p.Title?.S || slug;
+            const summary = p.summary?.S || p.Summary?.S || p.description?.S || "";
+            const pub = p.publishedAt?.S || p.PublishedAt?.S || p.updatedAt?.S || p.UpdatedAt?.S || new Date().toISOString();
+            const guid = p.id?.S || p.Id?.S || url;
+            const tags = p.tags?.L || p.Tags?.L || [];
+            const cats = tags.map(t => `<category>${xmlEscape(t.S || t)}</category>`).join("") || "";
+
+            return `
+              <item>
+                <title>${xmlEscape(title)}</title>
+                <link>${url}</link>
+                <guid isPermaLink="false">${xmlEscape(guid)}</guid>
+                <pubDate>${rfc822(pub)}</pubDate>
+                <description><![CDATA[${summary}]]></description>
+                ${cats}
+              </item>`;
+          };
+
+          const rssWrap = (items) => `<?xml version="1.0" encoding="UTF-8"?>
+          <rss version="2.0">
+          <channel>
+            <title>${xmlEscape(FEED_TITLE)}</title>
+            <link>${SITE_URL}</link>
+            <description>${xmlEscape(FEED_DESC)}</description>
+            <lastBuildDate>${rfc822(Date.now())}</lastBuildDate>
+            ${items.join("\n")}
+          </channel>
+          </rss>`;
+
+          exports.handler = async (event) => {
+            const headers = {
+              'Content-Type': 'application/rss+xml; charset=utf-8',
+              'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=86400',
+              'Access-Control-Allow-Origin': '*',
+              'Access-Control-Allow-Methods': 'GET, OPTIONS',
+              'Access-Control-Allow-Headers': '*',
+            };
+
+            try {
+              console.log('RSS Request:', JSON.stringify(event, null, 2));
+              
+              // Routes: /rss.xml, /tags/{tag}/rss.xml
+              const path = event.rawPath || event.path || "";
+              const tagMatch = path.match(/\/tags\/([^/]+)\/rss\.xml$/);
+              const tagFilter = tagMatch ? decodeURIComponent(tagMatch[1]) : null;
+              
+              console.log('Path:', path, 'Tag Filter:', tagFilter);
+
+              // Fetch pages from DynamoDB
+              const res = await ddb.scan({
+                TableName: TABLE,
+                Limit: 200
+                // Note: Add filtering for published content if needed:
+                // FilterExpression: "#pub = :true AND #vis = :public",
+                // ExpressionAttributeNames: { "#pub":"published", "#vis":"visibility" },
+                // ExpressionAttributeValues: { ":true": true, ":public": "public" }
+              });
+
+              console.log(`Found ${res.Items?.length || 0} items in DynamoDB`);
+
+              let items = (res.Items || [])
+                .filter(p => {
+                  // Filter by tag if specified
+                  if (tagFilter) {
+                    const tags = p.tags?.L || p.Tags?.L || [];
+                    const hasTag = tags.some(t => (t.S || t) === tagFilter);
+                    console.log(`Item ${p.Page || p.slug} has tags:`, tags.map(t => t.S || t), 'matches:', hasTag);
+                    return hasTag;
+                  }
+                  return true;
+                })
+                .sort((a, b) => {
+                  const aDate = a.publishedAt?.S || a.PublishedAt?.S || a.updatedAt?.S || a.UpdatedAt?.S || 0;
+                  const bDate = b.publishedAt?.S || b.PublishedAt?.S || b.updatedAt?.S || b.UpdatedAt?.S || 0;
+                  return new Date(bDate) - new Date(aDate);
+                })
+                .slice(0, 50)
+                .map(buildItem);
+
+              console.log(`Generated ${items.length} RSS items`);
+
+              const body = rssWrap(items);
+              const etag = `"${Buffer.from(body).toString("base64").slice(0,27)}"`;
+
+              return {
+                statusCode: 200,
+                headers: { ...headers, "ETag": etag },
+                body
+              };
+
+            } catch (err) {
+              console.error('RSS Generation Error:', err);
+              return {
+                statusCode: 500,
+                headers,
+                body: '<?xml version="1.0" encoding="UTF-8"?><error>RSS feed temporarily unavailable</error>'
+              };
+            }
+          };
+
+  # RSS Feed Resources
+  ApiGatewayRssXmlResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ExistingApiGatewayId
+      ParentId: !Ref ExistingApiGatewayRootId
+      PathPart: rss.xml
+
+  ApiGatewayRssXmlGetMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ExistingApiGatewayId
+      ResourceId: !Ref ApiGatewayRssXmlResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GenerateRssFunction.Arn}/invocations
+    DependsOn:
+      - GenerateRssFunction
+
+  # Options method for CORS
+  ApiGatewayRssXmlOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ExistingApiGatewayId
+      ResourceId: !Ref ApiGatewayRssXmlResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{ "statusCode": 200 }'
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'*'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            ResponseTemplates:
+              application/json: "{}"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+
+  ApiGatewayTagsResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ExistingApiGatewayId
+      ParentId: !Ref ExistingApiGatewayRootId
+      PathPart: tags
+
+  ApiGatewayTagValueResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ExistingApiGatewayId
+      ParentId: !Ref ApiGatewayTagsResource
+      PathPart: "{tag}"
+
+  ApiGatewayTagRssXmlResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ExistingApiGatewayId
+      ParentId: !Ref ApiGatewayTagValueResource
+      PathPart: rss.xml
+
+  ApiGatewayTagRssXmlGetMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ExistingApiGatewayId
+      ResourceId: !Ref ApiGatewayTagRssXmlResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GenerateRssFunction.Arn}/invocations
+    DependsOn:
+      - GenerateRssFunction
+
+  # Options method for CORS on tag RSS
+  ApiGatewayTagRssXmlOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ExistingApiGatewayId
+      ResourceId: !Ref ApiGatewayTagRssXmlResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{ "statusCode": 200 }'
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'*'"
+              method.response.header.Access-Control-Allow-Methods: "'GET,OPTIONS'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            ResponseTemplates:
+              application/json: "{}"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+
+  # Lambda Invoke Permissions
+  GenerateRssLambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt GenerateRssFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ExistingApiGatewayId}/*/GET/rss.xml
+
+  GenerateRssTagLambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt GenerateRssFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ExistingApiGatewayId}/*/GET/tags/*/rss.xml
+
+  # Create a new deployment to include the RSS routes
+  ApiGatewayDeployment:
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      RestApiId: !Ref ExistingApiGatewayId
+      StageName: !Ref Environment
+      Description: !Sub "RSS deployment for ${Environment} - ${AWS::StackName}"
+    DependsOn:
+      - ApiGatewayRssXmlGetMethod
+      - ApiGatewayRssXmlOptionsMethod
+      - ApiGatewayTagRssXmlGetMethod
+      - ApiGatewayTagRssXmlOptionsMethod
+
+Outputs:
+  RssFeedUrl:
+    Description: Main RSS Feed URL
+    Value: !Sub "https://${WebDomain}/rss.xml"
+  
+  TagRssFeedUrlPattern:
+    Description: Tag RSS Feed URL Pattern
+    Value: !Sub "https://${WebDomain}/tags/{tag}/rss.xml"
+  
+  GenerateRssFunctionArn:
+    Description: RSS Lambda Function ARN
+    Value: !GetAtt GenerateRssFunction.Arn
+  
+  RssLambdaLogGroup:
+    Description: RSS Lambda CloudWatch Log Group
+    Value: !Sub "/aws/lambda/GenerateRss-${Environment}"

@@ -1,9 +1,13 @@
 .modern-footer {
-  background: linear-gradient(135deg, var(--color-gray-900) 0%, var(--aurora-blue) 100%);
+  width: 100%;
+  background: linear-gradient(135deg, var(--color-gray-900) 0%, #1e293b 30%, #334155 70%, var(--aurora-blue) 100%);
   color: var(--text-inverse);
   margin-top: 0;
   position: relative;
   overflow: hidden;
+  box-shadow: 
+    0 -4px 16px rgba(0, 0, 0, 0.15),
+    0 -8px 32px rgba(30, 41, 59, 0.25);
 }
 
 .modern-footer::before {
@@ -17,8 +21,9 @@
 }
 
 .footer-container {
-  max-width: 1400px !important;
-  margin: 0 auto !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
   padding: 0 var(--space-lg) !important;
 }
 
@@ -27,8 +32,9 @@
   grid-template-columns: 1fr 1fr 1fr;
   gap: var(--space-2xl);
   padding: var(--space-lg) var(--space-2xl); /* Reduced top padding to minimize gap */
-  max-width: 1400px !important;
-  margin: 0 auto !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
 }
 
 .footer-section h3 {

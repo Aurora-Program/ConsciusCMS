@@ -1,12 +1,16 @@
 /* Modern Footer Styles with Aurora Colors */
 .modern-footer {
-    /* Cambio: gradiente suave con colores Aurora (no negro) */
-    background: linear-gradient(135deg, #1e4a7a 0%, #2563eb 50%, #1e3a5f 100%);
-    color: rgba(255, 255, 255, 0.9);
+    width: 100%;
+    /* Cambio: gradiente más vibrante con colores distinguibles */
+    background: linear-gradient(135deg, #1e293b 0%, #334155 30%, #475569 60%, #64748b 100%);
+    color: rgba(255, 255, 255, 0.95);
     padding: 4rem 0 2rem;
     margin-top: 4rem;
     position: relative;
     overflow: hidden;
+    box-shadow: 
+        0 -4px 16px rgba(0, 0, 0, 0.1),
+        0 -8px 32px rgba(30, 41, 59, 0.3);
 }
 
 .modern-footer::before {
@@ -21,8 +25,9 @@
 }
 
 .footer-container {
-    max-width: 1200px;
-    margin: 0 auto;
+    width: 100%;
+    max-width: none;
+    margin: 0;
     padding: 0 2rem;
 }
 

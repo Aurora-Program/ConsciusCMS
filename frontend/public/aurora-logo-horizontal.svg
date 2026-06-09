@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 160" role="img" aria-labelledby="t h">
+  <title id="t">Aurora Program Horizontal Logo</title>
+  <desc id="h">Horizontal logotype with radiant pyramid mark.</desc>
+  <defs>
+    <linearGradient id="gradCoreH" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563eb"/>
+      <stop offset="55%" stop-color="#4338ca"/>
+      <stop offset="100%" stop-color="#F0E68C"/>
+    </linearGradient>
+    <radialGradient id="radAuraH" cx="40%" cy="45%" r="75%">
+      <stop offset="0%" stop-color="#F0E68C" stop-opacity="0.85"/>
+      <stop offset="45%" stop-color="#2563eb" stop-opacity="0.3"/>
+      <stop offset="80%" stop-color="#0f172a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="520" height="160" rx="28" fill="#0f172a"/>
+  <g transform="translate(24,12)">
+    <circle cx="68" cy="62" r="58" fill="url(#radAuraH)"/>
+    <polygon points="68,14 24,138 112,138" fill="url(#gradCoreH)" stroke="#F0E68C" stroke-width="2" stroke-linejoin="round"/>
+    <polygon points="68,14 24,138 68,138" fill="rgba(15,23,42,0.35)"/>
+    <line x1="68" y1="14" x2="68" y2="138" stroke="rgba(255,255,255,0.45)" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="68" cy="14" r="5" fill="#F0E68C"/>
+  </g>
+  <g fill="#f1f5f9" font-family="'Inter',system-ui,sans-serif" font-weight="600" letter-spacing="1px" font-size="60" transform="translate(180,108)">
+    <text textLength="320" lengthAdjust="spacingAndGlyphs">AURORA</text>
+  </g>
+  <g fill="#F0E68C" font-family="'Inter',system-ui,sans-serif" font-weight="400" font-size="20" transform="translate(182,138)">
+    <text>PROGRAM</text>
+  </g>
+</svg>

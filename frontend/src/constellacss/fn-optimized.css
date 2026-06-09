@@ -1,0 +1,270 @@
+/**
+ * ConstellaCSS - Sistema de Funciones Puras para Estilos Eficientes
+ * Optimización avanzada con composición funcional
+ */
+
+/* ========================================
+   FUNCIONES PURAS DE COMPOSICIÓN (fn)
+   ======================================== */
+
+/* Funciones puras semánticas - Solo declaran intención */
+.fn--BrandPage { 
+  /* Función: Página de marca */
+  --semantic-role: brand-page;
+}
+
+.fn--BrandHero { 
+  /* Función: Hero de marca */
+  --semantic-role: brand-hero;
+}
+
+.fn--BrandTitle { 
+  /* Función: Título de marca */
+  --semantic-role: brand-title;
+}
+
+.fn--BrandSubtitle { 
+  /* Función: Subtítulo de marca */
+  --semantic-role: brand-subtitle;
+}
+
+.fn--BrandStats { 
+  /* Función: Estadísticas de marca */
+  --semantic-role: brand-stats;
+}
+
+.fn--BrandCard { 
+  /* Función: Tarjeta de marca */
+  --semantic-role: brand-card;
+}
+
+.fn--BrandNumber { 
+  /* Función: Número de marca */
+  --semantic-role: brand-number;
+}
+
+.fn--BrandLabel { 
+  /* Función: Etiqueta de marca */
+  --semantic-role: brand-label;
+}
+
+.fn--CTA { 
+  /* Función: Call to Action */
+  --semantic-role: cta;
+}
+
+.fn--CTAGroup { 
+  /* Función: Grupo CTA */
+  --semantic-role: cta-group;
+}
+
+.fn--CTATitle { 
+  /* Función: Título CTA */
+  --semantic-role: cta-title;
+}
+
+.fn--CTASection { 
+  /* Función: Sección CTA */
+  --semantic-role: cta-section;
+}
+
+.fn--Section { 
+  /* Función: Sección genérica */
+  --semantic-role: section;
+}
+
+.fn--SectionTitle { 
+  /* Función: Título de sección */
+  --semantic-role: section-title;
+}
+
+.fn--Description { 
+  /* Función: Descripción */
+  --semantic-role: description;
+}
+
+.fn--FeatureCard { 
+  /* Función: Tarjeta de funcionalidad */
+  --semantic-role: feature-card;
+}
+
+.fn--FeatureTitle { 
+  /* Función: Título de funcionalidad */
+  --semantic-role: feature-title;
+}
+
+.fn--FeatureDescription { 
+  /* Función: Descripción de funcionalidad */
+  --semantic-role: feature-description;
+}
+
+.fn--Icon { 
+  /* Función: Icono */
+  --semantic-role: icon;
+}
+
+/* Funciones de estado puro */
+.fn--active { 
+  --state: active;
+}
+
+.fn--hover { 
+  --state: hover;
+}
+
+.fn--focus { 
+  --state: focus;
+}
+
+.fn--disabled { 
+  --state: disabled;
+}
+
+/* Funciones de contexto puro */
+.fn--primary { 
+  --context: primary;
+}
+
+.fn--secondary { 
+  --context: secondary;
+}
+
+.fn--accent { 
+  --context: accent;
+}
+
+.fn--brand { 
+  --context: brand;
+}
+
+.fn--professional { 
+  --context: professional;
+}
+
+/* Funciones de componente puro */
+.fn--StatCard { 
+  --component-type: stat-card;
+}
+
+.fn--Titulo { 
+  --component-type: titulo;
+}
+
+.fn--Subtitulo { 
+  --component-type: subtitulo;
+}
+
+.fn--TituloSeccion { 
+  --component-type: titulo-seccion;
+}
+
+.fn--Descripcion { 
+  --component-type: descripcion;
+}
+
+.fn--FeatureTitulo { 
+  --component-type: feature-titulo;
+}
+
+.fn--FeatureDescripcion { 
+  --component-type: feature-descripcion;
+}
+
+/* Funciones de interacción pura */
+.fn--clickable { 
+  --interaction: clickable;
+  cursor: pointer;
+}
+
+.fn--draggable { 
+  --interaction: draggable;
+  cursor: move;
+}
+
+.fn--selectable { 
+  --interaction: selectable;
+  user-select: text;
+}
+
+.fn--expandable { 
+  --interaction: expandable;
+}
+
+/* ========================================
+   FUNCIONES DE FONDOS RICOS (PURE)
+   ======================================== */
+
+.fn--RichBgStats {
+  --rich-bg: stats;
+  --animation-speed: slow;
+}
+
+.fn--RichBgFeatures {
+  --rich-bg: features;
+  --animation-speed: medium;
+}
+
+.fn--RichBgCTA {
+  --rich-bg: cta;
+  --animation-speed: fast;
+}
+
+.fn--RichBgHero {
+  --rich-bg: hero;
+  --animation-speed: slow;
+}
+
+/* ========================================
+   FUNCIONES DE PATRONES (PURE)
+   ======================================== */
+
+.fn--PatternDots {
+  --pattern-type: dots;
+  --pattern-opacity: subtle;
+}
+
+.fn--PatternGrid {
+  --pattern-type: grid;
+  --pattern-opacity: minimal;
+}
+
+.fn--PatternDiagonal {
+  --pattern-type: diagonal;
+  --pattern-opacity: minimal;
+}
+
+.fn--PatternMesh {
+  --pattern-type: mesh;
+  --pattern-opacity: light;
+}
+
+/* ========================================
+   FUNCIONES DE ICONOS (PURE)
+   ======================================== */
+
+.fn--IconDecorative {
+  --icon-type: decorative;
+  --icon-size: large;
+  --icon-opacity: subtle;
+}
+
+.fn--IconStats {
+  --icon-semantic: stats;
+  --icon-position: top-right;
+}
+
+.fn--IconFeatures {
+  --icon-semantic: features;
+  --icon-position: top-left;
+}
+
+.fn--IconCTA {
+  --icon-semantic: cta;
+  --icon-position: bottom-right;
+}
+
+.fn--IconCard {
+  --icon-type: card;
+  --icon-size: medium;
+  --icon-interactive: true;
+}

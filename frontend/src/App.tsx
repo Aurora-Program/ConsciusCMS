@@ -1,9 +1,9 @@
 
-import Home from './Pages/home';
+import Home from './Pages/homeEspiral';
 import LandingPage from './Pages/landing';
 import ExampleListPage from './Pages/examples-list';
 import Foot from './Pages/foot';
-import Header from './Pages/header';
+import Header from './Pages/headerEspiral';
 import Article from './Pages/article';
 import Articles from './Pages/articles';
 import Documentation from './Pages/documentation';
@@ -28,11 +28,25 @@ import ExamplePage from './assets/example';
 import Products from './Pages/products';
 import Product from './Pages/product';
 import Harmonia from './Pages/harmonia';
+import PaginaEjemploRBAC from './Pages/PaginaEjemploRBAC';
+import PaginaEjemploARC from './Pages/PaginaEjemploARC';
+import DemostracionARC from './Pages/DemostracionARCSimple';
 import EthicsI from './Pages/ethicsi';
 import InnvaLab from './Pages/innvalab';
 import IdeasPage from './Pages/ideas';
 import IdeaPage from './Pages/idea';
 import HomePage from './Pages/homepage';
+import ConsciusCMSPage from './Pages/consciuscms';
+import ConsciusCMSHome from './Pages/consciusCMSHome';
+import ProfessionalConsciusCMSHomePage from './Pages/ProfessionalConsciusCMSHomePage';
+import StarterKitDemo from './Pages/StarterKitDemo';
+import ARCPlayground from './Pages/ARCPlayground';
+import ARCRulesEditor from './Pages/ARCRulesEditor';
+import ARCLiveDemo from './Pages/ARCLiveDemo';
+import Simulator from './Pages/simulator';
+import PureConstellacss from './Pages/ARCRulesEditor';
+import Test1 from './Pages/test1';
+
 
 
 function App() {
@@ -68,6 +82,13 @@ function App() {
           <Route path="/acerca" element={<Acerca />} />
           <Route path="/chatbot" element={<Chatbot />} />
           <Route path="/design-system" element={<DesignSystemDemo />} />
+          <Route path="/rbac-style" element={<PaginaEjemploRBAC />} />
+          <Route path="/arc" element={<PaginaEjemploARC />} />
+          <Route path="/arc-demo" element={<DemostracionARC />} />
+          <Route path="/playground" element={<ARCPlayground />} />
+          <Route path="/rules-editor" element={<ARCRulesEditor />} />
+          <Route path="/live-demo" element={<ARCLiveDemo />} />
+          <Route path="/starter-kit" element={<StarterKitDemo />} />
           <Route path="/example" element={<ExamplePage />} />
           {/* duplicate /projects removed */}
           <Route path="/products" element={<Products />} />
@@ -77,10 +98,16 @@ function App() {
           <Route path="/innvalab" element={<InnvaLab />} />
           <Route path="/ideas" element={<IdeasPage />} />
           <Route path="/idea/:name" element={<IdeaPage />} />
+          <Route path="/consciuscms" element={<ConsciusCMSPage />} />
+          <Route path="/consciuscms/home" element={<ConsciusCMSHome />} />
+          <Route path="/consciuscms/professional" element={<ProfessionalConsciusCMSHomePage />} />
+          <Route path="/professional" element={<ProfessionalConsciusCMSHomePage />} />
           <Route path="/plataformas/harmonia" element={<Harmonia />} />
           <Route path="/plataformas/ethicsi" element={<EthicsI />} />
           <Route path="/plataformas/innvalab" element={<InnvaLab />} />
           <Route path= "/homepage" element={<HomePage />} />
+          <Route path= "/simulator" element={<PureConstellacss />} />
+          <Route path= "/test1" element={<Test1 />} />
 
           <Route path="*" element={<div style={{padding:'2rem'}}><h2>Ruta no encontrada</h2><p>No coincide esta URL. ¿Seguro que estás ejecutando el dev server de <code>frontend</code> y no el de <code>cmsInterface</code>? </p><p>Rutas disponibles: / , /landing , /examples , /projects ...</p></div>} />
 

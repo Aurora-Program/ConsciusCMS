@@ -1,0 +1,687 @@
+/**
+ * ConstellaCSS - Extensiones Profesionales
+ * Estilos corporativos y elegantes siguiendo principios de funciones puras
+ */
+
+/* ========================================
+   TOKENS PROFESIONALES AVANZADOS
+   ======================================== */
+
+:root {
+  /* Paleta profesional corporativa expandida */
+  --color-corp-navy: #0f172a;
+  --color-corp-blue: #1e40af;
+  --color-corp-light-blue: #3b82f6;
+  --color-corp-sky: #0ea5e9;
+  --color-corp-indigo: #6366f1;
+  --color-corp-purple: #8b5cf6;
+  --color-corp-silver: #8b9dc3;
+  --color-corp-white: #ffffff;
+  --color-corp-gray: #f8fafc;
+  --color-corp-light-gray: #f1f5f9;
+  --color-corp-dark-gray: #64748b;
+  --color-corp-emerald: #10b981;
+  --color-corp-amber: #f59e0b;
+  --color-corp-rose: #f43f5e;
+  
+  /* Gradientes profesionales mejorados */
+  --gradient-corp-primary: linear-gradient(135deg, var(--color-corp-navy) 0%, var(--color-corp-blue) 50%, var(--color-corp-indigo) 100%);
+  --gradient-corp-secondary: linear-gradient(135deg, var(--color-corp-blue) 0%, var(--color-corp-light-blue) 50%, var(--color-corp-sky) 100%);
+  --gradient-corp-accent: linear-gradient(135deg, var(--color-corp-indigo) 0%, var(--color-corp-purple) 100%);
+  --gradient-corp-success: linear-gradient(135deg, var(--color-corp-emerald) 0%, var(--color-corp-sky) 100%);
+  --gradient-corp-warm: linear-gradient(135deg, var(--color-corp-amber) 0%, var(--color-corp-rose) 100%);
+  --gradient-corp-subtle: linear-gradient(135deg, var(--color-corp-light-gray) 0%, var(--color-corp-white) 100%);
+  --gradient-corp-mesh: 
+    radial-gradient(at 40% 20%, var(--color-corp-indigo) 0px, transparent 50%),
+    radial-gradient(at 80% 0%, var(--color-corp-sky) 0px, transparent 50%),
+    radial-gradient(at 0% 50%, var(--color-corp-purple) 0px, transparent 50%),
+    radial-gradient(at 80% 50%, var(--color-corp-amber) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, var(--color-corp-rose) 0px, transparent 50%),
+    radial-gradient(at 80% 100%, var(--color-corp-emerald) 0px, transparent 50%),
+    radial-gradient(at 0% 0%, var(--color-corp-light-blue) 0px, transparent 50%);
+  
+  /* Fondos con texturas y patrones */
+  --pattern-dots: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+  --pattern-grid: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  --pattern-diagonal: repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(255,255,255,0.02) 2px, rgba(255,255,255,0.02) 4px);
+  
+  /* Sombras profesionales mejoradas */
+  --shadow-corp-soft: 0 2px 4px rgba(15, 23, 42, 0.06);
+  --shadow-corp-medium: 0 4px 12px rgba(15, 23, 42, 0.1);
+  --shadow-corp-strong: 0 8px 32px rgba(15, 23, 42, 0.15);
+  --shadow-corp-intense: 0 20px 60px rgba(15, 23, 42, 0.2);
+  --shadow-corp-colored: 0 8px 32px rgba(99, 102, 241, 0.2);
+  
+  /* Tipografía profesional */
+  --font-corp-primary: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-corp-display: 'Inter Display', 'Inter', sans-serif;
+  --font-corp-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  
+  /* Espaciado profesional mejorado */
+  --space-corp-xs: 0.375rem;
+  --space-corp-sm: 0.75rem;
+  --space-corp-md: 1.5rem;
+  --space-corp-lg: 2.5rem;
+  --space-corp-xl: 4rem;
+  --space-corp-2xl: 6rem;
+  
+  /* Transiciones suaves profesionales */
+  --transition-corp-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-corp-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-corp-slow: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ========================================
+   HERO SECTION PROFESIONAL MEJORADO
+   ======================================== */
+
+.hero-professional {
+  background: var(--gradient-corp-primary);
+  background-size: 400% 400%;
+  animation: gradientShift 8s ease infinite;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-professional::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--pattern-grid);
+  background-size: 40px 40px;
+  opacity: 0.1;
+  pointer-events: none;
+}
+
+.hero-professional::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: var(--gradient-corp-mesh);
+  opacity: 0.3;
+  animation: meshRotate 20s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes meshRotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.hero-content-professional {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-corp-lg);
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+
+.hero-title-professional {
+  font-family: var(--font-corp-display);
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--color-corp-white);
+  margin-bottom: var(--space-corp-md);
+  background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.hero-subtitle-professional {
+  font-family: var(--font-corp-primary);
+  font-size: clamp(1.125rem, 2.5vw, 1.5rem);
+  font-weight: 400;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: var(--space-corp-xl);
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.hero-cta-professional {
+  display: flex;
+  gap: var(--space-corp-md);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ========================================
+   BOTONES PROFESIONALES
+   ======================================== */
+
+.btn-professional-primary {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-corp-sm) var(--space-corp-lg);
+  background: var(--color-corp-white);
+  color: var(--color-corp-navy);
+  font-family: var(--font-corp-primary);
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: var(--transition-corp-smooth);
+  box-shadow: var(--shadow-corp-medium);
+  border: none;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-professional-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.btn-professional-primary:hover::before {
+  left: 100%;
+}
+
+.btn-professional-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-corp-strong);
+}
+
+.btn-professional-secondary {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-corp-sm) var(--space-corp-lg);
+  background: transparent;
+  color: var(--color-corp-white);
+  font-family: var(--font-corp-primary);
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  transition: var(--transition-corp-smooth);
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+}
+
+.btn-professional-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+}
+
+/* ========================================
+   CARDS PROFESIONALES
+   ======================================== */
+
+.card-professional {
+  background: var(--color-corp-white);
+  border-radius: 12px;
+  padding: var(--space-corp-lg);
+  box-shadow: var(--shadow-corp-soft);
+  transition: var(--transition-corp-smooth);
+  border: 1px solid rgba(203, 213, 225, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.card-professional::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--gradient-corp-secondary);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.card-professional:hover::before {
+  transform: scaleX(1);
+}
+
+.card-professional:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-corp-medium);
+}
+
+.card-stat {
+  text-align: center;
+  background: rgba(255, 255, 255, 0.98);
+  border-radius: var(--radius-corp-lg);
+  padding: var(--space-corp-xl);
+  box-shadow: var(--shadow-corp-md);
+  transition: all var(--transition-corp-smooth);
+  position: relative;
+  overflow: hidden;
+}
+
+.card-stat::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--gradient-corp-accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--transition-corp-smooth);
+}
+
+.card-stat:hover::before {
+  transform: scaleX(1);
+}
+
+.card-stat:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-corp-lg);
+}
+
+.card-stat-icon {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto var(--space-corp-md);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: white;
+  position: relative;
+  z-index: 1;
+}
+
+.card-stat:nth-child(1) .card-stat-icon {
+  background: var(--gradient-corp-blue);
+}
+
+.card-stat:nth-child(2) .card-stat-icon {
+  background: var(--gradient-corp-purple);
+}
+
+.card-stat:nth-child(3) .card-stat-icon {
+  background: var(--gradient-corp-emerald);
+}
+
+.card-stat:nth-child(4) .card-stat-icon {
+  background: var(--gradient-corp-amber);
+}
+
+.card-stat-number {
+  font-family: var(--font-corp-display);
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--color-corp-navy);
+  margin-bottom: var(--space-corp-xs);
+  background: var(--gradient-corp-secondary);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.card-stat-label {
+  font-family: var(--font-corp-primary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-corp-dark-gray);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ========================================
+   SECCIONES PROFESIONALES MEJORADAS
+   ======================================== */
+
+.section-professional {
+  padding: var(--space-corp-2xl) 0;
+  position: relative;
+  background: var(--color-corp-white);
+}
+
+.section-professional-stats {
+  background: var(--gradient-corp-subtle);
+  background-size: 200% 200%;
+  animation: subtleGradient 10s ease infinite;
+  position: relative;
+}
+
+.section-professional-stats::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--pattern-dots);
+  background-size: 20px 20px;
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.section-professional-features {
+  background: var(--gradient-corp-secondary);
+  background-size: 300% 300%;
+  animation: gradientShift 12s ease infinite;
+  position: relative;
+  color: white;
+}
+
+.section-professional-features::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--pattern-diagonal);
+  background-size: 8px 8px;
+  opacity: 0.1;
+  pointer-events: none;
+}
+
+.section-professional-cta {
+  background: var(--gradient-corp-accent);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+  position: relative;
+}
+
+.section-professional-cta::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--gradient-corp-mesh);
+  opacity: 0.2;
+  pointer-events: none;
+}
+
+@keyframes subtleGradient {
+  0%, 100% { background-position: 0% 0%; }
+  50% { background-position: 100% 100%; }
+}
+
+.section-header-professional {
+  text-align: center;
+  margin-bottom: var(--space-corp-xl);
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
+  z-index: 1;
+}
+
+.section-title-professional {
+  font-family: var(--font-corp-display);
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 700;
+  color: var(--color-corp-navy);
+  margin-bottom: var(--space-corp-md);
+  line-height: 1.2;
+  position: relative;
+}
+
+.section-professional-features .section-title-professional {
+  color: white;
+}
+
+.section-professional-cta .section-title-professional {
+  color: white;
+}
+
+.section-subtitle-professional {
+  font-family: var(--font-corp-primary);
+  font-size: 1.25rem;
+  color: var(--color-corp-dark-gray);
+  line-height: 1.6;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.section-professional-features .section-subtitle-professional {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.section-professional-cta .section-subtitle-professional {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Iconos decorativos para secciones */
+.section-icon {
+  position: absolute;
+  font-size: 8rem;
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.section-icon-stats {
+  top: 10%;
+  right: 5%;
+  color: var(--color-corp-blue);
+}
+
+.section-icon-features {
+  top: 15%;
+  left: 5%;
+  color: white;
+}
+
+.section-icon-cta {
+  bottom: 10%;
+  right: 8%;
+  color: white;
+}
+
+/* ========================================
+   GRID PROFESIONAL
+   ======================================== */
+
+.grid-professional {
+  display: grid;
+  gap: var(--space-corp-lg);
+  margin: 0 auto;
+  max-width: 1200px;
+  padding: 0 var(--space-corp-lg);
+}
+
+.grid-professional-2 {
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.grid-professional-3 {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.grid-professional-4 {
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+/* ========================================
+   FEATURES PROFESIONALES
+   ======================================== */
+
+.feature-professional {
+  background: var(--color-corp-white);
+  border-radius: 12px;
+  padding: var(--space-corp-lg);
+  text-align: center;
+  box-shadow: var(--shadow-corp-soft);
+  transition: var(--transition-corp-smooth);
+  border: 1px solid rgba(203, 213, 225, 0.2);
+}
+
+.feature-professional:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-corp-strong);
+}
+
+.card-feature {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-corp-lg);
+  padding: var(--space-corp-xl);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(15px);
+  transition: all var(--transition-corp-smooth);
+  position: relative;
+  overflow: hidden;
+  text-align: left;
+}
+
+.card-feature::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.8);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--transition-corp-smooth);
+}
+
+.card-feature:hover::before {
+  transform: scaleX(1);
+}
+
+.card-feature:hover {
+  transform: translateY(-8px);
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.card-feature-icon {
+  width: 70px;
+  height: 70px;
+  border-radius: var(--radius-corp-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--color-corp-navy);
+  background: rgba(255, 255, 255, 0.9);
+  margin-bottom: var(--space-corp-lg);
+  position: relative;
+  z-index: 1;
+}
+
+.feature-icon-professional {
+  font-size: 3rem;
+  margin-bottom: var(--space-corp-md);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 80px;
+  height: 80px;
+  background: var(--gradient-corp-subtle);
+  border-radius: 50%;
+  margin: 0 auto var(--space-corp-md);
+}
+
+.feature-title-professional {
+  font-family: var(--font-corp-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: var(--space-corp-md);
+  line-height: 1.3;
+}
+
+.section-professional-features .feature-title-professional {
+  color: white;
+}
+
+.feature-description-professional {
+  font-family: var(--font-corp-primary);
+  line-height: 1.6;
+  font-size: 1rem;
+}
+
+.section-professional-features .feature-description-professional {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* ========================================
+   RESPONSIVIDAD PROFESIONAL
+   ======================================== */
+
+@media (max-width: 768px) {
+  .hero-professional {
+    min-height: 90vh;
+  }
+  
+  .hero-content-professional {
+    padding: 0 var(--space-corp-md);
+  }
+  
+  .hero-cta-professional {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .btn-professional-primary,
+  .btn-professional-secondary {
+    width: 100%;
+    max-width: 280px;
+    justify-content: center;
+  }
+  
+  .grid-professional {
+    padding: 0 var(--space-corp-md);
+    gap: var(--space-corp-md);
+  }
+  
+  .section-professional {
+    padding: var(--space-corp-xl) 0;
+  }
+}
+
+/* ========================================
+   ANIMACIONES PROFESIONALES
+   ======================================== */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.animate-delay-100 { animation-delay: 0.1s; }
+.animate-delay-200 { animation-delay: 0.2s; }
+.animate-delay-300 { animation-delay: 0.3s; }
+.animate-delay-400 { animation-delay: 0.4s; }

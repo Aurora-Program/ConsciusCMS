@@ -1,0 +1,37 @@
+{
+  "$schema": "./templates.schema.json",
+  "version": 1,
+  "templates": [
+    {
+      "name": "examples",
+      "alias": ["exmaples"],
+      "schemaVersion": 1,
+      "description": "Listado simple de páginas de ejemplo",
+      "fields": [
+        { "name": "Title", "type": "text", "required": true },
+        { "name": "Subtitle", "type": "text", "required": false },
+        { "name": "Content", "type": "richtext", "required": false }
+      ]
+    },
+    {
+      "name": "article",
+      "schemaVersion": 1,
+      "description": "Artículo con título, resumen y cuerpo",
+      "fields": [
+        { "name": "Title", "type": "text", "required": true },
+        { "name": "Summary", "type": "text", "required": false },
+        { "name": "Body", "type": "richtext", "required": true }
+      ]
+    },
+    {
+      "name": "project",
+      "schemaVersion": 1,
+      "description": "Proyecto con metadata básica",
+      "fields": [
+        { "name": "Title", "type": "text", "required": true },
+        { "name": "Description", "type": "text", "required": true },
+        { "name": "Status", "type": "enum", "values": ["idea", "active", "archived"], "required": true }
+      ]
+    }
+  ]
+}
