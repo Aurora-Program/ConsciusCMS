@@ -3,12 +3,13 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 import {  iEditorState, iSchemaField, iListComponent, iPageValue} from "../types";
 
-import {fetchPageByPage, fetchPages, addPage, savePage, deletePage, updatePage, requestPublishIntent, publishPage, publishDelete } from './editorService.ts'
+import {fetchPageByPage, fetchPagesBatch, addPage, savePage, deletePage, updatePage, requestPublishIntent, publishPage, publishDelete } from './editorService.ts'
 
 
 
 
 const noError =  {status:false, titulo: "No error", descripcion: "No error"}
+const PAGE_BATCH_SIZE = 200
 
 const initialState : iEditorState = {
 
@@ -18,13 +19,24 @@ const initialState : iEditorState = {
         Template:""
         },
         loading: false,
+        nextKey: null,
+        hasMore: true,
         Error: noError
       
 }
 
 
 export const loadPages = createAsyncThunk("Page/LoadPage",async () =>{
-    return (fetchPages())
+    return (fetchPagesBatch({ limit: PAGE_BATCH_SIZE }))
+})
+
+export const loadMorePages = createAsyncThunk("Page/LoadMorePages", async (_, thunkAPI) => {
+    const state: any = thunkAPI.getState();
+    const editorState = state?.editor;
+    if (!editorState?.hasMore || !editorState?.nextKey) {
+        return { items: [], nextKey: editorState?.nextKey ?? null, skipped: true };
+    }
+    return fetchPagesBatch({ limit: PAGE_BATCH_SIZE, nextKey: editorState.nextKey });
 })
 
 
@@ -138,12 +150,45 @@ const editorSlice =  createSlice(
         extraReducers: (builder) => {
             builder.addCase(loadPages.fulfilled,(state,action)=>{
             
-                state.pages = action.payload
+                state.pages = action.payload.items
+                state.nextKey = action.payload.nextKey
+                state.hasMore = !!action.payload.nextKey
+                state.loading = false
             
+            }),
+            builder.addCase(loadPages.pending,(state)=>{
+                state.loading = true
             }),
             builder.addCase(loadPages.rejected,(state,action)=>{
                 state.Error = {status: true, titulo: action.error.message, description:action.error.stack}
+                state.loading = false
             
+            }),
+
+            builder.addCase(loadMorePages.pending,(state)=>{
+                state.loading = true
+            }),
+            builder.addCase(loadMorePages.fulfilled,(state,action)=>{
+                if ((action.payload as any)?.skipped) {
+                    state.loading = false
+                    return
+                }
+                const incoming = action.payload.items || []
+                const existing = new Set(state.pages.map((i: any) => `${i.Page}::${i.Template}`))
+                incoming.forEach((item: any) => {
+                    const key = `${item.Page}::${item.Template}`
+                    if (!existing.has(key)) {
+                        state.pages.push(item)
+                        existing.add(key)
+                    }
+                })
+                state.nextKey = action.payload.nextKey
+                state.hasMore = action.payload.nextKey !== null && action.payload.nextKey !== undefined
+                state.loading = false
+            }),
+            builder.addCase(loadMorePages.rejected,(state,action)=>{
+                state.Error = {status: true, titulo: action.error.message, description:action.error.stack}
+                state.loading = false
             }),
 
 
@@ -258,4 +303,6 @@ const editorSlice =  createSlice(
 export default editorSlice.reducer
 
 export const {editComponent, loadNewPage, addNewPage, updateSelectedPage, removeError, newSelectedPage, renameSelectedPage} =  editorSlice.actions
+
+export { loadPages, loadMorePages }
 

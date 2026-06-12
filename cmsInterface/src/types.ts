@@ -83,6 +83,8 @@ export interface iSchemaPage {
     pages: iPage[]
     loading: boolean
     Error: any
+    nextKey?: string | null
+    hasMore?: boolean
     data?: any[]
   }
 

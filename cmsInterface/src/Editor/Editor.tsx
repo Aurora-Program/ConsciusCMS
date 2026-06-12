@@ -5,7 +5,7 @@ import { useT } from "../util/useTranslation"
 import { loadSchemas, selectSchema } from "../Schema/schemaSlice"
 import "./editor.css"
 import "../profile.css"
-import { loadPages,  selectPageAction,  newSelectedPage } from "./editorSlice"
+import { loadPages, loadMorePages,  selectPageAction,  newSelectedPage } from "./editorSlice"
 import Field from "./Fields"
 import {  iSchemaPage, iPage, iSchemaField, iPageValue } from "../types"
 import { Tab, Tabs } from "react-bootstrap"
@@ -38,6 +38,7 @@ const [showPreview, setShowPreview] = useState(false)
 const [showConfirmDelete, setShowConfirmDelete] = useState(false)
 const dispatch = useAppDispatch()
 const loading = useAppSelector((state) => state.editor.loading)
+const hasMorePages = useAppSelector((state: any) => state.editor.hasMore)
 const [filterName, setFilterName] = useState("")
 const [filterTemplate, setFilterTemplate] = useState("xxx")
 const [filterList, setFilterList] = useState("")
@@ -56,12 +57,22 @@ const [publishMessage, setPublishMessage] = useState<string | null>(null)
 const [publishToken, setPublishToken] = useState<string | null>(null)
 const [publishAction, setPublishAction] = useState<'save'|'delete'|'none'>('none')
 
+const normalizeDisplayText = (input: string = '') => {
+  if (!input) return input
+  return input
+    .replace(/≤/g, 'ó')
+    .replace(/φ/g, 'í')
+    .replace(/ß/g, 'á')
+    .replace(/±/g, 'ñ')
+    .replace(/·/g, 'ú')
+}
+
 // Token is now requested only on Save button click to avoid duplicate requests
 
 function filterPages(){
   let temp = pages
   if (filterTemplate !== ""){
-    temp = pages.filter((i: iPage) => i.Template === filterTemplate)
+    temp = pages.filter((i: iPage) => (i.Template || "").toLowerCase() === filterTemplate.toLowerCase())
   }
   if (filterName!==""){
     temp = temp.filter((i: iPage)=> i.Page.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().includes(filterName.toLowerCase()))
@@ -71,6 +82,12 @@ function filterPages(){
 
 function selectBlock(v: number){
     setNum(v)
+}
+
+function loadMoreInBatches(){
+  if (!loading && hasMorePages) {
+    dispatch(loadMorePages() as any)
+  }
 }
 
 async function clickOnCreatePage(){
@@ -127,6 +144,14 @@ const matchedFields = (components && selectedPage && selectedPage.Template)
 useEffect(()=> {dispatch(loadPages())},[])
 useEffect(()=> {dispatch(loadSchemas())},[])
 
+useEffect(() => {
+  const totalFiltered = filterPages().length
+  const totalPages = Math.max(1, Math.ceil(totalFiltered / block))
+  if (hasMorePages && !loading && num >= totalPages) {
+    dispatch(loadMorePages() as any)
+  }
+}, [num, filterName, filterTemplate, hasMorePages, loading])
+
     return (
 
 
@@ -152,7 +177,7 @@ useEffect(()=> {dispatch(loadSchemas())},[])
                       <path d="M16 17H8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                     {t('editor.tabPages')}
-                    <span className="editor-tab-count">{pages.filter((p: iPage) => templates.some((t: iSchemaPage) => t.CType === "page" && t.page === p.Template)).length}</span>
+                    <span className="editor-tab-count">{pages.filter((p: iPage) => templates.some((t: iSchemaPage) => t.CType === "page" && t.page.toLowerCase() === (p.Template || "").toLowerCase())).length}</span>
                   </span>
                 }>  
                    
@@ -170,11 +195,11 @@ useEffect(()=> {dispatch(loadSchemas())},[])
                                  ?   
                                 <button className="editor-template-button" onClick={()=>{setFilterTemplate(item.page); setNum(1) }}>
                                   <span className="editor-template-tag" data-template={item.page.toLowerCase()}>{item.page}</span>
-                                  <span className="editor-template-count">{pages.filter((p: iPage) => p.Template === item.page).length}/{item.max || '∞'}</span>
+                                  <span className="editor-template-count">{pages.filter((p: iPage) => (p.Template || "").toLowerCase() === item.page.toLowerCase()).length}/{item.max || '∞'}</span>
                                 </button> :
                                 <div className="editor-template-button active">
                                   <span className="editor-template-tag active" data-template={item.page.toLowerCase()}>{item.page}</span>
-                                  <span className="editor-template-count">{pages.filter((p: iPage) => p.Template === item.page).length}/{item.max || '∞'}</span>
+                                  <span className="editor-template-count">{pages.filter((p: iPage) => (p.Template || "").toLowerCase() === item.page.toLowerCase()).length}/{item.max || '∞'}</span>
                                 </div>
                                
                                 }   
@@ -194,7 +219,7 @@ useEffect(()=> {dispatch(loadSchemas())},[])
                     
                         <div className="ms-auto">
                            
-                        <Button variant= "primary" size="sm"  onClick={clickOnCreatePage} disabled={filterTemplate==="xxx" || pages.filter((i: iPage)=>  i.Template === filterTemplate).length >= (templates.find((i: iSchemaPage) => i.page === filterTemplate)?.max ?? 0) }  className="modern-add-btn" style={{fontSize: '0.8rem', padding: '0.35rem 0.8rem'}}>
+                        <Button variant= "primary" size="sm"  onClick={clickOnCreatePage} disabled={filterTemplate==="xxx" || pages.filter((i: iPage)=>  (i.Template || "").toLowerCase() === filterTemplate.toLowerCase()).length >= (templates.find((i: iSchemaPage) => i.page.toLowerCase() === filterTemplate.toLowerCase())?.max ?? 0) }  className="modern-add-btn" style={{fontSize: '0.8rem', padding: '0.35rem 0.8rem'}}>
                           <i className="bi bi-plus-circle"></i>{t('editor.addButton')}
                         </Button>
                         </div>
@@ -231,7 +256,7 @@ useEffect(()=> {dispatch(loadSchemas())},[])
           <div className="editorListTableTdExtra editorListTableTr"> 
             <span className="editor-template-tag" data-template={item.Template.toLowerCase()}>{item.Template}</span>
           </div> 
-          <div className="editorListTableTd editorListTableTr">{item.Page}</div> <div className="editorListTableTdExtra editorListTableTr " > { item.updateTime?.substring(0,21)}</div><div className="editorListTableTdExtra editorListTableTr">{item.updateUser}</div>
+          <div className="editorListTableTd editorListTableTr">{normalizeDisplayText(item.Page)}</div> <div className="editorListTableTdExtra editorListTableTr " > { item.updateTime?.substring(0,21)}</div><div className="editorListTableTdExtra editorListTableTr">{item.updateUser}</div>
          <div className="editorListTableTdActions editorListTableTr">
             <SplitButton
               variant="outline-primary"
@@ -312,6 +337,12 @@ useEffect(()=> {dispatch(loadSchemas())},[])
                         <div style={{display:"flex", width:"100%" , justifyContent:"center"}}>
                       
                             <PMAPagination handleClick={selectBlock} number={num} block={block} numberOfItems={filterPages().length} ></PMAPagination>  </div>
+
+                        <div style={{display:"flex", width:"100%", justifyContent:"center", marginTop:"8px"}}>
+                          <Button variant="secondary" size="sm" onClick={loadMoreInBatches} disabled={loading || !hasMorePages}>
+                            {loading ? "Cargando..." : hasMorePages ? "Cargar mas" : "No hay mas resultados"}
+                          </Button>
+                        </div>
      
                        
 
@@ -327,7 +358,7 @@ useEffect(()=> {dispatch(loadSchemas())},[])
                       <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                     Partial Content
-                    <span className="editor-tab-count">{pages.filter((p: iPage) => templates.some((t: iSchemaPage) => t.CType === "partial" && t.page === p.Template)).length}</span>
+                    <span className="editor-tab-count">{pages.filter((p: iPage) => templates.some((t: iSchemaPage) => t.CType === "partial" && t.page.toLowerCase() === (p.Template || "").toLowerCase())).length}</span>
                   </span>
                 }>
                 <div className="editorTabDiv">
@@ -343,11 +374,11 @@ useEffect(()=> {dispatch(loadSchemas())},[])
                                  ?   
                                 <button className="editor-template-button" onClick={()=>{setFilterTemplate(item.page); setNum(1) }}>
                                   <span className="editor-template-tag" data-template={item.page.toLowerCase()}>{item.page}</span>
-                                  <span className="editor-template-count">{pages.filter((p: iPage) => p.Template === item.page).length}/{item.max || '∞'}</span>
+                                  <span className="editor-template-count">{pages.filter((p: iPage) => (p.Template || "").toLowerCase() === item.page.toLowerCase()).length}/{item.max || '∞'}</span>
                                 </button> :
                                 <div className="editor-template-button active">
                                   <span className="editor-template-tag active" data-template={item.page.toLowerCase()}>{item.page}</span>
-                                  <span className="editor-template-count">{pages.filter((p: iPage) => p.Template === item.page).length}/{item.max || '∞'}</span>
+                                  <span className="editor-template-count">{pages.filter((p: iPage) => (p.Template || "").toLowerCase() === item.page.toLowerCase()).length}/{item.max || '∞'}</span>
                                 </div>
                                 }   
                                
@@ -403,7 +434,7 @@ useEffect(()=> {dispatch(loadSchemas())},[])
          <div className="editorListTableTdExtra editorListTableTr"> 
            <span className="editor-template-tag" data-template={item.Template.toLowerCase()}>{item.Template}</span>
          </div> 
-          <div className="editorListTableTd editorListTableTr"  >{item.Page}</div> 
+          <div className="editorListTableTd editorListTableTr"  >{normalizeDisplayText(item.Page)}</div> 
           <div className="editorListTableTdExtra editorListTableTr"> { item.updateTime?.substring(0,21)}</div>
           <div  className="editorListTableTdExtra editorListTableTr">{item.updateUser}</div>
           <div className="editorListTableTdActions editorListTableTr">
@@ -470,6 +501,12 @@ useEffect(()=> {dispatch(loadSchemas())},[])
                         <div className="editorListPagination">
                         
                             <PMAPagination handleClick={selectBlock} number={num} block={block} numberOfItems={filterPages().length} ></PMAPagination>  </div>
+
+                        <div style={{display:"flex", width:"100%", justifyContent:"center", marginTop:"8px"}}>
+                          <Button variant="secondary" size="sm" onClick={loadMoreInBatches} disabled={loading || !hasMorePages}>
+                            {loading ? "Cargando..." : hasMorePages ? "Cargar mas" : "No hay mas resultados"}
+                          </Button>
+                        </div>
              
                        
 

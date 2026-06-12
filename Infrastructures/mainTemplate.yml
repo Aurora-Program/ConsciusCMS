@@ -206,9 +206,25 @@ Resources:
       AttributeDefinitions:
         - AttributeName: Page
           AttributeType: S # S for String
+        - AttributeName: PAGE
+          AttributeType: S
+        - AttributeName: updateTimeEpoch
+          AttributeType: N
       KeySchema:
         - AttributeName: Page
           KeyType: HASH # Partition key
+      GlobalSecondaryIndexes:
+        - IndexName: PagesByUpdatedAt
+          KeySchema:
+            - AttributeName: PAGE
+              KeyType: HASH
+            - AttributeName: updateTimeEpoch
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+          ProvisionedThroughput:
+            ReadCapacityUnits: 5
+            WriteCapacityUnits: 5
       ProvisionedThroughput:
         ReadCapacityUnits: 5
         WriteCapacityUnits: 5
@@ -298,6 +314,7 @@ Resources:
             Action:
               - dynamodb:PutItem
               - dynamodb:GetItem
+                  - dynamodb:Query
               - dynamodb:UpdateItem
             Resource: !GetAtt ConscienceTokensTable.Arn
 
@@ -399,13 +416,6 @@ Resources:
         - email
         - name
 
-  # Cognito Hosted UI domain using account-name from SSM as prefix
-  CognitoUserPoolDomain:
-    Type: AWS::Cognito::UserPoolDomain
-    Properties:
-      Domain: 'consciuscms'
-      UserPoolId: !Ref UserPool
-
   MicroserviceExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -435,9 +445,11 @@ Resources:
                 Action:
                   - dynamodb:GetItem
                   - dynamodb:PutItem
+                  - dynamodb:Query
                   - dynamodb:Scan
                   - dynamodb:UpdateItem
                   - dynamodb:DeleteItem
+
                 Resource: !Sub arn:aws:dynamodb:*:${AWS::AccountId}:table/*
 
   CognitoAuthLambdaExecutionRole:
@@ -574,7 +586,7 @@ Resources:
               const resource = event.resource; // p.ej. "/pages", "/pages/{page}", "/ethics/token"
               const method = event.httpMethod;
 
-              // 1) Solicitud de token de concienciación
+              // 1) Solicitud de token de concienciacion
               if (resource === "/ethics/token" && method === "POST") {
                 const email = event?.requestContext?.authorizer?.email;
                 const payload = JSON.parse(event.body || "{}");
@@ -582,11 +594,11 @@ Resources:
                 const tokenItem = await createToken(email, payload.purpose, payload.page);
 
                 const message =
-                  "⚠️ Awareness Notice\n" +
+                  "[WARNING] Awareness Notice\n" +
                   "Low-quality, false, manipulative, or destructive information pushes complex " +
                   "systems toward instability. Before publishing, pause and consider the long-term, " +
                   "at-scale impact on yourself, your community, the internet, and the planet.\n\n" +
-                  "If—after honest reflection—you believe your content is constructive and responsible, " +
+                  "If after honest reflection you believe your content is constructive and responsible, " +
                   "use the token below to proceed with publication.";
 
                 const checklist = [
@@ -625,14 +637,20 @@ Resources:
 
                 const paramis = {
                   TableName: PAGES_TABLE,
-                  ProjectionExpression: "Page,Template,updateTime,updateUser"
+                  IndexName: "PagesByUpdatedAt",
+                  KeyConditionExpression: "PAGE = :page",
+                  ExpressionAttributeValues: {
+                    ":page": "PAGE"
+                  },
+                  ProjectionExpression: "Page,Template,updateTime,updateUser,updateTimeEpoch",
+                  ScanIndexForward: false
                 };
                 const allItems = [];
                 let lastEvaluatedKey = exclusiveStartKey;
 
                 do {
                   const remaining = safeLimit - allItems.length;
-                  const pageResult = await dynamo.scan({
+                  const pageResult = await dynamo.query({
                     ...paramis,
                     ExclusiveStartKey: lastEvaluatedKey,
                     Limit: remaining
@@ -659,10 +677,13 @@ Resources:
                 const dpage = decodeURI(event.pathParameters.page);
                 const parames = {
                   TableName: PAGES_TABLE,
-                  ExpressionAttributeValues: { ":p": dpage },
-                  FilterExpression: "Page = :p"
+                  Key: { Page: dpage }
                 };
-                body = await dynamo.scan(parames);
+                const pageResult = await dynamo.get(parames);
+                body = {
+                  Items: pageResult.Item ? [pageResult.Item] : [],
+                  Count: pageResult.Item ? 1 : 0
+                };
               }
               else if (resource === "/pages" && method === "POST") {
                 // Requiere token
@@ -671,11 +692,14 @@ Resources:
                 await validateAndConsumeToken(token, email);
 
                 let payload = { ...JSON.parse(event.body) };
-                const now = new Date().toString();
-                payload["updateTime"] = now;
+                const nowIso = new Date().toISOString();
+                const nowEpoch = Date.now();
+                payload["updateTime"] = nowIso;
+                payload["updateTimeEpoch"] = nowEpoch;
                 payload["updateUser"] = email;
-                payload["createdTime"] = now;
+                payload["createdTime"] = nowIso;
                 payload["creatorUser"] = email;
+                payload["PAGE"] = "PAGE";
 
                 const paramos = {
                   TableName: PAGES_TABLE,
@@ -692,12 +716,16 @@ Resources:
                 await validateAndConsumeToken(token, email);
 
                 let payload = { ...JSON.parse(event.body) };
-                payload["updateTime"] = new Date().toString();
+                const nowIso = new Date().toISOString();
+                const nowEpoch = Date.now();
+                payload["updateTime"] = nowIso;
+                payload["updateTimeEpoch"] = nowEpoch;
                 payload["updateUser"] = email;
+                payload["PAGE"] = "PAGE";
 
                 const param = {
                   TableName: PAGES_TABLE,
-                  // Asegura que solo se actualicen páginas existentes
+                  // Asegura que solo se actualicen paginas existentes
                   ConditionExpression: "attribute_exists(Page)",
                   Item: JSON.parse(JSON.stringify(payload))
                 };
@@ -705,7 +733,7 @@ Resources:
                 body = payload;
               }
               else if (resource === "/pages" && method === "DELETE") {
-                // (Opcional) también podrías exigir token aquí:
+                // (Opcional) tambien podrias exigir token aqui:
                 // const token = event.headers?.['ethics-token'] || event.headers?.['Ethics-Token'];
                 // await validateAndConsumeToken(token, event?.requestContext?.authorizer?.email);
 

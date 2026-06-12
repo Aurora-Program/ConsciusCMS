@@ -3,7 +3,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 import {  iEditorState, iSchemaField} from "../types.ts";
 
-import {fetchPageByPage, fetchPages, addPage, savePage, deletePage  } from './editorService.ts'
+import {fetchPageByPage, fetchPagesBatch, addPage, savePage, deletePage  } from './editorService.ts'
 
 
 
@@ -18,13 +18,25 @@ const initialState : iEditorState = {
         Template:"",
         nameSelectedPage:"",
         },
+        nextKey: null,
+        hasMore: true,
         Error: noError
       
 }
 
 
 export const loadPages = createAsyncThunk("Page/LoadPage",async (payload) =>{
-    return (fetchPages())
+    return (fetchPagesBatch({ limit: 60 }))
+
+})
+
+export const loadMorePages = createAsyncThunk("Page/LoadMorePages", async (_, thunkAPI) => {
+    const state: any = thunkAPI.getState();
+    const editorState = state?.editor;
+    if (!editorState?.hasMore || !editorState?.nextKey) {
+      return { items: [], nextKey: null };
+    }
+    return fetchPagesBatch({ limit: 60, nextKey: editorState.nextKey });
 
 })
 
@@ -116,13 +128,41 @@ const editorSlice =  createSlice(
             },
         extraReducers: (builder) => {
             builder.addCase(loadPages.fulfilled,(state,action)=>{
+                state.pages = action.payload.items
+                state.nextKey = action.payload.nextKey
+                state.hasMore = !!action.payload.nextKey
+                state.loading = false
             
-                state.pages = action.payload
-            
+            }),
+            builder.addCase(loadPages.pending,(state)=>{
+                state.loading = true
             }),
             builder.addCase(loadPages.rejected,(state,action)=>{
                 state.Error = {status: true, titulo: action.error.message, description:action.error.stack}
+                state.loading = false
             
+            }),
+
+            builder.addCase(loadMorePages.pending,(state)=>{
+                state.loading = true
+            }),
+            builder.addCase(loadMorePages.fulfilled,(state,action)=>{
+                const incoming = action.payload.items || []
+                const existing = new Set(state.pages.map((i: any) => `${i.Page}::${i.Template}`))
+                incoming.forEach((item: any) => {
+                    const key = `${item.Page}::${item.Template}`
+                    if (!existing.has(key)) {
+                        state.pages.push(item)
+                        existing.add(key)
+                    }
+                })
+                state.nextKey = action.payload.nextKey
+                state.hasMore = !!action.payload.nextKey
+                state.loading = false
+            }),
+            builder.addCase(loadMorePages.rejected,(state,action)=>{
+                state.Error = {status: true, titulo: action.error.message, description:action.error.stack}
+                state.loading = false
             }),
 
 

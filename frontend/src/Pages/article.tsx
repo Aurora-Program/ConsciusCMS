@@ -15,6 +15,25 @@ function Article() {
     const { id } = useParams()
     const t = useT()
 
+    const normalizeDisplayText = (input: string = '') => {
+        if (!input) return input
+        return input
+            .replace(/≤/g, 'ó')
+            .replace(/φ/g, 'í')
+            .replace(/ß/g, 'á')
+            .replace(/±/g, 'ñ')
+            .replace(/·/g, 'ú')
+    }
+
+    const decodeRouteId = (raw?: string) => {
+        if (!raw) return ''
+        try {
+            return decodeURIComponent(raw)
+        } catch {
+            return raw
+        }
+    }
+
     const visitCount = localStorage.getItem('value') ? Number(localStorage.getItem('value')) : 0;
 
     useEffect(() => { 
@@ -35,13 +54,33 @@ function Article() {
 
     useEffect(() => {
         if (id) {
+            const decodedId = decodeRouteId(id)
             console.log("=== ARTICLE SELECTPAGE DEBUG ===");
-            console.log("Loading article with Page ID:", id);
+            console.log("Loading article with Page ID:", decodedId);
+
+            const normalizeLookup = (v: string = '') =>
+                v
+                    .toLowerCase()
+                    .replace(/≤/g, 'ó')
+                    .replace(/φ/g, 'í')
+                    .replace(/ß/g, 'á')
+                    .replace(/±/g, 'ñ')
+                    .replace(/·/g, 'ú')
+
+            let resolvedId = decodedId
+            const byExact = pages.find((p: any) => p?.Page === decodedId)
+            if (!byExact) {
+                const target = normalizeLookup(decodedId)
+                const byNormalized = pages.find((p: any) => normalizeLookup(String(p?.Page || '')) === target)
+                if (byNormalized?.Page) {
+                    resolvedId = byNormalized.Page
+                }
+            }
             
             setIsLoading(true);
             
             // Use selectPageAction to load complete article content
-            dispatch(selectPageAction(id))
+            dispatch(selectPageAction(resolvedId))
                 .unwrap()
                 .then((result) => {
                     console.log("selectPageAction successful:", result);
@@ -56,7 +95,7 @@ function Article() {
                     setIsLoading(false);
                 });
         }
-    }, [id, dispatch])
+    }, [id, dispatch, pages])
 
     // Monitor selectedPage from Redux store
     useEffect(() => {
@@ -141,13 +180,13 @@ function Article() {
                         )}
                         <i className="fas fa-chevron-right"></i>
                         <span className="aurora-breadcrumb-current">
-                            {article.Page || 'Artículo'}
+                            {normalizeDisplayText(article.Page || 'Artículo')}
                         </span>
                     </div>
                     
                     <div className="aurora-article-header">
                         <h1 className="aurora-article-body-title">
-                            {article.Page || 'Artículo'}
+                            {normalizeDisplayText(article.Page || 'Artículo')}
                         </h1>
                     </div>
                 </div>

@@ -119,26 +119,66 @@ export async function deletePage(data: any){
 
 
 export async function fetchPageByPage(payload: string){
-    console.log("payload:"+payload)
-    const url = import.meta.env.VITE_URL_API_PAGES + "/" + payload
-    // const pageBucket = import.meta.env.VITE_CONTENT_BUCKET_URL // (unused, removed)
+    console.log("payload:" + payload)
+
+    const variants = new Set<string>()
+    const addVariant = (v?: string) => {
+        if (!v) return
+        const t = v.trim()
+        if (t.length > 0) variants.add(t)
+    }
+
+    const normalizeMojibake = (v: string) =>
+        v
+            .replace(/≤/g, 'ó')
+            .replace(/φ/g, 'í')
+            .replace(/ß/g, 'á')
+            .replace(/±/g, 'ñ')
+            .replace(/·/g, 'ú')
+
+    const denormalizeMojibake = (v: string) =>
+        v
+            .replace(/ó/g, '≤')
+            .replace(/í/g, 'φ')
+            .replace(/á/g, 'ß')
+            .replace(/ñ/g, '±')
+            .replace(/ú/g, '·')
+
+    addVariant(payload)
+    try { addVariant(decodeURIComponent(payload)) } catch {}
+    addVariant(normalizeMojibake(payload))
+    addVariant(denormalizeMojibake(payload))
+    try {
+        const decoded = decodeURIComponent(payload)
+        addVariant(normalizeMojibake(decoded))
+        addVariant(denormalizeMojibake(decoded))
+    } catch {}
 
     const config = {
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
-           
         }
-    };
-    const res = await axios.get( url );
+    }
 
+    let lastErr: any = null
+    for (const candidate of variants) {
+        try {
+            const safePayload = encodeURIComponent(candidate)
+            const url = import.meta.env.VITE_URL_API_PAGES + "/" + safePayload
+            const res = await axios.get(url, config)
+            const response: any = res?.data?.Items?.[0]
+            if (response) {
+                console.log("fetchPageByPage match:", candidate)
+                return { selectedPage: response, data: response?.values }
+            }
+        } catch (err) {
+            lastErr = err
+        }
+    }
 
-    console.log ("r: " + res['data'].Items)
-    const response : any = res['data'].Items[0]
-
-    const r = {selectedPage: response, data: response?.values}
-
-     return r
+    if (lastErr) throw lastErr
+    return { selectedPage: null, data: [] }
 
     }
 

@@ -15,6 +15,16 @@ function Articles() {
     // apiError state removed; errors are logged to console
     const t = useT()
 
+    const normalizeDisplayText = (input: string = '') => {
+        if (!input) return input
+        return input
+            .replace(/≤/g, 'ó')
+            .replace(/φ/g, 'í')
+            .replace(/ß/g, 'á')
+            .replace(/±/g, 'ñ')
+            .replace(/·/g, 'ú')
+    }
+
     const visitCount = localStorage.getItem('value') ? Number(localStorage.getItem('value')) : 0;
 
     // Helper function for text interpolation
@@ -217,12 +227,12 @@ function Articles() {
 
                                             <div className="aurora-article-content">
                                                 <Link 
-                                                    to={`/article/${article.Page}`} 
+                                                    to={`/article/${encodeURIComponent(article.Page || '')}`} 
                                                     className="aurora-article-title-link"
                                                 >
                                                     <h2 className="aurora-article-title">
                                                         {article.Title || article.Page 
-                                                            ? (article.Title || article.Page.replace(/([A-Z])/g, ' $1').replace(/^./, (str: string) => str.toUpperCase()))
+                                                            ? normalizeDisplayText(article.Title || article.Page.replace(/([A-Z])/g, ' $1').replace(/^./, (str: string) => str.toUpperCase()))
                                                             : <span className="aurora-no-content">
                                                                 <em>Sin título desde base de datos</em>
                                                               </span>

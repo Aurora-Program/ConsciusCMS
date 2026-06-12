@@ -146,9 +146,21 @@ export async function fetchPageByPage(payload: string) {
 }
 
 export async function fetchPages() {
+  const firstBatch = await fetchPagesBatch({ limit: 60 });
+  return firstBatch.items;
+}
+
+export async function fetchPagesBatch(params?: { limit?: number; nextKey?: string | null }) {
   const url = import.meta.env.VITE_URL_API_PAGES;
   await checkAccessTokenExpiration();
-  const res = await axios.get(url);
+  const limit = params?.limit ?? 60;
+  const nextKey = params?.nextKey ?? null;
+  const res = await axios.get(url, {
+    params: {
+      limit,
+      ...(nextKey ? { nextKey } : {}),
+    },
+  });
   const items = (res.data?.Items || []) as Array<{
     Page: string;
     Template: string;
@@ -160,7 +172,10 @@ export async function fetchPages() {
   items.forEach((item) =>
     payload.push({ Page: item.Page, Template: item.Template, values: [], updateTime: item.updateTime, updateUser: item.updateUser })
   );
-  return payload;
+  return {
+    items: payload,
+    nextKey: (res.data?.NextKey ?? null) as string | null,
+  };
 }
 
 export async function editPage(data: iSchemaField) {

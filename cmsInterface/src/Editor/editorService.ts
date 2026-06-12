@@ -12,6 +12,8 @@ type PagesListItem = {
     updateUser?: string;
 };
 
+const DEFAULT_BATCH_SIZE = 200;
+
 
 export const downloadFile = async (name: string) => {
     const res = await fetch(url_bucket + "/" + name, {
@@ -192,7 +194,8 @@ export async function deletePage(data: any){
 
 export async function fetchPageByPage(payload: string){
     console.log("payload:"+payload)
-    const url = import.meta.env.VITE_URL_API_PAGES + "/" + payload
+    const safePayload = encodeURIComponent(payload)
+    const url = import.meta.env.VITE_URL_API_PAGES + "/" + safePayload
     try{
     const res = await axios.get(url);
         console.log ("r: " + res['data'].Items)
@@ -205,29 +208,44 @@ export async function fetchPageByPage(payload: string){
     }
 
     }
-
-
-
     export async function fetchPages(){
+        const firstBatch = await fetchPagesBatch({ limit: DEFAULT_BATCH_SIZE });
+        return firstBatch.items;
+    }
+
+    export async function fetchPagesBatch(params?: { limit?: number; nextKey?: string | null }){
 
     const url = import.meta.env.VITE_URL_API_PAGES
     checkAccessTokenExpiration();
 
+    const limit = params?.limit ?? DEFAULT_BATCH_SIZE;
+    const nextKey = params?.nextKey ?? null;
+
     console.log("url: "+ url)
     
     try{
-        const res = await axios.get( url, { headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' } } );
+        const res = await axios.get(url, {
+            headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+            params: {
+                limit,
+                ...(nextKey ? { nextKey } : {})
+            }
+        });
         console.log (res['data'])
         
     const payload = [] as iPage[]
     (res['data'].Items as PagesListItem[]).forEach((item: PagesListItem) => {
-        payload.push({Page: item.Page, Template: item.Template, values: [], updateTime:item.updateTime, updateUser: item.updateUser})
+        const normalizedTemplate = (item.Template && item.Template.trim().length > 0) ? item.Template : "Articles";
+        payload.push({Page: item.Page, Template: normalizedTemplate, values: [], updateTime:item.updateTime, updateUser: item.updateUser})
     })
-        return payload
+        return {
+            items: payload,
+            nextKey: (res.data?.NextKey ?? res.data?.nextKey ?? null) as string | null
+        }
     }catch(err:any){
-        console.error('fetchPages error', err && err.response ? err.response.data : err);
+        console.error('fetchPagesBatch error', err && err.response ? err.response.data : err);
         const msg = err && err.response && err.response.data ? JSON.stringify(err.response.data) : err.message || String(err);
-        throw new Error(`fetchPages failed: ${msg}`);
+        throw new Error(`fetchPagesBatch failed: ${msg}`);
     }
     }
 
