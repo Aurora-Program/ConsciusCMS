@@ -304,5 +304,3 @@ export default editorSlice.reducer
 
 export const {editComponent, loadNewPage, addNewPage, updateSelectedPage, removeError, newSelectedPage, renameSelectedPage} =  editorSlice.actions
 
-export { loadPages, loadMorePages }
-
