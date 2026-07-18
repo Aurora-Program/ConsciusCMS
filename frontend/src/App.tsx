@@ -43,7 +43,6 @@ import StarterKitDemo from './Pages/StarterKitDemo';
 import ARCPlayground from './Pages/ARCPlayground';
 import ARCRulesEditor from './Pages/ARCRulesEditor';
 import ARCLiveDemo from './Pages/ARCLiveDemo';
-import Simulator from './Pages/simulator';
 import PureConstellacss from './Pages/ARCRulesEditor';
 import Test1 from './Pages/test1';
 
