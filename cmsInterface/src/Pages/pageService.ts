@@ -138,7 +138,10 @@ export async function fetchPageByPage(payload: string){
 
 
     console.log ("r: " + res['data'].Items)
-    const response : iSchemaField[] = res['data'].Items[0]
+    const response: any = res['data']?.Items?.[0] ?? { values: [] }
+
+    const safeArray = <T>(value: T[] | undefined | null): T[] => Array.isArray(value) ? value : []
+    const safeFind = <T extends { name?: string; Schema?: { name?: string } }>(items: T[] | undefined | null, predicate: (item: T) => boolean) => safeArray(items).find(predicate)
 
     const loadData = () => {
 
@@ -146,16 +149,16 @@ export async function fetchPageByPage(payload: string){
       
      
 
-        [...response.values.find(v => v.name == "Proyectos")?.value].sort((a,b)=> a.order - b.order)?.map((i)=>
+                safeArray(safeFind(response.values, v => v.name == "Proyectos")?.value).sort((a,b)=> a.order - b.order)?.map((i)=>
        { 
             let tempslides = [];
             
              console.log( i.value);
-             [...i.value?.find(v=>v.Schema.name == "Diapositivas")?.value].sort((a,b)=> a.order - b.order)?.map(d =>{
+                         safeArray(safeFind(i.value, v=>v.Schema?.name == "Diapositivas")?.value).sort((a,b)=> a.order - b.order)?.map(d =>{
                
-                tempslides.push({name: d?.value?.find(v=> v.Schema.name == "Titulo").value?.text, layout: d.value?.find(v=> v.Schema.name == "Pantalla completa")?.value?.value,  image:url_bucket+ "/" + d.value?.find(v=> v.Schema.name == "Fotografia")?.value?.name, color:d.value?.find(v=> v.Schema.name == "Color de la fuente")?.value?.value, nameAlt: d?.value?.find(v=> v.Schema.name == "Titulo Alternativo")?.value?.text, layoutAlt: d.value?.find(v=> v.Schema.name == "Pantalla completa alternativa")?.value?.value, imageAlt: d.value?.find(v=> v.Schema.name == "Fotografía Alternativa")?.value?.name ? url_bucket+ "/" + d.value?.find(v=> v.Schema.name == "Fotografía Alternativa")?.value?.name : undefined, nameDes: d?.value?.find(v=> v.Schema.name == "TituloDes")?.value?.text,  nameDesAlt: d?.value?.find(v=> v.Schema.name == "TituloDesAlt")?.value?.text  })})
+                                tempslides.push({name: safeFind(d?.value, v=> v.Schema?.name == "Titulo")?.value?.text, layout: safeFind(d.value, v=> v.Schema?.name == "Pantalla completa")?.value?.value,  image:url_bucket+ "/" + safeFind(d.value, v=> v.Schema?.name == "Fotografia")?.value?.name, color:safeFind(d.value, v=> v.Schema?.name == "Color de la fuente")?.value?.value, nameAlt: safeFind(d?.value, v=> v.Schema?.name == "Titulo Alternativo")?.value?.text, layoutAlt: safeFind(d.value, v=> v.Schema?.name == "Pantalla completa alternativa")?.value?.value, imageAlt: safeFind(d.value, v=> v.Schema?.name == "Fotografía Alternativa")?.value?.name ? url_bucket+ "/" + safeFind(d.value, v=> v.Schema?.name == "Fotografía Alternativa")?.value?.name : undefined, nameDes: safeFind(d?.value, v=> v.Schema?.name == "TituloDes")?.value?.text,  nameDesAlt: safeFind(d?.value, v=> v.Schema?.name == "TituloDesAlt")?.value?.text  })})
           
-              tempprojects.push( {name: i?.value?.find(v => v.Schema.name == "Nombre")?.value?.text, description:i?.value?.find(v => v.Schema.name == "Descripcion")?.value?.text, descriptionEn:i?.value?.find(v => v.Schema.name == "DescripcionEn")?.value?.text, descriptionCat:i?.value?.find(v => v.Schema.name == "DescripcionCat")?.value?.text, fichero:i?.value?.find(v => v.Schema.name == "Fichero ")?.value?.name,   slides:tempslides    
+                            tempprojects.push( {name: safeFind(i?.value, v => v.Schema?.name == "Nombre")?.value?.text, description:safeFind(i?.value, v => v.Schema?.name == "Descripcion")?.value?.text, descriptionEn:safeFind(i?.value, v => v.Schema?.name == "DescripcionEn")?.value?.text, descriptionCat:safeFind(i?.value, v => v.Schema?.name == "DescripcionCat")?.value?.text, fichero:safeFind(i?.value, v => v.Schema?.name == "Fichero ")?.value?.name,   slides:tempslides    
              
 
 
@@ -196,7 +199,8 @@ export async function fetchPageByPage(payload: string){
     const res = await axios.get( url, config );
     console.log (res['data'])
     const payload : iSchemaPage[] = []
-    res['data'].Items.map((item : iSchemaPageTable) => payload.push({Page: item.Page, Template: item.Template}))
+    const items = Array.isArray(res['data']?.Items) ? res['data'].Items : []
+    items.map((item : iSchemaPageTable) => payload.push({Page: item.Page, Template: item.Template}))
     return payload
     }
 

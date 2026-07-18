@@ -24,9 +24,10 @@ export const downloadFile = async (name: string) => {
     return URL.createObjectURL(imageBlob);
 }
 
+// Upload an image to the content bucket (authorized PUT)
 export const uploadImage = async (file: File, uniquename: string)=> {
 
-    checkAccessTokenExpiration();
+    await checkAccessTokenExpiration();
 
         try{
         await fetch(url_bucket + "/" + uniquename, {
@@ -43,6 +44,13 @@ export const uploadImage = async (file: File, uniquename: string)=> {
                 console.error("uploadImage error", e)
         }
 
+}
+
+export async function fetchPageByPage(payload: string) {
+    await checkAccessTokenExpiration();
+    const url = import.meta.env.VITE_URL_API_PAGES + "/" + payload;
+    const res = await axios.get(url);
+    return res.data?.Items?.[0] ?? { values: [] };
 }
 
 // ---------- Ethics token helpers ----------
@@ -186,26 +194,6 @@ export async function deletePage(data: any){
 
     await axios.delete( url, config );
     return data
-
-    }
-
-
-
-
-export async function fetchPageByPage(payload: string){
-    console.log("payload:"+payload)
-    const safePayload = encodeURIComponent(payload)
-    const url = import.meta.env.VITE_URL_API_PAGES + "/" + safePayload
-    try{
-    const res = await axios.get(url);
-        console.log ("r: " + res['data'].Items)
-    const response : any = res['data'].Items[0]
-        return response
-    }catch(err:any){
-        console.error('fetchPageByPage error', err && err.response ? err.response.data : err);
-        const msg = err && err.response && err.response.data ? JSON.stringify(err.response.data) : err.message || String(err);
-        throw new Error(`fetchPageByPage failed: ${msg}`);
-    }
 
     }
     export async function fetchPages(){

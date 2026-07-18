@@ -25,9 +25,9 @@
     "resendCode": "Reenviar código",
     "confirm": "Confirmar",
     "eulaTitle": "EULA - Términos y Condiciones",
-    "eulaClose": "Cerrar"
-  ,
-    "signInFailed": "Error de inicio de sesión"
+    "eulaClose": "Cerrar",
+    "signInFailed": "Error de inicio de sesión",
+    "errorPrefix": "Error:"
   },
   "menu": {
     "adminTitle": "Consola de Administración",

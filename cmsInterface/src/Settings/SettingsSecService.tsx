@@ -71,10 +71,10 @@ export async function getSettingSecByArea(payload?: string){
         }
     };
     const res = await axios.get( url, config );
+    const items = Array.isArray(res?.data?.Items) ? res.data.Items : []
 
-
-    console.log ("r: " + res['data'].Items)
-    const response : iSchemaField[] = res['data'].Items
+    console.log ("r: " + items)
+    const response : iSchemaField[] = items
      return response
 
     }

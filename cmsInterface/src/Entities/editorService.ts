@@ -142,7 +142,7 @@ export async function fetchPageByPage(payload: string) {
   await checkAccessTokenExpiration();
   const url = import.meta.env.VITE_URL_API_PAGES + "/" + payload;
   const res = await axios.get(url);
-  return res.data.Items[0];
+  return res.data?.Items?.[0] ?? { values: [] };
 }
 
 export async function fetchPages() {

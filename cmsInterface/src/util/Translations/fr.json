@@ -26,7 +26,8 @@
     "confirm": "Confirmer",
     "eulaTitle": "CLUF - Termes et Conditions",
     "eulaClose": "Fermer",
-    "signInFailed": "Erreur de connexion"
+    "signInFailed": "Erreur de connexion",
+    "errorPrefix": "Erreur :"
   },
   "menu": {
     "adminTitle": "Console d’Administration",

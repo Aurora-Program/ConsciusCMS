@@ -66,9 +66,11 @@ export const uploadImage = async (file)=> {
 
 
 
-export async function getSettingByArea(payload: string){
-    console.log("payload:"+payload)
-    const url = import.meta.env.VITE_URL_API_SETTINGS + "/" + payload
+export async function getSettingByArea(payload?: string){
+    const area = payload ?? "Profile"
+    if (!payload) console.warn("getSettingByArea called with undefined payload - defaulting to 'Profile'")
+    console.log("payload:"+area)
+    const url = import.meta.env.VITE_URL_API_SETTINGS + "/" + area
 
     const config = {
         headers: {
@@ -79,10 +81,10 @@ export async function getSettingByArea(payload: string){
         }
     };
     const res = await axios.get( url, config );
+    const items = Array.isArray(res?.data?.Items) ? res.data.Items : []
 
-
-    console.log ("r: " + res['data'].Items)
-    const response : iSchemaField[] = res['data'].Items
+    console.log ("r: " + items)
+    const response : iSchemaField[] = items
      return response
 
     }
