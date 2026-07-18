@@ -67,7 +67,8 @@ export const userSlice = createSlice ({
     }),
         builder.addCase(getUserProfileAction.fulfilled, (state, action)=>{
             console.log(action.payload)
-            action.payload.map((i) =>{
+            const profileSettings = Array.isArray(action.payload) ? action.payload : []
+            profileSettings.map((i) =>{
             switch (i.Setting){
 
                 case "MFA":

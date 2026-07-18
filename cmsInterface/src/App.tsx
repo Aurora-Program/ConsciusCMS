@@ -4,6 +4,7 @@ import Editor from './Editor/Editor';
 import Admin from './admin';
 import Login from './users/login';
 import Dashboard from './dashboard';
+import { useEffect } from 'react';
 
 
 import './App.css';
@@ -22,9 +23,6 @@ import UserProfile from './users/userProfile';
 
 function App() {
   const dispatch = useAppDispatch()
-  dispatch(getSettingAction())
-  // Request Profile-specific settings from primary settings service
-  dispatch(getSettingAction("Profile"))
 
 function parseJwt (token : string) {
     var base64Url = token.split('.')[1];
@@ -37,14 +35,21 @@ function parseJwt (token : string) {
 
   const searchParams = new URLSearchParams(document.location.search)
 
-    if (sessionStorage.getItem('idToken')) {
-      const IdToken = parseJwt(sessionStorage["idToken"].toString())
+  useEffect(() => {
+    const accessToken = sessionStorage.getItem('accessToken')
+    if (accessToken) {
+      dispatch(getSettingAction("Profile"))
+    }
+  }, [dispatch])
+
+  useEffect(() => {
+    const idToken = sessionStorage.getItem('idToken')
+    if (idToken) {
+      const IdToken = parseJwt(idToken)
       console.log(IdToken)
       dispatch(authenticate({"email": IdToken.email, "name":IdToken.name, "role" :IdToken["cognito:groups"]}))
-
-    } else {
-      console.error('Session token was not set properly.');
     }
+  }, [dispatch])
                          
   const isAuthenticated = () => {
     const accessToken = sessionStorage.getItem('accessToken');

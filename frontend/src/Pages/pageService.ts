@@ -144,14 +144,25 @@ export async function fetchPageByPage(payload: string){
             .replace(/ñ/g, '±')
             .replace(/ú/g, '·')
 
+    const normalizeLookupKey = (v: string) =>
+        normalizeMojibake(v || '')
+            .replace(/�/g, 'i')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, ' ')
+            .trim()
+
     addVariant(payload)
     try { addVariant(decodeURIComponent(payload)) } catch {}
     addVariant(normalizeMojibake(payload))
     addVariant(denormalizeMojibake(payload))
+    addVariant(payload.replace(/�/g, 'i'))
     try {
         const decoded = decodeURIComponent(payload)
         addVariant(normalizeMojibake(decoded))
         addVariant(denormalizeMojibake(decoded))
+        addVariant(decoded.replace(/�/g, 'i'))
     } catch {}
 
     const config = {
@@ -175,6 +186,21 @@ export async function fetchPageByPage(payload: string){
         } catch (err) {
             lastErr = err
         }
+    }
+
+    // Fallback: if direct endpoint lookup fails because of encoding differences,
+    // fetch the full list and match by a normalized key.
+    try {
+        const res = await axios.get(import.meta.env.VITE_URL_API_PAGES, config)
+        const items = Array.isArray(res?.data?.Items) ? res.data.Items : []
+        const targetKeys = new Set(Array.from(variants).map(normalizeLookupKey).filter(Boolean))
+        const matched = items.find((item: any) => targetKeys.has(normalizeLookupKey(String(item?.Page || ''))))
+        if (matched) {
+            console.log("fetchPageByPage fallback match:", matched?.Page)
+            return { selectedPage: matched, data: matched?.values }
+        }
+    } catch {
+        // Keep original error behavior below.
     }
 
     if (lastErr) throw lastErr

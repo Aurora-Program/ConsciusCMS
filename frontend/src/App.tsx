@@ -72,6 +72,8 @@ function App() {
           <Route path="/projects" element={<Projects />} />
           <Route path="/project/:name" element={<Project />} />
           <Route path="/book" element={<Book />} />
+          <Route path="/content" element={<Book />} />
+          <Route path="/content/*" element={<Book />} />
           <Route path="/chapter/:name" element={<Chapter />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/message" element={<Message />} />

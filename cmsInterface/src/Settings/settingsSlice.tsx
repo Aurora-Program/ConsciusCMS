@@ -82,9 +82,10 @@ export const settingsSlice = createSlice({
   },
     extraReducers: (builder) => {
       builder.addCase(getSettingAction.fulfilled, (state, action) =>{
-        state.loginPicture = action.payload.find((i)=> i.Setting == "LoginPicture").Value
-        state.logo = action.payload.find((i) => i.Setting == "Logo").Value
-        state.websiteName = action.payload.find((i)=> i.Setting == "WebsiteName").Value
+        const settings = Array.isArray(action.payload) ? action.payload : []
+        state.loginPicture = settings.find((i)=> i.Setting == "LoginPicture")?.Value ?? ""
+        state.logo = settings.find((i) => i.Setting == "Logo")?.Value ?? ""
+        state.websiteName = settings.find((i)=> i.Setting == "WebsiteName")?.Value ?? ""
 
         
 
@@ -92,12 +93,13 @@ export const settingsSlice = createSlice({
 
 
       builder.addCase(getSettingSecAction.fulfilled, (state, action) =>{
+        const settings = Array.isArray(action.payload) ? action.payload : []
 
-        state.contactName = action.payload?.find((i)=> i.Setting == "ContactName")?.Value
-        state.PhoneNumber = action.payload?.find((i) => i.Setting == "ContactPhone")?.Value
-        state.EmailAddress = action.payload?.find((i)=> i.Setting == "ContactEmail")?.Value
-        state.licenseModel = action.payload?.find((i)=> i.Setting == "LicenseModel")?.Value
-        state.licenseExpiration = action.payload?.find((i) => i.Setting == "LicenseExpiration")?.Value
+        state.contactName = settings.find((i)=> i.Setting == "ContactName")?.Value ?? ""
+        state.PhoneNumber = settings.find((i) => i.Setting == "ContactPhone")?.Value ?? ""
+        state.EmailAddress = settings.find((i)=> i.Setting == "ContactEmail")?.Value ?? ""
+        state.licenseModel = settings.find((i)=> i.Setting == "LicenseModel")?.Value ?? ""
+        state.licenseExpiration = settings.find((i) => i.Setting == "LicenseExpiration")?.Value ?? ""
         
 
       }),

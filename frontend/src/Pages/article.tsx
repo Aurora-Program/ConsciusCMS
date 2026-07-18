@@ -34,6 +34,20 @@ function Article() {
         }
     }
 
+    const normalizeLookup = (v: string = '') =>
+        v
+            .toLowerCase()
+            .replace(/≤/g, 'ó')
+            .replace(/φ/g, 'í')
+            .replace(/ß/g, 'á')
+            .replace(/±/g, 'ñ')
+            .replace(/·/g, 'ú')
+            .replace(/�/g, 'i')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-z0-9]+/g, ' ')
+            .trim()
+
     const visitCount = localStorage.getItem('value') ? Number(localStorage.getItem('value')) : 0;
 
     useEffect(() => { 
@@ -57,15 +71,6 @@ function Article() {
             const decodedId = decodeRouteId(id)
             console.log("=== ARTICLE SELECTPAGE DEBUG ===");
             console.log("Loading article with Page ID:", decodedId);
-
-            const normalizeLookup = (v: string = '') =>
-                v
-                    .toLowerCase()
-                    .replace(/≤/g, 'ó')
-                    .replace(/φ/g, 'í')
-                    .replace(/ß/g, 'á')
-                    .replace(/±/g, 'ñ')
-                    .replace(/·/g, 'ú')
 
             let resolvedId = decodedId
             const byExact = pages.find((p: any) => p?.Page === decodedId)
